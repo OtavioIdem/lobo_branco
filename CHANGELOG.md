@@ -4,6 +4,24 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-10 — M1 tarefas 1.1 a 1.5: folha de atributos e pipeline de dano
+- `StatSheet`: valores base mais modificadores Flat, PercentAdd e PercentMult, com cache
+  por atributo e evento de mudanca. Formula independente da ordem de chegada.
+- `StatModifier` carrega a origem, para que uma pocao que vence leve embora exatamente
+  os proprios bonus e nenhum outro.
+- `StatBlockDef`: valores base em asset.
+- Pipeline de dano com os 11 estagios do doc 03 secao 9, cada um um objeto testavel,
+  com log passo a passo que mostra cada multiplicador aplicado.
+- `CombatTuningDef`: todos os multiplicadores de combate em um asset. E a superficie
+  de balanceamento do combate inteiro.
+- Assets criados: `CombatTuning` e `StatBlock_Player` com os numeros do doc 03 secao 12.
+- 55 testes passando. Os dois cenarios de referencia batem: preparado 2,19x,
+  despreparado 0,41x, razao de 5,3 vezes entre eles.
+- `PlayerLocomotion.Tick(deltaTime)`: o tempo passou a entrar por parametro. Os testes
+  de movimento simulam passos fixos de 1/60 e deixaram de ser intermitentes.
+- Nomenclatura: o atributo Vigor virou `Endurance` e o recurso Vigor virou `Stamina`
+  em codigo, porque os dois colidiam. Registrado no doc 07 secao 4.2.
+
 ### 2026-09-09 — Agentes e skills de projeto
 - `CLAUDE.md`: contexto carregado em toda sessao, com regras de arquitetura, pilares,
   escopo travado e definicao de pronto.

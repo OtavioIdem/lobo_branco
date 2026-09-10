@@ -73,11 +73,26 @@ namespace LoboBranco.Player
 
         void Update()
         {
+            Tick(Time.deltaTime);
+        }
+
+        /// <summary>
+        /// Um passo de simulacao com delta explicito.
+        ///
+        /// O tempo entra por parametro pelo mesmo motivo que input e camera entram por
+        /// propriedade: <c>Time.deltaTime</c> e estado ambiente, e depender dele torna o
+        /// comportamento impossivel de reproduzir. Com o delta explicito, um teste roda
+        /// 60 passos de 1/60 e obtem exatamente um segundo de movimento, toda vez.
+        /// </summary>
+        public void Tick(float deltaTime)
+        {
+            if (deltaTime <= 0f) return;
+
             Vector2 input = Vector2.ClampMagnitude(MoveInput, 1f);
             float targetSpeed = (SprintHeld ? runSpeed : walkSpeed) * input.magnitude;
 
             _currentSpeed = Mathf.SmoothDamp(
-                _currentSpeed, targetSpeed, ref _speedSmoothVelocity, speedSmoothTime);
+                _currentSpeed, targetSpeed, ref _speedSmoothVelocity, speedSmoothTime, Mathf.Infinity, deltaTime);
 
             Vector3 planarDirection = Vector3.zero;
 
@@ -88,24 +103,25 @@ namespace LoboBranco.Player
                 float targetAngle = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg + ReferenceYaw;
 
                 float smoothedAngle = Mathf.SmoothDampAngle(
-                    transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, turnSmoothTime);
+                    transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity,
+                    turnSmoothTime, Mathf.Infinity, deltaTime);
 
                 transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
                 planarDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             }
 
-            ApplyGravity();
+            ApplyGravity(deltaTime);
 
             Vector3 velocity = planarDirection * _currentSpeed + Vector3.up * _verticalVelocity;
-            _controller.Move(velocity * Time.deltaTime);
+            _controller.Move(velocity * deltaTime);
         }
 
-        void ApplyGravity()
+        void ApplyGravity(float deltaTime)
         {
             if (_controller.isGrounded && _verticalVelocity <= 0f)
                 _verticalVelocity = groundedStick;
             else
-                _verticalVelocity += gravity * Time.deltaTime;
+                _verticalVelocity += gravity * deltaTime;
         }
 
         /// <summary>Zera a inercia. Chamar em teleporte, morte e troca de cena.</summary>

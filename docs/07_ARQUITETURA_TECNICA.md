@@ -208,10 +208,9 @@ Isso é a peça de infraestrutura mais importante do projeto. Poções, talentos
 equipamento e buffs de combate todos precisam alterar os mesmos números, e precisam poder
 ser removidos individualmente.
 
-```csharp
-public enum StatType { Vitality, Vigor, AttackDamage, Armor, SignIntensity,
-                       ToxicityMax, CritChance, MoveSpeed, /* ... */ }
+**Implementado.** `Assets/_Project/Code/Stats/`.
 
+```csharp
 public enum ModifierOp { Flat, PercentAdd, PercentMult }
 
 public readonly struct StatModifier
@@ -226,13 +225,33 @@ public sealed class StatSheet
 {
     // valor = (base + soma dos Flat) * (1 + soma dos PercentAdd) * produto dos PercentMult
     public float Get(StatType stat);
-    public void AddModifier(StatModifier mod);
-    public void RemoveAllFromSource(object source);   // ← a razão de existir do campo Source
-    public event Action<StatType> OnStatChanged;      // ← a UI escuta isto, não faz polling
+    public void SetBase(StatType stat, float value);
+    public void AddModifier(in StatModifier mod);
+    public int RemoveAllFromSource(object source);    // ← a razão de existir do campo Source
+    public event Action<StatType> StatChanged;        // ← a UI escuta isto, não faz polling
 }
 ```
 
 O campo `Source` é o que impede o bug clássico de "a poção venceu mas o bônus ficou".
+
+Somar os `PercentAdd` antes de multiplicar é o que torna o resultado independente da ordem
+de chegada. Duas poções de mais 30% dão mais 60%, não mais 69%. Beber na ordem inversa
+tem que dar o mesmo número, e há teste para isso.
+
+Valores base vêm de `StatBlockDef`, um ScriptableObject. Balancear a vida de um inimigo é
+editar asset.
+
+#### Nota de nomenclatura: Vigor
+
+O jogo exibe **Vigor** para o recurso gasto em sinais e esquiva, e o original também
+chamava um dos quatro atributos de Vigor. Em código isso colidiria, então:
+
+| Documento | Código |
+|---|---|
+| Atributo Vigor | `StatType.Endurance` |
+| Recurso Vigor | `StatType.MaxStamina`, `StaminaRegen` |
+
+Os nomes exibidos vêm de localização, nunca do `enum` (`tech/adr/0005`).
 
 ### 4.3 Pipeline de dano como cadeia de estágios
 
