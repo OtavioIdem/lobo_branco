@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "// Anexa o depurador ao editor da Unity que estiver aberto.": "Ponha um breakpoint, entre em Play e ele para.",
+            "name": "Anexar ao Unity Editor",
+            "type": "vstuc",
+            "request": "attach"
+        }
+    ]
+}

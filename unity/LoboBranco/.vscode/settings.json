@@ -1,0 +1,55 @@
+{
+    "// Exclusoes": "Library, Temp e obj tem centenas de milhares de arquivos. Sem excluir, a busca e o watcher do VS Code travam.",
+    "files.exclude": {
+        "**/.DS_Store": true,
+        "**/Library": true,
+        "**/Temp": true,
+        "**/Obj": true,
+        "**/obj": true,
+        "**/Build": true,
+        "**/Builds": true,
+        "**/Logs": true,
+        "**/UserSettings": true,
+        "**/MemoryCaptures": true,
+        "**/*.csproj": true,
+        "**/*.sln": true
+    },
+    "files.watcherExclude": {
+        "**/Library/**": true,
+        "**/Temp/**": true,
+        "**/obj/**": true,
+        "**/Logs/**": true,
+        "**/Builds/**": true
+    },
+    "search.exclude": {
+        "**/Library": true,
+        "**/Temp": true,
+        "**/obj": true,
+        "**/Builds": true,
+        "**/Logs": true
+    },
+
+    "// Meta files": "Renomear um .cs sem levar o .meta desconecta as referencias da cena. O VS Code cuida disso.",
+    "explorer.excludeGitIgnore": false,
+    "files.associations": {
+        "*.asmdef": "json",
+        "*.inputactions": "json",
+        "*.shader": "shaderlab",
+        "*.hlsl": "hlsl",
+        "*.uxml": "xml",
+        "*.uss": "css"
+    },
+
+    "// C#": "O Dev Kit precisa do .sln gerado pela Unity. Se o IntelliSense falhar, use Assets > Open C# Project na Unity.",
+    "dotnet.defaultSolution": "LoboBranco.sln",
+    "omnisharp.useModernNet": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp",
+        "editor.tabSize": 4,
+        "editor.rulers": [ 120 ]
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+}

@@ -1,2 +1,2 @@
 semana,data,horas_trabalhadas,tarefas_concluidas,tarefas_adicionadas,bugs_abertos,milestone,notas
-1,2026-09-09,0,6,0,0,M0,"Levantamento concluido. Tarefas 0.1 a 0.8 do doc 12 executadas: projeto Unity criado, configurado e com build verificada."
+1,2026-09-09,0,12,0,0,M0,"Levantamento concluido. Tarefas 0.1 a 0.12 executadas: projeto Unity configurado, movimento e camera de terceira pessoa, 19 testes automatizados passando."

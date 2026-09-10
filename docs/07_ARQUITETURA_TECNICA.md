@@ -105,7 +105,9 @@ unity/LoboBranco/
 │   │   ├── Code/
 │   │   │   ├── Core/              TW1R.Core.asmdef
 │   │   │   ├── Stats/             TW1R.Stats.asmdef
+│   │   │   ├── Camera/            TW1R.Camera.asmdef
 │   │   │   ├── Combat/            TW1R.Combat.asmdef
+│   │   │   ├── Player/            TW1R.Player.asmdef
 │   │   │   ├── Inventory/         TW1R.Inventory.asmdef
 │   │   │   ├── Alchemy/           TW1R.Alchemy.asmdef
 │   │   │   ├── Progression/       TW1R.Progression.asmdef
@@ -115,7 +117,8 @@ unity/LoboBranco/
 │   │   │   ├── Investigation/     TW1R.Investigation.asmdef
 │   │   │   ├── Save/              TW1R.Save.asmdef
 │   │   │   ├── UI/                TW1R.UI.asmdef
-│   │   │   └── Bootstrap/         TW1R.Bootstrap.asmdef  (só aqui se conhece tudo)
+│   │   │   ├── Bootstrap/         TW1R.Bootstrap.asmdef  (só aqui se conhece tudo)
+│   │   │   └── Tests/             EditMode e PlayMode, com asmdef próprio cada
 │   │   ├── Data/                    ← ScriptableObjects, a fonte da verdade em runtime
 │   │   │   ├── Items/ Monsters/ Skills/ Recipes/ Quests/ LootTables/
 │   │   ├── Ink/                     ← .ink e .json compilado
@@ -146,19 +149,31 @@ Sem `.asmdef`, cada mudança em qualquer script recompila tudo. Com 12 módulos,
 recompila só UI. Em um projeto que você vai iterar por meses, isso é a diferença entre
 1 segundo e 15 segundos por edição, milhares de vezes.
 
-Grafo de dependência permitido (as flechas só apontam para a esquerda):
+Grafo de dependência permitido. Cada módulo só pode referenciar os que estão **abaixo**
+dele na tabela, nunca acima nem ao lado:
 
-```
-Bootstrap → UI → { Quests, Inventory, Progression, Alchemy, Combat }
-                        ↓          ↓            ↓          ↓
-                   Dialogue    Stats ←──────────┴──── Investigation
-                        ↓          ↓
-                       Core ←──────┘
-                        ↑
-                       AI ─┘
-```
+| Nível | Módulo | Referencia |
+|---|---|---|
+| 5 | `Bootstrap` | todos |
+| 4 | `UI` | Core, Stats, Combat, Inventory, Alchemy, Progression, Quests, Investigation, Dialogue |
+| 3 | `Player` | Core, Stats, Combat, Camera |
+| 3 | `AI` | Core, Stats, Combat |
+| 3 | `Alchemy` | Core, Stats, Inventory |
+| 3 | `Quests` | Core, Dialogue |
+| 2 | `Combat`, `Inventory`, `Progression`, `Investigation` | Core, Stats |
+| 2 | `Camera` | Core |
+| 1 | `Stats`, `Save`, `Dialogue` | Core |
+| 0 | `Core` | nada |
 
 `Core` não depende de nada. Se `Core` precisar de algo, o algo está no lugar errado.
+
+Dois módulos merecem explicação, porque não são óbvios:
+
+- **`Camera`** existe separado de `Player` porque o pivô de câmera também serve cutscene,
+  câmera de diálogo e câmera livre de debug. Ele não lê input: recebe deltas. Isso é o que
+  o torna reutilizável e testável em EditMode.
+- **`Player`** é o dono da máquina de estados e do leitor de input. Ele conhece `Camera`,
+  e não o contrário. Se a câmera precisasse conhecer o jogador, haveria ciclo.
 
 ## 4. Padrões de código
 

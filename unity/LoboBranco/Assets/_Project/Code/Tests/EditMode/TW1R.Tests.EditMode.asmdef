@@ -6,6 +6,7 @@
         "UnityEditor.TestRunner",
         "TW1R.Core",
         "TW1R.Stats",
+        "TW1R.Camera",
         "TW1R.Combat",
         "TW1R.Inventory",
         "TW1R.Alchemy",

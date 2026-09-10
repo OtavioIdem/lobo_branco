@@ -4,6 +4,28 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-09 — Movimento e camera de terceira pessoa (tarefas 0.9 a 0.12)
+- `PlayerControls.inputactions`: 17 acoes e 37 bindings, teclado, mouse e gamepad,
+  conforme o doc 02 secao 4.
+- Modulos novos `TW1R.Player` e `TW1R.Camera` (ADR 0006). O grafo de dependencia do
+  doc 07 virou tabela de niveis.
+- `PlayerInputReader`: unico ponto do jogo que fala com o Input System.
+- `PlayerLocomotion`: caminhada a 2,0 m/s, corrida a 5,5 m/s, gravidade, rampas e giro
+  suavizado. Sem nenhuma referencia a input ou camera, o que o torna testavel.
+- `ThirdPersonCameraRig`: pivo com yaw livre e pitch limitado entre -35 e 70 graus.
+  Nao le input, recebe deltas.
+- `PlayerBrain`: liga os tres e trava o cursor. E onde a FSM vai morar.
+- `PlayerDebugOverlay`: painel IMGUI com FPS, velocidade, posicao e angulos. F1 esconde.
+- `CM_Exploration`: CinemachineCamera com follow amortecido, mira dura e deoccluder
+  contra parede.
+- `GameLayers`: nomes e mascaras de layer centralizados.
+- Cena `Sandbox_Combate` montada por script (`SandboxSetup`), nao a mao.
+- 19 testes automatizados passando: 11 em EditMode para a camera, 8 em PlayMode para
+  o movimento.
+- `.editorconfig`, `.vscode/settings.json`, `extensions.json` e `launch.json`.
+  VS Code definido como editor externo, com a extensao vstuc instalada.
+- `.gitattributes` passa a fixar LF em codigo, para concordar com o `.editorconfig`.
+
 ### 2026-09-09 — M0 parcial: projeto Unity criado e configurado
 - Modulo Windows Build Support (IL2CPP) instalado no editor 6000.6.0f1.
 - Projeto Unity criado em `unity/LoboBranco` a partir do template URP, resolvido para
@@ -14,12 +36,10 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 - Pacotes removidos: Visual Scripting e Collab Proxy.
 - URP configurada: Forward+, GPU Resident Drawer, GPU Occlusion Culling,
   Adaptive Probe Volumes, sombra a 60 m com 4 cascatas, depth e opaque texture ligadas.
-- Arvore `Assets/_Project` criada com 15 assembly definitions e o grafo de dependencias
-  do doc 07.
+- Arvore `Assets/_Project` criada com assembly definitions e o grafo do doc 07.
 - 7 tags e 10 layers de usuario definidas; 36 pares de colisao desativados.
 - Fisica a 60 Hz, 8 iteracoes de solver.
-- 6 cenas criadas e registradas no Build Settings: Boot, MainMenu, Sandbox_Combate,
-  Zone_Vilarejo, Zone_Floresta, Zone_Cripta.
+- 6 cenas criadas e registradas no Build Settings.
 - `Assets/Editor/ProjectSetup.cs`: setup reproduzivel pelo menu Lobo Branco.
 - Build de verificacao para Windows x64 gerada com sucesso, 0 erros de compilacao.
 - Git inicializado com LFS e o merge driver UnityYAMLMerge para cenas e prefabs.

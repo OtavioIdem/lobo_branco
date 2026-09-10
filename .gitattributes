@@ -1,6 +1,17 @@
 # Normalizacao de fim de linha
 * text=auto
 
+# Codigo e configuracao: LF, para concordar com o .editorconfig
+*.cs       text eol=lf
+*.asmdef   text eol=lf
+*.json     text eol=lf
+*.md       text eol=lf
+*.shader   text eol=lf
+*.hlsl     text eol=lf
+*.uxml     text eol=lf
+*.uss      text eol=lf
+*.ink      text eol=lf
+
 # Merge de cenas e prefabs com a ferramenta da Unity
 *.unity   merge=unityyamlmerge eol=lf
 *.prefab  merge=unityyamlmerge eol=lf

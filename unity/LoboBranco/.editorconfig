@@ -1,0 +1,70 @@
+# Convencoes de codigo do projeto. Lido por VS Code (C# Dev Kit), Visual Studio e Rider.
+# Manter isto versionado e o que impede o estilo de divergir entre maquinas e sessoes.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,md}]
+indent_size = 2
+
+[*.{asmdef,inputactions}]
+indent_size = 4
+
+# Arquivos gerados pela Unity: nao reformatar
+[*.{meta,unity,prefab,asset,mat,anim,controller}]
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+[*.cs]
+indent_size = 4
+max_line_length = 120
+
+# ----------------------------------------------------------------- organizacao
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_using_directive_placement = outside_namespace:warning
+
+# ----------------------------------------------------------------- nomenclatura
+dotnet_naming_rule.private_fields_underscore.severity = suggestion
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+
+dotnet_naming_rule.constants_pascal.severity = suggestion
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_style.pascal.capitalization = pascal_case
+
+# ----------------------------------------------------------------- preferencias
+csharp_prefer_braces = when_multiline:suggestion
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_namespace_declarations = block_scoped:silent
+dotnet_style_readonly_field = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = false:silent
+
+# ----------------------------------------------------------------- diagnosticos
+# Campos [SerializeField] privados sao atribuidos pelo Inspector, nao pelo codigo.
+# Sem isto o analisador reclama de "nunca atribuido" em todo MonoBehaviour.
+dotnet_diagnostic.CS0649.severity = none
+dotnet_diagnostic.IDE0044.severity = none
+
+# Chamar de forma assincrona sem await e um bug de verdade em codigo de jogo.
+dotnet_diagnostic.CS4014.severity = error
+
+# Comparacao de ponto flutuante por igualdade: quase sempre um bug.
+dotnet_diagnostic.CS1718.severity = error

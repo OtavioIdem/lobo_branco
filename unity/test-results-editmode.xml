@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="11" result="Passed" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0,2666319">
+  <test-suite type="TestSuite" id="1000" name="LoboBranco" fullname="LoboBranco" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.266632" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1012" name="TW1R.Tests.EditMode.dll" fullname="E:/Unity_Games/TW1-Remaster/unity/LoboBranco/Library/ScriptAssemblies/TW1R.Tests.EditMode.dll" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.231782" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="21648" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1013" name="LoboBranco" fullname="LoboBranco" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.229859" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1014" name="Tests" fullname="LoboBranco.Tests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.229274" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="ThirdPersonCameraRigTests" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.222363" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1009" name="AlignBehindTarget_adota_o_yaw_do_alvo" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.AlignBehindTarget_adota_o_yaw_do_alvo" methodname="AlignBehindTarget_adota_o_yaw_do_alvo" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="1730562976" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.072562" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1004" name="Mouse_para_cima_olha_para_cima_por_padrao" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.Mouse_para_cima_olha_para_cima_por_padrao" methodname="Mouse_para_cima_olha_para_cima_por_padrao" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="331837364" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.016932" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1002" name="Pitch_nao_passa_do_limite_inferior_olhando_para_baixo" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.Pitch_nao_passa_do_limite_inferior_olhando_para_baixo" methodname="Pitch_nao_passa_do_limite_inferior_olhando_para_baixo" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="232003138" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.002255" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1003" name="Pitch_nao_passa_do_limite_superior_olhando_para_cima" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.Pitch_nao_passa_do_limite_superior_olhando_para_cima" methodname="Pitch_nao_passa_do_limite_superior_olhando_para_cima" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="822842199" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.001917" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="PlanarForward_concorda_com_o_yaw" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.PlanarForward_concorda_com_o_yaw" methodname="PlanarForward_concorda_com_o_yaw" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="790795059" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.001672" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="PlanarForward_e_horizontal_e_normalizado" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.PlanarForward_e_horizontal_e_normalizado" methodname="PlanarForward_e_horizontal_e_normalizado" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="2083641544" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.002627" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="Sem_alvo_os_metodos_de_posicionamento_nao_lancam" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.Sem_alvo_os_metodos_de_posicionamento_nao_lancam" methodname="Sem_alvo_os_metodos_de_posicionamento_nao_lancam" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="756569545" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.005170" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1011" name="SnapToTarget_posiciona_o_pivo_acima_do_alvo" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.SnapToTarget_posiciona_o_pivo_acima_do_alvo" methodname="SnapToTarget_posiciona_o_pivo_acima_do_alvo" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="1791273124" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.002285" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1005" name="Yaw_circula_dentro_de_zero_a_360" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.Yaw_circula_dentro_de_zero_a_360" methodname="Yaw_circula_dentro_de_zero_a_360" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="461694889" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.003171" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1006" name="Yaw_negativo_tambem_circula_para_dentro_da_faixa" fullname="LoboBranco.Tests.ThirdPersonCameraRigTests.Yaw_negativo_tambem_circula_para_dentro_da_faixa" methodname="Yaw_negativo_tambem_circula_para_dentro_da_faixa" classname="LoboBranco.Tests.ThirdPersonCameraRigTests" runstate="Runnable" seed="363157220" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.001088" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1017" name="Unity.Addressables.DocExampleCode.Editor.Tests.dll" fullname="E:/Unity_Games/TW1-Remaster/unity/LoboBranco/Library/ScriptAssemblies/Unity.Addressables.DocExampleCode.Editor.Tests.dll" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.009257" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="21648" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1018" name="AddressableAssets" fullname="AddressableAssets" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.008532" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1019" name="DocExampleCode" fullname="AddressableAssets.DocExampleCode" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.008204" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1015" name="TestStub" fullname="AddressableAssets.DocExampleCode.TestStub" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.007724" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1016" name="RequiredTest" fullname="AddressableAssets.DocExampleCode.TestStub.RequiredTest" methodname="RequiredTest" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" seed="1278204852" result="Passed" start-time="2026-09-10 00:50:49Z" end-time="2026-09-10 00:50:49Z" duration="0.000747" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: C:/Users/Otávio/AppData/LocalLow/Otavio/LoboBranco\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

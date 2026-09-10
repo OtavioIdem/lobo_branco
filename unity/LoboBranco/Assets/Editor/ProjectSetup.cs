@@ -34,8 +34,11 @@ namespace LoboBranco.EditorTools
 
         static readonly string[] PackagesToRemove =
         {
-            "com.unity.visualscripting", // nao usamos; custa tempo de compilacao
-            "com.unity.collab-proxy",    // versionamento e Git (ADR 0001 do repo)
+            "com.unity.visualscripting",        // nao usamos; custa tempo de compilacao
+            "com.unity.collab-proxy",           // versionamento e Git
+            "com.unity.purchasing",             // sem compra no app; ainda cria Assets/Resources/BillingMode.json
+            "com.unity.multiplayer.center",     // jogo e single player (doc 00 secao 5)
+            "com.unity.xr.legacyinputhelpers",  // sem XR, e depende do Input Manager antigo
         };
 
         [MenuItem("Lobo Branco/Setup/1. Instalar pacotes")]
@@ -103,6 +106,35 @@ namespace LoboBranco.EditorTools
                 }
                 Thread.Sleep(200);
             }
+        }
+
+        // ------------------------------------------------------- editor externo
+
+        [MenuItem("Lobo Branco/Setup/0. Usar VS Code como editor")]
+        public static void UseVsCode()
+        {
+            string[] candidates =
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Programs", "Microsoft VS Code", "Code.exe"),
+                @"C:\Program Files\Microsoft VS Code\Code.exe",
+            };
+
+            string path = candidates.FirstOrDefault(File.Exists);
+
+            if (path == null)
+            {
+                Debug.LogError("[Setup] Code.exe nao encontrado nos caminhos conhecidos.");
+                return;
+            }
+
+            EditorPrefs.SetString("kScriptsDefaultApp", path);
+
+            // Gera .csproj e .sln para o C# Dev Kit ler; sem isso o IntelliSense fica cego.
+            EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", true);
+            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+
+            Debug.Log($"[Setup] Editor externo definido: {path}");
         }
 
         // ------------------------------------------------- matriz de colisao

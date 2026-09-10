@@ -13,18 +13,18 @@ Legenda de tamanho: **P** até 2 h, **M** de 2 a 5 h, **G** de 5 a 12 h.
 
 | # | Tarefa | Tam. | Doc |
 |---|---|---|---|
-| 0.1 | Instalar módulo IL2CPP; configurar editor externo | P | 11 §2 |
-| 0.2 | Criar projeto `LoboBranco` com template Universal 3D | P | 11 §3 |
-| 0.3 | Aplicar toda a configuração obrigatória (Force Text, layers, tags, física, tempo) | M | 11 §4 |
-| 0.4 | `git init`, LFS, YAMLMerge, primeiro commit | P | 11 §5 |
-| 0.5 | Criar a árvore de pastas `_Project` completa | P | 07 §3 |
-| 0.6 | Criar os 12 `.asmdef` com o grafo de dependências correto | M | 07 §3 |
-| 0.7 | Instalar pacotes do manifest (Input, Cinemachine, AI Nav, Behavior, Addressables, Newtonsoft, ProBuilder, Test Framework) | M | 07 §2 |
-| 0.8 | Instalar Ink Unity Integration por Git URL | P | 11 §2.4 |
-| 0.9 | Criar Input Action Asset com todas as ações do doc 02 §4 | M | 02 §4 |
-| 0.10 | Controlador de movimento: andar, correr, gravidade, slope, `CharacterController` | G | 08 §2 |
-| 0.11 | Cinemachine 3: `CM_Exploration` com colisão e damping | M | 07 §7 |
-| 0.12 | Cena `Sandbox_Combate` com plano, luz e painel de debug | M | 11 §6 |
+| ~~0.1~~ ✅ | Instalar módulo IL2CPP; configurar editor externo | P | 11 §2 |
+| ~~0.2~~ ✅ | Criar projeto `LoboBranco` com template Universal 3D | P | 11 §3 |
+| ~~0.3~~ ✅ | Aplicar toda a configuração obrigatória (Force Text, layers, tags, física, tempo) | M | 11 §4 |
+| ~~0.4~~ ✅ | `git init`, LFS, YAMLMerge, primeiro commit | P | 11 §5 |
+| ~~0.5~~ ✅ | Criar a árvore de pastas `_Project` completa | P | 07 §3 |
+| ~~0.6~~ ✅ | Criar os 12 `.asmdef` com o grafo de dependências correto | M | 07 §3 |
+| ~~0.7~~ ✅ | Instalar pacotes do manifest (Input, Cinemachine, AI Nav, Behavior, Addressables, Newtonsoft, ProBuilder, Test Framework) | M | 07 §2 |
+| ~~0.8~~ ✅ | Instalar Ink Unity Integration por Git URL | P | 11 §2.4 |
+| ~~0.9~~ ✅ | Input Action Asset com as 17 ações do doc 02 §4 | M | 02 §4 |
+| ~~0.10~~ ✅ | Controlador de movimento: andar, correr, gravidade, slope, `CharacterController` | G | 08 §2 |
+| ~~0.11~~ ✅ | Cinemachine: `CM_Exploration` com deoccluder e damping | M | 07 §7 |
+| ~~0.12~~ ✅ | Cena `Sandbox_Combate` com plano, luz e painel de debug | M | 11 §6 |
 | 0.13 | Build de Windows e verificação do checklist de saída | P | 11 §7 |
 
 **Portão M0:** cápsula anda com teclado e gamepad, câmera acompanha, build roda.

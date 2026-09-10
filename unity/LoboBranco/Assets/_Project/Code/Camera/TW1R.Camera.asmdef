@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.Camera",
+    "rootNamespace": "LoboBranco.CameraSystem",
+    "references": ["TW1R.Core","Unity.Cinemachine"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
