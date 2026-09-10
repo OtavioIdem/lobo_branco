@@ -1,4 +1,3 @@
-| `unity/LoboBranco/` | O projeto Unity. **Aponte o Unity Hub para esta pasta**, nao para a raiz |
 # CLAUDE.md — Projeto Lobo Branco
 
 Protótipo de RPG de ação em Unity, remaster autoral de The Witcher (2007).
@@ -11,7 +10,7 @@ Projeto solo, não-comercial, feito para aprender desenvolvimento de jogos.
 | `docs/00` a `docs/12` | **A fonte da verdade.** Design, arquitetura, roadmap |
 | `tech/adr/` | Decisões de arquitetura com justificativa |
 | `design/*.csv` | Planilhas de balanceamento, trilhas, ecos, tracking semanal |
-| `unity/LoboBranco/` | O projeto Unity |
+| `unity/LoboBranco/` | O projeto Unity. **Aponte o Unity Hub para esta pasta**, não para a raiz |
 | `unity/LoboBranco/Assets/_Project/` | Tudo que é nosso. Nada nosso fica fora daqui |
 | `unity/Builds/` | Saída de build, fora do controle de versão |
 | `research/` | Rascunhos e anotações. Não é canônico |
