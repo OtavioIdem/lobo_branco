@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.UI",
+    "rootNamespace": "LoboBranco.UI",
+    "references": ["TW1R.Core","TW1R.Stats","TW1R.Combat","TW1R.Inventory","TW1R.Alchemy","TW1R.Progression","TW1R.Quests","TW1R.Investigation","TW1R.Dialogue"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

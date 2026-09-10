@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.Save",
+    "rootNamespace": "LoboBranco.Save",
+    "references": ["TW1R.Core"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

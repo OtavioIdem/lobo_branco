@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.Bootstrap",
+    "rootNamespace": "LoboBranco.Bootstrap",
+    "references": ["TW1R.Core","TW1R.Stats","TW1R.Combat","TW1R.Inventory","TW1R.Alchemy","TW1R.Progression","TW1R.Quests","TW1R.Dialogue","TW1R.AI","TW1R.Investigation","TW1R.Save","TW1R.UI"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

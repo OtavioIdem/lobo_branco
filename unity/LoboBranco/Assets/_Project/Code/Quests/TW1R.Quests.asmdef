@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.Quests",
+    "rootNamespace": "LoboBranco.Quests",
+    "references": ["TW1R.Core","TW1R.Dialogue"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,11 @@
+trilha,tier,no,grau,custo,efeito_resumo,implementado
+Esgrima,1,Guarda Alta,bronze,1,"Aparo bloqueia ataques Heavy com custo dobrado",nao
+Esgrima,1,Passo de Lado,bronze,1,"Esquiva +0.04s invulneravel e lateral durante ataque",nao
+Esgrima,1,Fio da Lamina,bronze,1,"+8% dano com aco (passagem)",nao
+Esgrima,1,Leitura de Postura,prata,2,"Indicador da postura ideal sobre o inimigo",nao
+Esgrima,2,Riposte Cortante,prata,2,"Riposte aplica Sangramento 3/s por 6s",nao
+Esgrima,2,Corrente Longa,prata,2,"Teto de Fluxo 5 para 8 elos, bonus max 45%",nao
+Esgrima,2,Desarme,prata,2,"Aard em humanoide atordoado o desarma",nao
+Esgrima,2,Danca de Grupo,prata,2,"Postura Grupo atinge 360 graus",nao
+Esgrima,3,Duelista,ouro,3,"Riposte em 1v1 remove recuperacao por 1.5s",nao
+Esgrima,3,Ceifador,ouro,3,"Morte em Grupo transfere corrente de Fluxo",nao

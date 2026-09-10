@@ -1,0 +1,8 @@
+flag,tipo,valores,capitulo_plantio,capitulo_colheita,manifestacao,implementado
+abigail_fate,string,salva|linchada|exonerada,I,V,"Abigail cura feridos e abre rota, ou praga fecha distrito",nao
+chapter1_villagers,int,0-12,I,II,"Sobreviventes reconhecem e hostilizam no Bairro do Templo",nao
+raymond_suspected,bool,true|false,II,III,"Cena extra revelando mais sobre Azar Javed",nao
+adda_fate,string,curada|morta,III,"V,Epilogo","Foltest como aliado politico ou inimigo",nao
+alvin_fate,string,triss|lago|abandonado,IV,Epilogo,"Determina qual profecia se realiza",nao
+alignment,float,-1.0 a 1.0,"II,III,V","V,Epilogo","Qual faccao controla Vizima no final",nao
+beast_summoner_known,bool,true|false,I,I,"Habilita a terceira opcao na turba (exonerar Abigail)",nao

@@ -1,0 +1,9 @@
+entidade,vitalidade,dano_por_golpe,armadura,arquetipo,postura_ideal,oleo_vulneravel,sinal_vulneravel,classe
+jogador_nv1,100,12,4,-,-,-,-,-
+aldeao_hostil,40,8,0,agil,rapida,-,axii,humano
+bandido,70,14,3,agil,rapida,-,axii,humano
+barghest,55,16,2,agil,rapida,besta,igni,besta
+afogado,90,20,4,pesado,forte,necrofago,igni,necrofago
+ghoul,65,15,3,enxame,grupo,necrofago,-,necrofago
+alghoul,140,26,12,pesado,forte,necrofago,aard,necrofago
+a_besta,400,34,8,pesado,forte,besta,igni,besta

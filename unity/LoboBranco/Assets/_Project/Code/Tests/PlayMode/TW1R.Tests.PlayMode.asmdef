@@ -1,0 +1,22 @@
+{
+    "name": "TW1R.Tests.PlayMode",
+    "rootNamespace": "LoboBranco.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "TW1R.Core",
+        "TW1R.Stats",
+        "TW1R.Combat",
+        "TW1R.Quests",
+        "TW1R.Save"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [ "nunit.framework.dll" ],
+    "autoReferenced": false,
+    "defineConstraints": [ "UNITY_INCLUDE_TESTS" ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

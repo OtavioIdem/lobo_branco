@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.Alchemy",
+    "rootNamespace": "LoboBranco.Alchemy",
+    "references": ["TW1R.Core","TW1R.Stats","TW1R.Inventory"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,14 @@
+{
+    "name": "TW1R.Investigation",
+    "rootNamespace": "LoboBranco.Investigation",
+    "references": ["TW1R.Core","TW1R.Stats"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
