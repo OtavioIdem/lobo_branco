@@ -5,7 +5,7 @@ e reinterpretando seus sistemas com mecânicas próprias.
 
 > **Status:** M0 em andamento — projeto Unity criado e configurado. Sem código de jogo ainda.
 > **Engine:** Unity `6000.6.0f1` com URP 17.6.0
-> **Projeto Unity:** `unity/LoboBranco` — abra pelo Unity Hub por esse caminho
+> **Projeto Unity:** `unity/LoboBranco`
 > **Plataforma alvo do protótipo:** Windows x64
 > **Natureza:** projeto pessoal, não-comercial, de aprendizado.
 
@@ -76,6 +76,21 @@ TW1-Remaster/
     ├── LoboBranco/    O projeto Unity
     └── Builds/        Saída de build (fora do controle de versão)
 ```
+
+## Abrir no Unity Hub
+
+No Hub, em **Add**, aponte para esta pasta e não para a raiz do repositório:
+
+```
+E:\Unity_Games\TW1-Remaster\unity\LoboBranco
+```
+
+O Hub só aceita a pasta que contém diretamente `Assets` e `ProjectSettings`, ou uma cujos
+filhos imediatos sejam projetos. Ele não desce dois níveis, então selecionar
+`TW1-Remaster` falha com "No valid Unity projects found".
+
+O projeto fica em uma subpasta de propósito, para que `docs/`, `design/` e `tech/` fiquem
+no mesmo repositório sem virar lixo dentro de `Assets`.
 
 ## Estado do projeto Unity
 

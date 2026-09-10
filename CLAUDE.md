@@ -1,3 +1,4 @@
+| `unity/LoboBranco/` | O projeto Unity. **Aponte o Unity Hub para esta pasta**, nao para a raiz |
 # CLAUDE.md — Projeto Lobo Branco
 
 Protótipo de RPG de ação em Unity, remaster autoral de The Witcher (2007).
