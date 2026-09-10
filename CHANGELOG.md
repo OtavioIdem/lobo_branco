@@ -4,6 +4,16 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-09 — Agentes e skills de projeto
+- `CLAUDE.md`: contexto carregado em toda sessao, com regras de arquitetura, pilares,
+  escopo travado e definicao de pronto.
+- Sete agentes em `.claude/agents/`, um por setor: unity-engenheiro, game-designer,
+  narrativa-ink, arte-tecnica, qa-unity, revisor-arquitetura e pesquisador-tw1.
+- Seis skills em `.claude/skills/`: unity-batch, novo-sistema, novo-monstro,
+  novo-contrato, balancear-combate e adr.
+- `scripts/unity.sh`: roda o editor sem interface para compilar, testar, buildar e
+  executar metodo, com deteccao de versao, guarda de lockfile e leitura dos resultados.
+
 ### 2026-09-09 — Movimento e camera de terceira pessoa (tarefas 0.9 a 0.12)
 - `PlayerControls.inputactions`: 17 acoes e 37 bindings, teclado, mouse e gamepad,
   conforme o doc 02 secao 4.

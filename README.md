@@ -29,10 +29,42 @@ e reinterpretando seus sistemas com mecânicas próprias.
 | 12 | [docs/11_SETUP_AMBIENTE.md](docs/11_SETUP_AMBIENTE.md) | Passo a passo de instalação e configuração |
 | 13 | [docs/12_BACKLOG_VERTICAL_SLICE.md](docs/12_BACKLOG_VERTICAL_SLICE.md) | Tarefas concretas, ordenadas, do primeiro dia |
 
+## Agentes e skills
+
+Sete agentes especializados por setor, em `.claude/agents/`. Chame pelo nome, ou deixe
+que sejam escolhidos pela descrição.
+
+| Agente | Setor |
+|---|---|
+| `unity-engenheiro` | Implementa sistemas de gameplay em C# |
+| `game-designer` | Projeta e balanceia mecânicas, mantém as planilhas |
+| `narrativa-ink` | Diálogo, quests, contratos, sistema de Ecos |
+| `arte-tecnica` | Greybox, shaders, VFX, iluminação, áudio, licenças |
+| `qa-unity` | Compila, testa, builda, diagnostica |
+| `revisor-arquitetura` | Confere o código contra o doc 07 e os ADRs |
+| `pesquisador-tw1` | Pesquisa o jogo original e referências de design |
+
+Seis skills para os procedimentos que se repetem, em `.claude/skills/`.
+
+| Skill | Quando dispara |
+|---|---|
+| `unity-batch` | Compilar, testar, buildar, rodar método de editor |
+| `novo-sistema` | Criar um módulo ou sistema de gameplay do zero |
+| `novo-monstro` | Adicionar um inimigo completo, com bestiário e encontro |
+| `novo-contrato` | Montar uma quest nas dez etapas, com Eco |
+| `balancear-combate` | Mexer em qualquer número de combate |
+| `adr` | Registrar uma decisão de arquitetura |
+
+O `CLAUDE.md` é lido automaticamente a cada sessão e carrega o essencial do projeto.
+**Abra o Claude Code com `E:\Unity_Games\TW1-Remaster` como diretório**, senão nada
+disso é encontrado.
+
 ## Estrutura de pastas
 
 ```
 TW1-Remaster/
+├── CLAUDE.md      Contexto carregado em toda sessão
+├── .claude/       Agentes e skills do projeto
 ├── docs/          Levantamentos e design docs (a fonte da verdade)
 ├── design/        Planilhas de balanceamento, tabelas, grafos de quest
 ├── research/      Anotações do original, bestiário, mapas de referência
