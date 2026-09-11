@@ -7,12 +7,18 @@ Status: aceita
 
 O [doc 13](../../docs/13_COOP_E_REDE.md) transformou o slice do Capítulo I em uma caçada
 cooperativa de 2 a 4 jogadores, em sessão privada aberta por código de convite. Isso obriga
-a escolher uma biblioteca de rede e um modelo de autoridade antes da tarefa 1.6 do
-[doc 12](../../docs/12_BACKLOG_VERTICAL_SLICE.md), que é a máquina de estados do jogador.
+a escolher uma biblioteca de rede e um modelo de autoridade antes das tarefas 1.10 e 1.11 do
+[doc 12](../../docs/12_BACKLOG_VERTICAL_SLICE.md), que são esquiva, aparo e riposte.
 
-O momento não é coincidência. A FSM é a peça que decide o que o personagem pode fazer a cada
-quadro. Se ela nascer sem saber quem tem autoridade, cada estado criado depois vira uma
-conversão a mais na hora de ligar a rede.
+O momento importa por duas razões. A primeira é que a máquina de estados tem hoje **dois**
+estados, `Locomotion` e `Attack`. Converter dois estados para o modelo de autoridade é
+barato; converter os doze que o M1 ainda vai criar, não.
+
+A segunda é o aparo. A janela de 0,18 s do [doc 03 §5](../../docs/03_COMBATE.md) é o sistema
+mais sensível a latência do projeto inteiro: ela é menor do que a viagem de ida e volta de
+muitas conexões domésticas. Quem decide se um aparo aconteceu, e contra qual quadro do
+ataque inimigo, é uma decisão de rede, não de combate. Construir aparo antes de responder
+isso é construí-lo duas vezes.
 
 As restrições que pesam:
 
@@ -59,7 +65,7 @@ mesma classe, mas só o host a chama.
 
 ### Fica mais fácil
 - O movimento continua respondendo na hora, sem predição, sem rollback, sem buffer de estado.
-- `PlayerLocomotion`, `DamagePipeline` e os 55 testes existentes sobrevivem sem alteração.
+- `PlayerLocomotion`, `DamagePipeline` e os 115 testes existentes sobrevivem sem alteração.
 - NGO é de primeira parte. A documentação, os exemplos e as mensagens de erro do editor falam
   a mesma língua, o que importa quando o objetivo é aprender.
 - Relay resolve travessia de NAT e entrega um código de convite pronto, que é literalmente a

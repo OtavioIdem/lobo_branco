@@ -139,7 +139,7 @@ para isso, a preparação exata que rede exige.
 | `Player/PlayerMeleeAttacker` | **Ajuste** | Dispara pedido; quem resolve o acerto é o host |
 | `Combat/CombatDummy` | **Ajuste** | Vira `NetworkBehaviour` |
 | `Player/PlayerBrain` | **Reescrever** | É o único que junta input, câmera e FSM. É onde a autoridade entra |
-| `Tests/*` | **Integral** | Os 55 testes continuam valendo. Testam lógica pura, que é justamente o que não muda |
+| `Tests/*` | **Integral** | Os 115 testes continuam valendo. Testam lógica pura, que é justamente o que não muda |
 
 Nada é jogado fora. Um arquivo é reescrito.
 
@@ -190,7 +190,8 @@ descoberto no meio do caminho.
 
 | # | Risco | Mitigação |
 |---|---|---|
-| X6 | Rede entra tarde e vira retrofit caro | Entra **agora**, antes da tarefa 1.6. A FSM nasce sabendo de autoridade |
+| X6 | Rede entra tarde e vira retrofit caro | Entra **agora**, antes das tarefas 1.10 e 1.11. A FSM tem 2 estados hoje e vai ter 12 no fim do M1 |
+| X6b | Aparo de 0,18 s não sobrevive à latência | É o primeiro sistema a ser projetado em rede, não o último. Ver ADR 0008 |
 | X7 | Escopo volta a crescer pela porta das escolas | Duas escolas. A terceira só depois do portão M1, e só se o portão passar |
 | X8 | Depender de serviço de nuvem trava o desenvolvimento | Transporte direto por IP em desenvolvimento. Relay só para jogar com gente de fora |
 | X9 | Balanceamento do doc 03 foi feito para um alvo e um jogador | Rebalancear é tarefa explícita do M1, não descoberta. O `CombatTuningDef` já centraliza |

@@ -44,6 +44,30 @@ Legenda de tamanho: **P** até 2 h, **M** de 2 a 5 h, **G** de 5 a 12 h.
 | ~~1.7~~ ✅ | Buffer de input de 0,2 s | P | 07 §4.4 |
 | ~~1.8~~ ✅ | Estados `Locomotion`, `Attack` leve e forte | G | 03 §4 |
 | ~~1.9~~ ✅ | Hitbox por evento de animação com `OverlapCapsule` e lista de já-atingidos | M | 07 §4.5 |
+
+**A rede entra aqui.** Não depois do M1. A FSM tem dois estados hoje e vai ter doze no fim
+do milestone, e a janela de aparo de 0,18 s da tarefa 1.11 é menor que o ping de muita gente.
+Construir esquiva e aparo antes de decidir quem tem autoridade é construí-los duas vezes.
+Justificativa completa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-com-relay.md).
+
+| # | Tarefa | Tam. | Doc |
+|---|---|---|---|
+| 1.9a | Instalar NGO, Transport, Services Core, Authentication, Relay e Multiplayer Play Mode | P | ADR 0008 |
+| 1.9b | `NetworkManager` na cena de bootstrap, transporte direto por IP, duas cápsulas na mesma cena | M | ADR 0008 |
+| 1.9c | Prefab de jogador em rede: `NetworkObject`, spawn por conexão, câmera e input só do dono | M | 13 §6 |
+| 1.9d | `PlayerBrain` reescrito com autoridade. É o único arquivo que a rede obriga a reescrever | G | 13 §7 |
+| 1.9e | `StatSheet` autoritativo no host e replicado. Cliente lê, nunca escreve | G | 13 §6 |
+| 1.9f | Ataque vira pedido: RPC do dono, `MeleeHitbox` e `DamagePipeline` rodando só no host | G | 13 §6 |
+| 1.9g | Painel de debug mostra papel, dono, autoridade e ida-e-volta de cada personagem | P | 13 §11 |
+| 1.9h | Relay: autenticação anônima, criar sessão, gerar e entrar por código de convite | G | ADR 0008 |
+| 1.9i | UI mínima de sala: hospedar, colar código, entrar, ver quem está dentro | M | 13 §8 |
+
+**Portão da rede:** duas pessoas em máquinas diferentes entram na mesma `Sandbox_Combate`
+por código, batem no mesmo `CombatDummy`, e o dano bate igual nas duas telas. Só depois disso
+a tarefa 1.10 começa.
+
+| # | Tarefa | Tam. | Doc |
+|---|---|---|---|
 | 1.10 | Estados `Dodge` e `Roll` com frames de invulnerabilidade | M | 03 §5 |
 | 1.11 | Estados `Parry` e `Riposte` com a janela de 0,18 s | G | 03 §5 |
 | 1.12 | Sistema de Fluxo com a janela de 0,22 s e os cinco níveis de bônus | M | 03 §6 |
@@ -66,8 +90,19 @@ Legenda de tamanho: **P** até 2 h, **M** de 2 a 5 h, **G** de 5 a 12 h.
 | 1.29 | Painel de debug: vitalidade, vigor, postura, Fluxo, e o log de dano | M | 11 §6 |
 | 1.30 | Balancear com os números do doc 03 §12 e ajustar até o TTD alvo | G | 03 §12 |
 
-**Portão M1:** você luta contra 4 cápsulas por 10 minutos e quer continuar.
-Se não, pare aqui e reprojete. Não construa conteúdo sobre um combate ruim.
+| 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
+| 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |
+| 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Vontade. Zero `if` por escola | G | 13 §5 |
+| 1.34 | Seleção de escola na entrada da sala | P | 13 §8 |
+| 1.35 | Rebalancear o doc 03 para dois jogadores. Os números foram feitos para um | G | 03 §12 |
+
+**Portão M1:** duas pessoas lutam contra 4 cápsulas por 10 minutos e querem continuar, **e**
+pelo menos uma vez uma delas fez algo que a outra não conseguiria fazer sozinha.
+
+A segunda metade é o teste de verdade. Coop em que dois jogadores fazem a mesma coisa mais
+rápido não é coop, é jogo solo com testemunha. Falhou só na segunda metade, o problema está
+nos kits: volte para 1.31 a 1.33. Falhou na primeira, pare aqui e reprojete o combate.
+Não construa conteúdo sobre um combate ruim.
 
 ---
 
