@@ -1,5 +1,6 @@
 using System.IO;
 using LoboBranco.Combat;
+using LoboBranco.Player;
 using LoboBranco.Stats;
 using UnityEditor;
 using UnityEngine;
@@ -18,6 +19,9 @@ namespace LoboBranco.EditorTools
     {
         const string CombatFolder = "Assets/_Project/Data/Combat";
         const string StatsFolder = "Assets/_Project/Data/Stats";
+        const string AttacksFolder = "Assets/_Project/Data/Combat/Attacks";
+        const string WeaponsFolder = "Assets/_Project/Data/Combat/Weapons";
+        const string PlayerFolder = "Assets/_Project/Data/Player";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -51,9 +55,138 @@ namespace LoboBranco.EditorTools
                 Entry(StatType.CarryWeight, 60f),
             });
 
+            // docs/03 secao 12: barghest tem 55 de vitalidade, 16 de dano, 2 de armadura.
+            CreateStatBlock($"{StatsFolder}/StatBlock_Barghest.asset", new[]
+            {
+                Entry(StatType.MaxVitality, 55f),
+                Entry(StatType.AttackDamage, 16f),
+                Entry(StatType.Armor, 2f),
+            });
+
+            CreateAttacks();
+            CreateWeapons();
+            CreatePlayerTuning();
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[CombatData] Assets de combate prontos.");
+        }
+
+        // --------------------------------------------------------------- ataques
+
+        /// <summary>
+        /// Os tres golpes da tabela do docs/03 secao 4. Tempo do golpe e recuperacao vem
+        /// direto de la; a divisao do tempo do golpe entre anticipacao e janela de dano
+        /// nao esta no documento e foi decidida aqui (tech/adr/0007).
+        /// </summary>
+        static void CreateAttacks()
+        {
+            EnsureFolder(AttacksFolder);
+
+            CreateAttack($"{AttacksFolder}/Attack_Light.asset", a =>
+            {
+                a.stance = Stance.Fast;         // 0,75x de dano
+                a.strikeTime = 0.25f;
+                a.recovery = 0.15f;
+                a.hitboxOpenAt = 0.55f;         // anticipacao de 0,14 s, janela de 0,10 s
+                a.hitboxCloseAt = 0.95f;
+                a.staminaCost = 4f;
+                a.maxTargets = 1;
+                a.arcDegrees = 110f;
+                a.reach = 2.2f;
+                a.radius = 0.55f;
+                a.heightOffset = 1.1f;
+            });
+
+            CreateAttack($"{AttacksFolder}/Attack_Heavy.asset", a =>
+            {
+                a.stance = Stance.Strong;       // 1,45x de dano
+                a.strikeTime = 0.55f;
+                a.recovery = 0.45f;
+                a.hitboxOpenAt = 0.72f;         // anticipacao de 0,40 s: e o golpe telegrafado
+                a.hitboxCloseAt = 0.96f;
+                a.staminaCost = 8f;
+                a.maxTargets = 1;
+                a.arcDegrees = 100f;
+                a.reach = 2.4f;
+                a.radius = 0.6f;
+                a.heightOffset = 1.1f;
+            });
+
+            // Sem input ligado ainda: a troca de postura e a tarefa 1.14. O asset existe
+            // agora porque ele e o unico que exercita arco de 180 graus e quatro alvos.
+            CreateAttack($"{AttacksFolder}/Attack_Group.asset", a =>
+            {
+                a.stance = Stance.Group;        // 0,90x de dano
+                a.strikeTime = 0.40f;
+                a.recovery = 0.55f;
+                a.hitboxOpenAt = 0.62f;
+                a.hitboxCloseAt = 0.95f;
+                a.staminaCost = 12f;
+                a.maxTargets = 4;
+                a.arcDegrees = 180f;
+                a.reach = 2.6f;
+                a.radius = 0.9f;
+                a.heightOffset = 1.1f;
+            });
+        }
+
+        static void CreateWeapons()
+        {
+            EnsureFolder(WeaponsFolder);
+
+            // docs/03 secao 12: jogador nivel 1 bate 12 de base.
+            CreateWeapon($"{WeaponsFolder}/Weapon_SteelSword.asset", WeaponMaterial.Steel, 12f);
+            CreateWeapon($"{WeaponsFolder}/Weapon_SilverSword.asset", WeaponMaterial.Silver, 12f);
+        }
+
+        static void CreatePlayerTuning()
+        {
+            EnsureFolder(PlayerFolder);
+
+            if (File.Exists($"{PlayerFolder}/PlayerTuning.asset"))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {PlayerFolder}/PlayerTuning.asset");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<PlayerTuningDef>();
+            asset.inputBufferSeconds = 0.2f;    // docs/07 secao 4.4
+
+            AssetDatabase.CreateAsset(asset, $"{PlayerFolder}/PlayerTuning.asset");
+            Debug.Log($"[CombatData] Criado: {PlayerFolder}/PlayerTuning.asset");
+        }
+
+        static void CreateAttack(string path, System.Action<AttackDef> configure)
+        {
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<AttackDef>();
+            configure(asset);
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        static void CreateWeapon(string path, WeaponMaterial material, float baseDamage)
+        {
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<MeleeWeaponDef>();
+            asset.material = material;
+            asset.damageType = DamageType.Slash;
+            asset.baseDamage = baseDamage;
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
         }
 
         // ------------------------------------------------------------------ util

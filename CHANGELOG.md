@@ -4,6 +4,24 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-10 — M1 tarefas 1.6 a 1.9: FSM, buffer de input, ataques e hitbox
+- Maquina de estados do jogador escrita a mao, com contrato de quatro metodos e tempo
+  por parametro. Estados `Locomotion` e `Attack`.
+- `PlayerStateRules`: a regra de ouro do combate em um lugar so. Nenhum input cancela
+  acao comprometida, exceto esquiva e rolamento, mais atordoamento, morte e dialogo,
+  que sao o mundo agindo sobre o jogador e nao input.
+- `InputBuffer` de 0,2 s. Sem ele o combate parece irresponsivo mesmo com numeros certos.
+- `AttackDef`: anticipacao, janela de dano e recuperacao em asset, com os tempos do
+  doc 03 secao 4. Golpes leve, forte e de grupo criados.
+- `MeleeHitbox`: consulta de capsula sem alocacao, filtrada por arco, com lista de
+  ja-atingidos por golpe. Sem `OnTriggerEnter` em colisor de espada.
+- `CombatDummy`: alvo de sandbox que recebe dano, pisca e revive, para dar o que bater.
+- Painel de debug mostra estado, fase do golpe, buffer e alvos atingidos.
+- ADR 0007: a janela de dano e dirigida por tempo decorrido e nao por evento de animacao,
+  porque nao existe Animator no projeto ainda. `AttackDef` tem chave para inverter isso
+  quando as animacoes entrarem no M4.
+- 115 testes passando, contra 55 antes.
+
 ### 2026-09-10 — M1 tarefas 1.1 a 1.5: folha de atributos e pipeline de dano
 - `StatSheet`: valores base mais modificadores Flat, PercentAdd e PercentMult, com cache
   por atributo e evento de mudanca. Formula independente da ordem de chegada.

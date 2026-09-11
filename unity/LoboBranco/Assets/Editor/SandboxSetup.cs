@@ -1,8 +1,10 @@
 using System.IO;
 using System.Linq;
 using LoboBranco.CameraSystem;
+using LoboBranco.Combat;
 using LoboBranco.Core;
 using LoboBranco.Player;
+using LoboBranco.Stats;
 using Unity.Cinemachine;
 using Unity.Cinemachine.TargetTracking;
 using UnityEditor;
@@ -21,6 +23,17 @@ namespace LoboBranco.EditorTools
         const string ScenePath = "Assets/_Project/Scenes/Sandbox_Combate.unity";
         const string ControlsPath = "Assets/_Project/Settings/PlayerControls.inputactions";
 
+        const string TuningPath = "Assets/_Project/Data/Combat/CombatTuning.asset";
+        const string PlayerStatsPath = "Assets/_Project/Data/Stats/StatBlock_Player.asset";
+        const string EnemyStatsPath = "Assets/_Project/Data/Stats/StatBlock_Barghest.asset";
+        const string SteelSwordPath = "Assets/_Project/Data/Combat/Weapons/Weapon_SteelSword.asset";
+        const string LightAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Light.asset";
+        const string HeavyAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Heavy.asset";
+        const string PlayerTuningPath = "Assets/_Project/Data/Player/PlayerTuning.asset";
+        const string EnemyMaterialPath = "Assets/_Project/Art/Materials/M_Greybox_Enemy.mat";
+
+        const string EnemyRoot = "Enemies";
+
         // Escalas fixas do projeto (docs/08_PIPELINE_ARTE_E_AUDIO.md secao 2).
         const float PlayerHeight = 1.85f;
         const float PlayerRadius = 0.3f;
@@ -35,12 +48,14 @@ namespace LoboBranco.EditorTools
             DestroyIfPresent("Player");
             DestroyIfPresent("CameraPivot");
             DestroyIfPresent("CM_Exploration");
+            DestroyIfPresent(EnemyRoot);
 
             var player = CreatePlayer();
             var pivot = CreateCameraPivot(player.transform);
             CreateVirtualCamera(pivot.transform);
             EnsureBrainOnMainCamera();
             WirePlayer(player, pivot.GetComponent<ThirdPersonCameraRig>());
+            CreateEnemies();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -69,6 +84,7 @@ namespace LoboBranco.EditorTools
 
             player.AddComponent<PlayerInputReader>();
             player.AddComponent<PlayerLocomotion>();
+            player.AddComponent<PlayerMeleeAttacker>();
             player.AddComponent<PlayerBrain>();
             player.AddComponent<PlayerDebugOverlay>();
 
@@ -107,13 +123,103 @@ namespace LoboBranco.EditorTools
 
             var brain = new SerializedObject(player.GetComponent<PlayerBrain>());
             brain.FindProperty("cameraRig").objectReferenceValue = rig;
+            brain.FindProperty("tuning").objectReferenceValue = Require<PlayerTuningDef>(PlayerTuningPath);
             brain.ApplyModifiedPropertiesWithoutUndo();
 
             var overlay = new SerializedObject(player.GetComponent<PlayerDebugOverlay>());
             overlay.FindProperty("locomotion").objectReferenceValue = player.GetComponent<PlayerLocomotion>();
             overlay.FindProperty("input").objectReferenceValue = player.GetComponent<PlayerInputReader>();
+            overlay.FindProperty("brain").objectReferenceValue = player.GetComponent<PlayerBrain>();
+            overlay.FindProperty("attacker").objectReferenceValue = player.GetComponent<PlayerMeleeAttacker>();
             overlay.FindProperty("cameraRig").objectReferenceValue = rig;
             overlay.ApplyModifiedPropertiesWithoutUndo();
+
+            WireAttacker(player.GetComponent<PlayerMeleeAttacker>());
+        }
+
+        /// <summary>
+        /// Liga os assets de combate. Sem eles, o componente se desliga sozinho no Awake
+        /// e o ataque some sem erro visivel, entao cada ausencia vira um log.
+        /// </summary>
+        static void WireAttacker(PlayerMeleeAttacker attacker)
+        {
+            var so = new SerializedObject(attacker);
+
+            so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
+            so.FindProperty("statBlock").objectReferenceValue = Require<StatBlockDef>(PlayerStatsPath);
+            so.FindProperty("weapon").objectReferenceValue = Require<MeleeWeaponDef>(SteelSwordPath);
+            so.FindProperty("lightAttack").objectReferenceValue = Require<AttackDef>(LightAttackPath);
+            so.FindProperty("heavyAttack").objectReferenceValue = Require<AttackDef>(HeavyAttackPath);
+
+            // Zero significa "use GameLayers.PlayerAttackTargets", mas gravar a mascara
+            // explicita aqui torna visivel no Inspector no que o golpe acerta.
+            so.FindProperty("targetMask").intValue = GameLayers.PlayerAttackTargets;
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // ------------------------------------------------------------- inimigos
+
+        /// <summary>
+        /// Tres capsulas vermelhas: uma de frente e duas nos flancos, dentro do arco de
+        /// 180 graus da postura Grupo e fora do arco de 110 do golpe leve. E o arranjo
+        /// minimo em que da para ver que o filtro de arco existe.
+        /// </summary>
+        static void CreateEnemies()
+        {
+            var root = new GameObject(EnemyRoot);
+
+            CreateEnemy(root.transform, "Enemy_Alvo_Frente", new Vector3(0f, 0f, -4.0f));
+            CreateEnemy(root.transform, "Enemy_Alvo_Esquerda", new Vector3(-2.2f, 0f, -3.4f));
+            CreateEnemy(root.transform, "Enemy_Alvo_Direita", new Vector3(2.2f, 0f, -3.4f));
+        }
+
+        static void CreateEnemy(Transform parent, string name, Vector3 position)
+        {
+            var enemy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            enemy.name = name;
+            enemy.transform.SetParent(parent, false);
+            enemy.transform.position = position + Vector3.up;
+            enemy.layer = LayerMask.NameToLayer(GameLayers.Enemy);
+
+            var renderer = enemy.GetComponent<Renderer>();
+            if (renderer != null)
+                renderer.sharedMaterial = LoadOrCreateEnemyMaterial();
+
+            var dummy = enemy.AddComponent<CombatDummy>();
+
+            var so = new SerializedObject(dummy);
+            so.FindProperty("statBlock").objectReferenceValue = Require<StatBlockDef>(EnemyStatsPath);
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static Material LoadOrCreateEnemyMaterial()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(EnemyMaterialPath);
+            if (existing != null) return existing;
+
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null)
+            {
+                Debug.LogError("[Sandbox] Shader Lit da URP nao encontrado; capsula fica com o material padrao.");
+                return null;
+            }
+
+            var material = new Material(shader);
+            material.SetColor("_BaseColor", new Color(0.75f, 0.12f, 0.12f));
+
+            AssetDatabase.CreateAsset(material, EnemyMaterialPath);
+            return material;
+        }
+
+        static T Require<T>(string path) where T : Object
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+            if (asset == null)
+                Debug.LogError($"[Sandbox] Nao achei {path}. Rode 'Lobo Branco/Setup/6. Criar assets de combate' antes.");
+
+            return asset;
         }
 
         // -------------------------------------------------------------- camera

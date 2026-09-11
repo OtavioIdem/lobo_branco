@@ -40,10 +40,10 @@ Legenda de tamanho: **P** até 2 h, **M** de 2 a 5 h, **G** de 5 a 12 h.
 | ~~1.3~~ ✅ | `IDamageable`, `IDamageDealer`, `DamageContext` com o `Log` | M | 07 §4.3 |
 | ~~1.4~~ ✅ | Os 11 `IDamageStage` do pipeline, na ordem | G | 03 §9 |
 | ~~1.5~~ ✅ | Testes unitários do pipeline: os dois cenários de 2,19x e 0,41x | M | 03 §9 |
-| 1.6 | FSM do jogador: contrato de estado e transições | G | 07 §4.4 |
-| 1.7 | Buffer de input de 0,2 s | P | 07 §4.4 |
-| 1.8 | Estados `Locomotion`, `Attack` leve e forte | G | 03 §4 |
-| 1.9 | Hitbox por evento de animação com `OverlapCapsule` e lista de já-atingidos | M | 07 §4.5 |
+| ~~1.6~~ ✅ | FSM do jogador: contrato de estado e transições | G | 07 §4.4 |
+| ~~1.7~~ ✅ | Buffer de input de 0,2 s | P | 07 §4.4 |
+| ~~1.8~~ ✅ | Estados `Locomotion`, `Attack` leve e forte | G | 03 §4 |
+| ~~1.9~~ ✅ | Hitbox por evento de animação com `OverlapCapsule` e lista de já-atingidos | M | 07 §4.5 |
 | 1.10 | Estados `Dodge` e `Roll` com frames de invulnerabilidade | M | 03 §5 |
 | 1.11 | Estados `Parry` e `Riposte` com a janela de 0,18 s | G | 03 §5 |
 | 1.12 | Sistema de Fluxo com a janela de 0,22 s e os cinco níveis de bônus | M | 03 §6 |

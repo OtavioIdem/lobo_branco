@@ -1,13 +1,18 @@
 # CLAUDE.md — Projeto Lobo Branco
 
-Protótipo de RPG de ação em Unity, remaster autoral de The Witcher (2007).
+Protótipo de RPG de ação **cooperativo** em Unity, remaster autoral de The Witcher (2007).
+De 2 a 4 jogadores caçam juntos no Capítulo I, em sessão privada por código de convite.
 Projeto solo, não-comercial, feito para aprender desenvolvimento de jogos.
+
+O pivô para coop é de 2026-09-10 e está no `docs/13`. Onde o doc 13 contradiz um doc
+anterior, **o doc 13 vence** até que o doc antigo seja reescrito.
 
 ## Onde as coisas estão
 
 | Caminho | O que é |
 |---|---|
-| `docs/00` a `docs/12` | **A fonte da verdade.** Design, arquitetura, roadmap |
+| `docs/00` a `docs/13` | **A fonte da verdade.** Design, arquitetura, roadmap |
+| `docs/13` | Coop, escolas, modelo de autoridade. **Prevalece sobre os anteriores** |
 | `tech/adr/` | Decisões de arquitetura com justificativa |
 | `design/*.csv` | Planilhas de balanceamento, trilhas, ecos, tracking semanal |
 | `unity/LoboBranco/` | O projeto Unity. **Aponte o Unity Hub para esta pasta**, não para a raiz |
@@ -85,9 +90,17 @@ Estas não são preferências de estilo, são o que mantém o projeto navegável
 
 ## Estado atual
 
-M0 fechado. Existe um jogador que anda com câmera de terceira pessoa, 19 testes
-automatizados passando, e build gerando. O próximo passo é o **M1**, que começa pela
-folha de atributos e pelo pipeline de dano de 11 estágios (`docs/12`, tarefas 1.1 a 1.5).
+M0 fechado. M1 nas tarefas 1.1 a 1.9: existe jogador com câmera de terceira pessoa,
+folha de atributos com modificadores, pipeline de dano de 11 estágios, máquina de estados
+com buffer de input de 0,2 s, e golpes leve e forte com hitbox sem alocação.
+115 testes passando, build gerando.
+
+O próximo passo são as tarefas **1.10 e 1.11**: esquiva e rolamento com frames de
+invulnerabilidade, depois aparo e riposte com a janela de 0,18 s.
+
+A janela de dano é dirigida por tempo decorrido, não por evento de animação, porque ainda
+não existe `Animator` no projeto. O `AttackDef` tem uma chave para inverter isso quando as
+animações entrarem no M4 (`tech/adr/0007`).
 
 **M1 é um portão.** Se o combate contra cápsulas cinzas não for divertido depois de
 pronto, o projeto para e reprojeta o combate. Não construa conteúdo em cima de um

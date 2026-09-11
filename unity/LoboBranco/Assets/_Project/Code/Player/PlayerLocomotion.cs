@@ -6,16 +6,17 @@ namespace LoboBranco.Player
     /// Movimento do jogador. Deliberadamente sem nenhuma referencia ao Input System
     /// nem a camera: recebe <see cref="MoveInput"/> e <see cref="ReferenceYaw"/> de fora.
     ///
-    /// Isso e o que permite testar movimento sem simular teclado, e e o que vai permitir
-    /// que a FSM (doc 07 secao 4.4) assuma o controle depois: um estado de esquiva
-    /// simplesmente escreve em MoveInput.
+    /// Isso e o que permite testar movimento sem simular teclado, e e o que permite que a
+    /// FSM (doc 07 secao 4.4) assuma o controle: quem escreve em <see cref="MoveInput"/>
+    /// e o estado atual, atraves de <see cref="ILocomotionDriver"/>. O estado de ataque
+    /// escreve zero, e e so isso que impede o jogador de andar durante um golpe.
     ///
     /// Escalas e velocidades vem de docs/08_PIPELINE_ARTE_E_AUDIO.md secao 2 e sao
     /// fixas para o projeto inteiro. Mudar aqui muda o tamanho de todos os cenarios.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterController))]
-    public sealed class PlayerLocomotion : MonoBehaviour
+    public sealed class PlayerLocomotion : MonoBehaviour, ILocomotionDriver
     {
         [Header("Velocidade (m/s)")]
         [SerializeField] float walkSpeed = 2.0f;

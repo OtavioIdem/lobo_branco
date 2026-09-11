@@ -1,0 +1,56 @@
+using LoboBranco.Combat;
+using UnityEngine;
+
+namespace LoboBranco.Player
+{
+    /// <summary>
+    /// Tudo que um estado precisa alcancar, em um objeto so, criado uma vez.
+    ///
+    /// Os alvos sao interfaces e nao MonoBehaviours: e o que permite montar a maquina
+    /// inteira em um teste de EditMode com dublês, sem GameObject, sem fisica e sem
+    /// Animator. E a mesma razao pela qual <c>PlayerLocomotion</c> recebe direcao por
+    /// propriedade em vez de ler o teclado (regra 4 do CLAUDE.md).
+    ///
+    /// Nenhum estado le input diretamente: quem le e o <see cref="PlayerBrain"/>, que
+    /// escreve os campos continuos aqui uma vez por frame.
+    /// </summary>
+    public sealed class PlayerStateContext
+    {
+        // ------------------------------------------------------------- colaboradores
+
+        public PlayerStateMachine Machine;
+
+        /// <summary>Para onde os estados escrevem movimento. Nulo e valido: o estado so nao move.</summary>
+        public ILocomotionDriver Locomotion;
+
+        /// <summary>Quem empunha a arma. Nulo e valido: o golpe roda sem causar dano.</summary>
+        public IMeleeAttacker Attacker;
+
+        public InputBuffer Buffer;
+
+        // ------------------------------------------------------- entradas continuas
+
+        /// <summary>Eixo de movimento bruto, escrito pelo componente de ligacao a cada frame.</summary>
+        public Vector2 MoveInput;
+
+        public bool SprintHeld;
+
+        /// <summary>Aparo segurado. Consumido pela tarefa 1.11.</summary>
+        public bool ParryHeld;
+
+        /// <summary>
+        /// Yaw da camera. Os estados nao o usam para andar (quem escreve isso na locomocao
+        /// e o <see cref="PlayerBrain"/>), mas a esquiva da tarefa 1.10 precisa dele para
+        /// saber o que "para tras" significa quando nao ha input de direcao.
+        /// </summary>
+        public float ReferenceYaw;
+
+        // --------------------------------------------------------------- ataques
+
+        /// <summary>Golpe escolhido por quem pediu a transicao, consumido pelo estado de ataque.</summary>
+        public AttackDef PendingAttack;
+
+        public AttackDef LightAttack;
+        public AttackDef HeavyAttack;
+    }
+}

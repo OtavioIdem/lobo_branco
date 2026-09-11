@@ -18,6 +18,8 @@ namespace LoboBranco.Player
         [SerializeField] PlayerLocomotion locomotion;
         [SerializeField] ThirdPersonCameraRig cameraRig;
         [SerializeField] PlayerInputReader input;
+        [SerializeField] PlayerBrain brain;
+        [SerializeField] PlayerMeleeAttacker attacker;
 
         [Tooltip("F1 alterna o painel em tempo de execucao.")]
         [SerializeField] bool visible = true;
@@ -29,6 +31,8 @@ namespace LoboBranco.Player
         {
             if (locomotion == null) locomotion = GetComponent<PlayerLocomotion>();
             if (input == null) input = GetComponent<PlayerInputReader>();
+            if (brain == null) brain = GetComponent<PlayerBrain>();
+            if (attacker == null) attacker = GetComponent<PlayerMeleeAttacker>();
             if (cameraRig == null) cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
         }
 
@@ -51,11 +55,13 @@ namespace LoboBranco.Player
                 normal = { textColor = Color.white },
             };
 
-            GUILayout.BeginArea(new Rect(12f, 12f, 340f, 260f), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(12f, 12f, 420f, 420f), GUI.skin.box);
             GUILayout.Label("SANDBOX  —  F1 esconde", _style);
             GUILayout.Space(4f);
 
             GUILayout.Label($"FPS               {_fps,6:F0}", _style);
+
+            DrawStateMachine();
 
             if (locomotion != null)
             {
@@ -78,8 +84,45 @@ namespace LoboBranco.Player
 
             GUILayout.Space(4f);
             GUILayout.Label("WASD mover | mouse camera | Shift correr", _style);
+            GUILayout.Label("Botao esq. golpe leve | dir. golpe forte", _style);
+
+            if (attacker != null && !string.IsNullOrEmpty(attacker.LastHitSummary))
+            {
+                GUILayout.Space(4f);
+                GUILayout.Label("Ultimo golpe:", _style);
+                GUILayout.Label(attacker.LastHitSummary, _style);
+            }
 
             GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// Estado, fase do golpe e buffer. Sao os tres numeros que dizem se o combate esta
+        /// respondendo: um input que some sem virar transicao aparece aqui como uma acao
+        /// guardada que expira sozinha.
+        /// </summary>
+        void DrawStateMachine()
+        {
+            PlayerStateMachine machine = brain != null ? brain.Machine : null;
+            if (machine == null) return;
+
+            GUILayout.Label($"Estado            {machine.CurrentId,-14} {machine.TimeInState,5:F2}s", _style);
+
+            if (machine.Current is AttackState attackState && attackState.CurrentAttack != null)
+            {
+                GUILayout.Label(
+                    $"Golpe             {attackState.CurrentAttack.name} ({attackState.CurrentAttack.stance})", _style);
+                GUILayout.Label(
+                    $"Fase              {attackState.CurrentPhase,-14} hitbox {(attackState.HitboxOpen ? "ABERTA" : "fechada")}",
+                    _style);
+            }
+
+            InputBuffer buffer = brain.Buffer;
+            if (buffer != null)
+                GUILayout.Label($"Buffer            {buffer.Pending,-14} {buffer.Remaining,5:F2}s", _style);
+
+            if (attacker != null)
+                GUILayout.Label($"Alvos no golpe    {attacker.HitsThisSwing,6}", _style);
         }
     }
 }
