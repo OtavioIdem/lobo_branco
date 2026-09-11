@@ -1,9 +1,14 @@
 using LoboBranco.CameraSystem;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace LoboBranco.Player
 {
     /// <summary>
+    /// Autoridade: o dono (ADR 0008). Quem simula este personagem e a maquina de quem o
+    /// controla, e mais ninguem. O host nao corrige movimento, e o cliente nao declara
+    /// dano: quando o golpe conectar, quem resolve e o host (tarefa 1.9f).
+    ///
     /// Dono da maquina de estados do jogador (docs/07 secao 4.4) e o unico componente que
     /// conhece input, movimento e camera ao mesmo tempo.
     ///
@@ -12,11 +17,15 @@ namespace LoboBranco.Player
     /// comando; o input vira campo do contexto e evento de botao vira entrada no buffer;
     /// e a partir dai quem decide o que acontece e o estado atual, nunca este componente.
     /// Nenhum <c>if</c> de combate mora aqui, e isso e o ponto da FSM.
+    ///
+    /// Sem rede ligada, o jogador local e dono de si mesmo. Isso e deliberado: o risco X8
+    /// do doc 13 diz que a rede nao pode virar pre-requisito para testar combate, entao a
+    /// Sandbox_Combate continua jogavel sozinha, sem host nenhum.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerInputReader))]
     [RequireComponent(typeof(PlayerLocomotion))]
-    public sealed class PlayerBrain : MonoBehaviour
+    public sealed class PlayerBrain : NetworkBehaviour
     {
         [SerializeField] ThirdPersonCameraRig cameraRig;
 
@@ -31,10 +40,14 @@ namespace LoboBranco.Player
         PlayerInputReader _input;
         PlayerLocomotion _locomotion;
         PlayerMeleeAttacker _attacker;
+        PlayerDebugOverlay _overlay;
 
         PlayerStateContext _context;
         PlayerStateMachine _machine;
         InputBuffer _buffer;
+
+        bool _drivesThisCharacter;
+        bool _controlDecided;
 
         // ---------------------------------------------------------------- leitura
 
@@ -43,6 +56,9 @@ namespace LoboBranco.Player
 
         public InputBuffer Buffer => _buffer;
 
+        /// <summary>Verdadeiro no personagem que esta maquina controla. Falso nos companheiros.</summary>
+        public bool DrivesThisCharacter => _drivesThisCharacter;
+
         // ------------------------------------------------------------------ ciclo
 
         void Awake()
@@ -50,9 +66,74 @@ namespace LoboBranco.Player
             _input = GetComponent<PlayerInputReader>();
             _locomotion = GetComponent<PlayerLocomotion>();
             _attacker = GetComponent<PlayerMeleeAttacker>();
+            _overlay = GetComponent<PlayerDebugOverlay>();
+
+            BuildStateMachine();
+        }
+
+        /// <summary>
+        /// Roda depois de <c>OnNetworkSpawn</c> quando existe rede, e e o unico caminho
+        /// quando nao existe. Por isso ele so decide se ninguem decidiu antes.
+        /// </summary>
+        void Start()
+        {
+            if (!_controlDecided)
+                TakeControl();
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            if (IsOwner) TakeControl();
+            else ReleaseControl();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (!IsOwner) return;
+
+            _buffer?.Clear();
+            SetCursorLocked(false);
+        }
+
+        // ------------------------------------------------------------ autoridade
+
+        /// <summary>Liga input, movimento, camera e cursor. So no personagem que e meu.</summary>
+        void TakeControl()
+        {
+            _controlDecided = true;
+            _drivesThisCharacter = true;
+
+            if (_input != null) _input.enabled = true;
+            if (_locomotion != null) _locomotion.enabled = true;
+            if (_overlay != null) _overlay.enabled = true;
 
             ResolveCameraRig();
-            BuildStateMachine();
+
+            if (cameraRig != null)
+            {
+                cameraRig.FollowTarget = transform;
+                cameraRig.AlignBehindTarget();
+            }
+
+            SetCursorLocked(lockCursor);
+        }
+
+        /// <summary>
+        /// Desliga o que so faz sentido no dono. O <see cref="PlayerMeleeAttacker"/>
+        /// continua ligado de proposito: no host, e ele quem vai resolver o golpe do
+        /// companheiro na tarefa 1.9f, e a FSM parada garante que ele nao age sozinho.
+        /// </summary>
+        void ReleaseControl()
+        {
+            _controlDecided = true;
+            _drivesThisCharacter = false;
+
+            if (_input != null) _input.enabled = false;
+            if (_overlay != null) _overlay.enabled = false;
+
+            // Sem isto, a gravidade do CharacterController briga com a posicao que chega
+            // pela rede e o companheiro fica tremendo no chao.
+            if (_locomotion != null) _locomotion.enabled = false;
         }
 
         void BuildStateMachine()
@@ -87,14 +168,13 @@ namespace LoboBranco.Player
         {
             if (cameraRig == null)
             {
+                // Prefab de rede nao guarda referencia de cena, entao o dono acha o proprio
+                // pivo aqui. Cada instancia do jogo tem um, e so o dono encosta nele.
                 cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
 
                 if (cameraRig == null)
                     Debug.LogError($"{nameof(PlayerBrain)} nao encontrou um {nameof(ThirdPersonCameraRig)} na cena.", this);
             }
-
-            if (cameraRig != null && cameraRig.FollowTarget == null)
-                cameraRig.FollowTarget = transform;
         }
 
         void OnEnable()
@@ -118,16 +198,12 @@ namespace LoboBranco.Player
             _buffer?.Clear();
         }
 
-        void Start()
-        {
-            if (cameraRig != null)
-                cameraRig.AlignBehindTarget();
-
-            SetCursorLocked(lockCursor);
-        }
-
         void Update()
         {
+            // O companheiro e desenhado pela posicao que chega do dono dele. Simular a FSM
+            // aqui seria simular o mesmo personagem duas vezes, em duas maquinas.
+            if (!_drivesThisCharacter) return;
+
             float deltaTime = Time.deltaTime;
 
             if (cameraRig != null)
@@ -163,7 +239,7 @@ namespace LoboBranco.Player
         void OnApplicationFocus(bool hasFocus)
         {
             // Sem isso, alt-tab devolve o foco com o cursor solto e a camera para de girar.
-            if (lockCursor)
+            if (lockCursor && _drivesThisCharacter)
                 SetCursorLocked(hasFocus);
         }
 

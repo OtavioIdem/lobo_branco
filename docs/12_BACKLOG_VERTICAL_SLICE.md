@@ -52,7 +52,7 @@ Justificativa completa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-co
 
 | # | Tarefa | Tam. | Doc |
 |---|---|---|---|
-| 1.9a | Instalar NGO, Transport, Services Core, Authentication, Relay e Multiplayer Play Mode | P | ADR 0008 |
+| ~~1.9a~~ ✅ | Instalar NGO, Transport, Services Core, Authentication, Relay e Multiplayer Play Mode | P | ADR 0008 |
 | 1.9b | `NetworkManager` na cena de bootstrap, transporte direto por IP, duas cápsulas na mesma cena | M | ADR 0008 |
 | 1.9c | Prefab de jogador em rede: `NetworkObject`, spawn por conexão, câmera e input só do dono | M | 13 §6 |
 | 1.9d | `PlayerBrain` reescrito com autoridade. É o único arquivo que a rede obriga a reescrever | G | 13 §7 |

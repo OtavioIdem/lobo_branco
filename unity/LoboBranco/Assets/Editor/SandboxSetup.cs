@@ -3,10 +3,14 @@ using System.Linq;
 using LoboBranco.CameraSystem;
 using LoboBranco.Combat;
 using LoboBranco.Core;
+using LoboBranco.Net;
 using LoboBranco.Player;
 using LoboBranco.Stats;
 using Unity.Cinemachine;
 using Unity.Cinemachine.TargetTracking;
+using Unity.Netcode;
+using Unity.Netcode.Components;
+using Unity.Netcode.Transports.UTP;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -32,7 +36,10 @@ namespace LoboBranco.EditorTools
         const string PlayerTuningPath = "Assets/_Project/Data/Player/PlayerTuning.asset";
         const string EnemyMaterialPath = "Assets/_Project/Art/Materials/M_Greybox_Enemy.mat";
 
+        const string PlayerPrefabPath = "Assets/_Project/Prefabs/Characters/Player.prefab";
+
         const string EnemyRoot = "Enemies";
+        const string NetworkRoot = "NetworkManager";
 
         // Escalas fixas do projeto (docs/08_PIPELINE_ARTE_E_AUDIO.md secao 2).
         const float PlayerHeight = 1.85f;
@@ -43,24 +50,87 @@ namespace LoboBranco.EditorTools
         [MenuItem("Lobo Branco/Setup/5. Montar sandbox de combate")]
         public static void BuildSandbox()
         {
+            // O prefab primeiro: o NetworkManager da cena precisa apontar para ele.
+            GameObject prefab = BuildPlayerPrefab();
+
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
             DestroyIfPresent("Player");
             DestroyIfPresent("CameraPivot");
             DestroyIfPresent("CM_Exploration");
             DestroyIfPresent(EnemyRoot);
+            DestroyIfPresent(NetworkRoot);
 
-            var player = CreatePlayer();
-            var pivot = CreateCameraPivot(player.transform);
+            // O jogador nao mora mais na cena: quem o cria e o host, um por conexao
+            // (doc 13 secao 6). O pivo de camera fica, porque ele e local por natureza,
+            // e o dono se prende a ele quando nasce.
+            var pivot = CreateCameraPivot(null);
             CreateVirtualCamera(pivot.transform);
             EnsureBrainOnMainCamera();
-            WirePlayer(player, pivot.GetComponent<ThirdPersonCameraRig>());
+            CreateNetworkManager(prefab);
             CreateEnemies();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
 
             Debug.Log("[Sandbox] Hierarquia montada e cena salva.");
+        }
+
+        // ---------------------------------------------------------------- rede
+
+        /// <summary>
+        /// Monta o prefab de jogador em rede e o grava em disco. Autoridade de posicao no
+        /// dono, conforme a ADR 0008: o <see cref="NetworkTransform"/> sai daqui em modo
+        /// <c>Owner</c>, e nao no padrao, que e servidor.
+        /// </summary>
+        [MenuItem("Lobo Branco/Setup/7. Montar prefab de jogador em rede")]
+        public static GameObject BuildPlayerPrefab()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(PlayerPrefabPath) ?? string.Empty);
+
+            GameObject player = CreatePlayer();
+
+            player.AddComponent<NetworkObject>();
+
+            var netTransform = player.AddComponent<NetworkTransform>();
+            netTransform.AuthorityMode = NetworkTransform.AuthorityModes.Owner;
+
+            // Escala nunca muda em jogo. Sincronizar custa banda a toa em cada quadro.
+            netTransform.SyncScaleX = false;
+            netTransform.SyncScaleY = false;
+            netTransform.SyncScaleZ = false;
+
+            WirePlayer(player);
+
+            GameObject saved = PrefabUtility.SaveAsPrefabAsset(player, PlayerPrefabPath);
+            Object.DestroyImmediate(player);
+
+            Debug.Log($"[Sandbox] Prefab de jogador gravado em {PlayerPrefabPath}.");
+            return saved;
+        }
+
+        /// <summary>
+        /// Cria o objeto de rede da cena. Ele nao decide nada de jogo: hospeda o
+        /// <see cref="NetworkManager"/>, o transporte direto por IP e o painel de debug.
+        /// </summary>
+        static void CreateNetworkManager(GameObject playerPrefab)
+        {
+            var go = new GameObject(NetworkRoot);
+
+            var manager = go.AddComponent<NetworkManager>();
+            var transport = go.AddComponent<UnityTransport>();
+
+            manager.NetworkConfig ??= new NetworkConfig();
+            manager.NetworkConfig.NetworkTransport = transport;
+            manager.NetworkConfig.PlayerPrefab = playerPrefab;
+            manager.NetworkConfig.ConnectionApproval = true;
+
+            go.AddComponent<NetLauncher>();
+            go.AddComponent<NetSpawnRing>();
+            go.AddComponent<NetDebugHud>();
+
+            if (playerPrefab == null)
+                Debug.LogError($"[Sandbox] Nao achei {PlayerPrefabPath}. Nenhum jogador vai nascer.");
         }
 
         // ------------------------------------------------------------- jogador
@@ -111,7 +181,12 @@ namespace LoboBranco.EditorTools
             return player;
         }
 
-        static void WirePlayer(GameObject player, ThirdPersonCameraRig rig)
+        /// <summary>
+        /// Liga os assets do jogador. O pivo de camera fica de fora de proposito: prefab
+        /// nao guarda referencia de cena, entao quem acha o pivo e o dono, em tempo de
+        /// execucao, e so ele.
+        /// </summary>
+        static void WirePlayer(GameObject player)
         {
             var controls = AssetDatabase.LoadAssetAtPath<Object>(ControlsPath);
             if (controls == null)
@@ -122,7 +197,6 @@ namespace LoboBranco.EditorTools
             reader.ApplyModifiedPropertiesWithoutUndo();
 
             var brain = new SerializedObject(player.GetComponent<PlayerBrain>());
-            brain.FindProperty("cameraRig").objectReferenceValue = rig;
             brain.FindProperty("tuning").objectReferenceValue = Require<PlayerTuningDef>(PlayerTuningPath);
             brain.ApplyModifiedPropertiesWithoutUndo();
 
@@ -131,7 +205,6 @@ namespace LoboBranco.EditorTools
             overlay.FindProperty("input").objectReferenceValue = player.GetComponent<PlayerInputReader>();
             overlay.FindProperty("brain").objectReferenceValue = player.GetComponent<PlayerBrain>();
             overlay.FindProperty("attacker").objectReferenceValue = player.GetComponent<PlayerMeleeAttacker>();
-            overlay.FindProperty("cameraRig").objectReferenceValue = rig;
             overlay.ApplyModifiedPropertiesWithoutUndo();
 
             WireAttacker(player.GetComponent<PlayerMeleeAttacker>());

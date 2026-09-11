@@ -58,11 +58,16 @@ namespace LoboBranco.CameraSystem
             set => followTarget = value;
         }
 
+        /// <summary>Segundos de tolerancia antes de reclamar da falta de alvo.</summary>
+        const float MissingTargetGrace = 3f;
+
+        bool _warnedAboutTarget;
+
         void Awake()
         {
-            if (followTarget == null)
-                Debug.LogWarning($"{nameof(ThirdPersonCameraRig)} sem followTarget. O pivo vai ficar parado.", this);
-
+            // Nao adianta reclamar aqui: com rede, o alvo so aparece quando o personagem
+            // do dono nasce, e isso e depois do Awake do pivo. O aviso foi para LateUpdate,
+            // com folga, porque um aviso que aparece sempre e um aviso que ninguem le.
             SnapToTarget();
         }
 
@@ -100,7 +105,16 @@ namespace LoboBranco.CameraSystem
         // LateUpdate para rodar depois de todo movimento do jogador no frame.
         void LateUpdate()
         {
-            if (followTarget == null) return;
+            if (followTarget == null)
+            {
+                if (!_warnedAboutTarget && Time.timeSinceLevelLoad > MissingTargetGrace)
+                {
+                    _warnedAboutTarget = true;
+                    Debug.LogWarning($"{nameof(ThirdPersonCameraRig)} segue sem followTarget. O pivo fica parado.", this);
+                }
+
+                return;
+            }
 
             transform.position = followTarget.position + Vector3.up * pivotHeight;
             transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);

@@ -4,6 +4,34 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-10 — M1 tarefas 1.9a a 1.9d e 1.9g: a rede entra
+- Pacotes de rede instalados contra o editor 6000.6.0f1: NGO 2.13.2, Transport 6.6.0,
+  Services Core 1.18.0, Authentication 3.7.4, Relay 1.2.0 e Multiplayer Play Mode 3.0.0.
+- Modulo `Net` novo, no nivel 1 do grafo de asmdef, logo acima de `Core`. Ele hospeda a
+  sessao e nao conhece nenhum sistema de jogo: quem conhece rede e o sistema, nunca o
+  contrario. `Net` referenciando `Player` ou `Combat` e dependencia invertida.
+- `NetLauncher`: transporte direto por IP, sem depender de nuvem para testar (risco X8).
+  A instancia principal sobe como host e a virtual entra com `-lb-client` nos argumentos.
+- `NetSpawnRing`: o host aprova a conexao e escolhe onde cada bruxo nasce, em circulo.
+  Sem isso quatro personagens nascem dentro um do outro e o `CharacterController` chuta
+  todo mundo para fora, o que parece bug de rede e nao e.
+- `NetDebugHud` em F2: papel, cliente, ida e volta, e por personagem quem move e quem
+  resolve dano. Pedido pelo risco X10 desde o primeiro dia, e nao no fim.
+- `PlayerBrain` reescrito como `NetworkBehaviour`, o unico arquivo que a rede obrigou a
+  reescrever. O dono liga input, movimento, camera e cursor; o companheiro desliga
+  locomocao e input e e desenhado pela posicao que chega do dono dele.
+- Sem rede ligada, o jogador local e dono de si mesmo. A `Sandbox_Combate` continua
+  jogavel sozinha: rede nao pode virar pre-requisito para testar combate.
+- O jogador saiu da cena e virou prefab com `NetworkObject` e `NetworkTransform` em
+  autoridade de dono. Quem cria e o host, um por conexao. O pivo de camera fica na cena,
+  porque e local por natureza, e o dono se prende a ele quando nasce.
+- `ThirdPersonCameraRig` parou de reclamar da falta de alvo no `Awake`. Com rede, o alvo
+  so existe quando o personagem do dono nasce, e um aviso que aparece sempre ninguem le.
+- Sete assets de dados que nunca tinham sido versionados entraram no repositorio: os dois
+  golpes, o golpe em grupo, as duas espadas, a afinacao do jogador e o bloco do barghest.
+  Sem eles, um clone novo abria a sandbox com o `PlayerMeleeAttacker` se desligando sozinho
+  no `Awake`, ou seja, sem ataque e sem erro visivel.
+
 ### 2026-09-10 — Pivo para cooperativo (documentacao)
 - O slice do Capitulo I passa a ser jogado por 2 a 4 pessoas em sessao privada, com
   entrada por codigo de convite. Zona, contrato e combate seguem os mesmos.
