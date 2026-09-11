@@ -87,11 +87,18 @@ O protótipo é o **Capítulo I — Arredores de Vizima** e nada mais.
 - Save/load, menu, HUD, bestiário, inventário
 - 1 escolha estrutural com consequência dentro do próprio protótipo
 
+> **Atualização de 2026-09-10 ([doc 13](13_COOP_E_REDE.md)):** o protótipo passou a ser
+> cooperativo, de 2 a 4 jogadores em sessão privada por código de convite, com duas escolas
+> jogáveis. A zona, o contrato e o combate não mudaram. Saíram do slice a escolha da Abigail,
+> os Ecos e o diálogo ramificado em sessão. Onde esta seção contradiz o doc 13, vale o doc 13.
+
 **Fora do escopo (explicitamente):**
 - Capítulos II a V, epílogo, prólogo de Kaer Morhen
 - Romance, minijogos (dados, briga, bebida)
 - Montaria, natação, escalada
-- Multiplayer, console, mobile, localização além de pt-BR
+- ~~Multiplayer~~ (ver doc 13). PvP, servidor dedicado, matchmaking público e crossplay
+  continuam fora
+- Console, mobile, localização além de pt-BR
 - Dublagem (texto apenas)
 - Crafting de equipamento, encantamentos
 - Ciclo de dia/noite dinâmico completo (haverá dois estados fixos: dia e noite)

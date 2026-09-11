@@ -44,14 +44,20 @@ Toda feature precisa servir a pelo menos um destes. Se não serve, ela não entr
 Este é o único freio contra escopo infinito num projeto solo de 12 horas por semana.
 
 1. **O bruxo é investigador, não tanque.** Matar é o clímax, não a atividade.
+   Em coop, cada escola lê um tipo de vestígio e nenhuma lê todos (docs/13 seção 4.1).
 2. **Preparação vale mais que reflexo.** Óleo e poção certos valem mais que esquiva perfeita.
-3. **Escolha sem moral limpa, consequência atrasada.** Nunca marcar opção como boa ou má.
-4. **Vizima é um personagem.** A cidade reage de forma sistêmica ao seu alinhamento.
+3. ~~Escolha sem moral limpa~~ — **adiado** para depois do portão M1 (docs/13 seção 4.2).
+4. ~~Vizima é um personagem~~ — **adiado**, depende de save divergente por jogador.
 
 ## Escopo travado
 
-O protótipo é **só o Capítulo I**, os Arredores de Vizima. Capítulos II a V, romance,
-minijogos, montaria, multiplayer e dublagem estão explicitamente fora (docs/00 seção 5).
+O protótipo é **só o Capítulo I**, os Arredores de Vizima, jogado por **2 a 4 pessoas**.
+Capítulos II a V, romance, minijogos, montaria e dublagem seguem fora (docs/00 seção 5).
+Também fora, agora com mais motivo: PvP, servidor dedicado, matchmaking público, crossplay
+e progressão persistente entre sessões (docs/13 seção 8).
+
+**Duas escolas jogáveis no slice: Lobo e Grifo.** A terceira só depois do portão M1 passar.
+Essa é a porta pela qual o escopo vai tentar crescer, e ela fica fechada.
 
 Quando alguém pedir algo fora do escopo, diga que está fora e onde isso está registrado,
 antes de implementar. Escopo crescendo é o risco X1 do docs/10, o que mais mata projeto solo.
@@ -70,6 +76,12 @@ Estas não são preferências de estilo, são o que mantém o projeto navegável
    por propriedade. É isso que permite testar sem simular teclado.
 5. **Zero alocação por frame em combate.** Sem LINQ em `Update`, sem concatenação de string,
    `NonAlloc` em toda query de física. Um pico de GC no meio de um riposte é bug de jogabilidade.
+6. **O cliente pede, o host decide, todo mundo assiste** (ADR 0008). O dono simula o próprio
+   movimento e a própria FSM. Dano, vida, vigor e IA são do host, sempre. Nenhum cliente
+   declara dano. Sistema novo começa respondendo "quem tem autoridade aqui", e a resposta
+   vai no cabeçalho do arquivo.
+7. **Escola é dado, não código.** Um `if` por escola em código de combate é erro de revisão.
+   Escola é `StatBlockDef` mais afinidade de postura mais intensidade de sinal (docs/13 seção 5.1).
 
 ## Definição de pronto (docs/00 seção 7)
 
@@ -95,16 +107,21 @@ folha de atributos com modificadores, pipeline de dano de 11 estágios, máquina
 com buffer de input de 0,2 s, e golpes leve e forte com hitbox sem alocação.
 115 testes passando, build gerando.
 
-O próximo passo são as tarefas **1.10 e 1.11**: esquiva e rolamento com frames de
-invulnerabilidade, depois aparo e riposte com a janela de 0,18 s.
+O próximo passo **não** é mais a tarefa 1.10. É a **camada de rede** (`docs/13`, ADR 0008),
+e ela entra antes de esquiva, aparo e riposte. Dois motivos: a FSM tem dois estados hoje e
+vai ter doze no fim do M1, e a janela de aparo de 0,18 s é menor que o ping de muita gente,
+o que faz de "quem decide se o aparo aconteceu" uma pergunta de rede e não de combate.
 
 A janela de dano é dirigida por tempo decorrido, não por evento de animação, porque ainda
 não existe `Animator` no projeto. O `AttackDef` tem uma chave para inverter isso quando as
 animações entrarem no M4 (`tech/adr/0007`).
 
-**M1 é um portão.** Se o combate contra cápsulas cinzas não for divertido depois de
-pronto, o projeto para e reprojeta o combate. Não construa conteúdo em cima de um
-combate ruim.
+**M1 é um portão, e ele mudou** (`docs/13` seção 9). Duas pessoas lutam contra 4 cápsulas
+por 10 minutos e querem continuar, **e** pelo menos uma vez uma delas fez algo que a outra
+não conseguiria sozinha. A segunda metade é o teste de verdade: coop em que dois jogadores
+fazem a mesma coisa mais rápido não é coop. Se falhar só na segunda metade, o problema está
+nos kits e não na rede. Se falhar na primeira, o projeto para e reprojeta o combate.
+Não construa conteúdo em cima de um combate ruim.
 
 ## Agentes e skills
 

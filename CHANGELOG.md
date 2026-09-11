@@ -4,6 +4,27 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-10 — Pivo para cooperativo (documentacao)
+- O slice do Capitulo I passa a ser jogado por 2 a 4 pessoas em sessao privada, com
+  entrada por codigo de convite. Zona, contrato e combate seguem os mesmos.
+- `docs/13`: pilares sob coop, escolas em vez de personagens nomeados, modelo de
+  autoridade, auditoria de reuso dos 43 scripts e custo estimado do pivo.
+- Investigacao vira coletiva: cada escola le um tipo de vestigio e nenhuma le todos.
+  Sem isso um jogador acha a pista e os outros tres viram plateia.
+- Pilares 3 e 4 adiados. A escolha da Abigail nao tem resposta boa para quatro pessoas
+  dentro do orcamento, e adiar e melhor do que entregar votacao.
+- Duas escolas no slice, Lobo e Grifo. Escola e dado: bloco de atributos, afinidade de
+  postura e intensidade de sinal. Nenhum `if` por escola em codigo de combate.
+- ADR 0008: Netcode for GameObjects com Relay. Autoridade dividida, o dono simula o
+  proprio personagem e o host resolve todo o dano. Sem predicao nem reconciliacao,
+  porque e cooperativo contra IA e esse problema nao precisa ser resolvido aqui.
+- A rede entra antes da tarefa 1.10, nao depois do M1. A FSM tem dois estados hoje e
+  vai ter doze, e a janela de aparo de 0,18 s e menor que o ping de muita gente.
+- Nove tarefas de rede (1.9a a 1.9i) e cinco de escola (1.31 a 1.35) no `docs/12`.
+- O portao M1 mudou: duas pessoas querem continuar depois de 10 minutos, **e** uma delas
+  fez algo que a outra nao conseguiria sozinha. A segunda metade e o teste de verdade.
+- Custo assumido: 36 a 48 h a mais no M1, que sai de 4 para 7 ou 8 semanas.
+
 ### 2026-09-10 — M1 tarefas 1.6 a 1.9: FSM, buffer de input, ataques e hitbox
 - Maquina de estados do jogador escrita a mao, com contrato de quatro metodos e tempo
   por parametro. Estados `Locomotion` e `Attack`.
