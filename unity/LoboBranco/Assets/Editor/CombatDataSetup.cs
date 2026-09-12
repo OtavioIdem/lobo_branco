@@ -22,6 +22,7 @@ namespace LoboBranco.EditorTools
         const string AttacksFolder = "Assets/_Project/Data/Combat/Attacks";
         const string WeaponsFolder = "Assets/_Project/Data/Combat/Weapons";
         const string PlayerFolder = "Assets/_Project/Data/Player";
+        const string MonstersFolder = "Assets/_Project/Data/Monsters";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -66,6 +67,7 @@ namespace LoboBranco.EditorTools
             CreateAttacks();
             CreateWeapons();
             CreatePlayerTuning();
+            CreateMonsters();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -184,6 +186,40 @@ namespace LoboBranco.EditorTools
             asset.material = material;
             asset.damageType = DamageType.Slash;
             asset.baseDamage = baseDamage;
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // -------------------------------------------------------------- especies
+
+        /// <summary>
+        /// A especie do alvo de sandbox. Os numeros dela nao ficam aqui: o asset aponta
+        /// para o <c>StatBlock_Barghest</c>, que ja tem os 55 de vitalidade do docs/03
+        /// secao 12. Quem duplica numero acaba com dois barghests diferentes.
+        ///
+        /// As resistencias saem vazias, e isso e deliberado: quais criaturas resistem a
+        /// que e decisao de balanceamento, e balanceamento e a tarefa 1.30, com o jogo
+        /// rodando. O que esta pronto aqui e o lugar onde esses numeros vao morar.
+        /// </summary>
+        static void CreateMonsters()
+        {
+            EnsureFolder(MonstersFolder);
+
+            string path = $"{MonstersFolder}/Monster_Barghest.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<MonsterDef>();
+            asset.displayName = "Barghest";
+            asset.creatureClass = CreatureClass.Beast;
+            asset.archetype = StanceArchetype.Agile;      // docs/03 secao 4: postura Rapida
+            asset.vulnerableToOil = OilClass.Beast;       // docs/05 secao 5: Oleo de Besta
+            asset.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Barghest.asset");
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");

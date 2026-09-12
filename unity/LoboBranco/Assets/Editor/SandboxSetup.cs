@@ -31,6 +31,7 @@ namespace LoboBranco.EditorTools
         const string TuningPath = "Assets/_Project/Data/Combat/CombatTuning.asset";
         const string PlayerStatsPath = "Assets/_Project/Data/Stats/StatBlock_Player.asset";
         const string EnemyStatsPath = "Assets/_Project/Data/Stats/StatBlock_Barghest.asset";
+        const string EnemyMonsterPath = "Assets/_Project/Data/Monsters/Monster_Barghest.asset";
         const string SteelSwordPath = "Assets/_Project/Data/Combat/Weapons/Weapon_SteelSword.asset";
         const string SilverSwordPath = "Assets/_Project/Data/Combat/Weapons/Weapon_SilverSword.asset";
         const string LightAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Light.asset";
@@ -331,7 +332,13 @@ namespace LoboBranco.EditorTools
             // quatro telas. Sem NetworkObject, cada participante mata a propria capsula.
             enemy.AddComponent<NetworkObject>();
 
-            enemy.AddComponent<CombatDummy>();
+            var dummy = enemy.AddComponent<CombatDummy>();
+
+            // A especie e o bloco de atributos apontam para os mesmos numeros: o
+            // MonsterDef descreve o barghest e referencia o StatBlock dele.
+            var so = new SerializedObject(dummy);
+            so.FindProperty("monster").objectReferenceValue = Require<MonsterDef>(EnemyMonsterPath);
+            so.ApplyModifiedPropertiesWithoutUndo();
 
             WireVitals(enemy.GetComponent<CharacterVitals>(), EnemyStatsPath);
         }

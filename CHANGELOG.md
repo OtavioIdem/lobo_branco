@@ -4,6 +4,29 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-12 — M1 tarefa 1.20: MonsterDef
+- `MonsterDef`: a especie em asset. Classe da criatura, arquetipo de postura, oleo que casa
+  e resistencia por tipo de dano. O `CombatDummy` parou de declarar essas quatro coisas em
+  codigo e passou a le-las de la.
+- Duas diferencas para o esboco do doc 07 secao 4.1, as duas de proposito. Vitalidade, dano
+  e armadura nao entraram: eles ja moram no `StatBlockDef`, e repetir os mesmos numeros em
+  dois assets criaria dois barghests diferentes, com a divergencia aparecendo so quando
+  alguem editasse um dos dois. Entrada de bestiario, tabela de loot e vulnerabilidade a
+  sinal tambem nao entraram, porque bestiario, loot e sinais nao existem: campo de dado
+  para sistema inexistente e promessa, nao dado.
+- `Monster_Barghest.asset` criado pelo setup de dados, apontando para o bloco de atributos
+  que ja tinha os 55 de vitalidade do doc 03 secao 12.
+- As resistencias saem vazias, e o vazio e neutro. Quais criaturas resistem a que e decisao
+  de balanceamento, e balanceamento e a tarefa 1.30, com o jogo rodando. O que ficou pronto
+  aqui e o lugar onde esses numeros vao morar, e o teste que garante que tipo nao listado
+  vale 1,0: sem ele, toda criatura seria imune a tudo que ninguem escreveu.
+- O `CombatDummy` ficou sem nenhum numero e sem nenhuma classificacao proprios. O que
+  sobrou nele e o que e mesmo de sandbox: piscar ao apanhar e levantar sozinho.
+- 165 testes passando, contra 162 antes.
+- **Ordem alterada**: a 1.20 entrou antes da 1.18. Quase todo sinal e um efeito sobre o
+  inimigo, e capsula nao cai, nao queima e nao muda de lado. Construir os sinais antes do
+  inimigo da 1.21 seria construi-los duas vezes. Registrado no doc 12.
+
 ### 2026-09-12 — M1 tarefa 1.17 (parcial): Adrenalina
 - `AdrenalinePool`: tres cargas que nao regeneram sozinhas. A diferenca para o Vigor e o
   que define o recurso: Vigor volta com o tempo, Adrenalina so entra quando o bruxo faz

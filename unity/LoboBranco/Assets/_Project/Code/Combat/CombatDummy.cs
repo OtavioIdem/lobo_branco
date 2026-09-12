@@ -13,20 +13,19 @@ namespace LoboBranco.Combat
     /// volta a ficar de pe depois de um tempo, para nao ter que reiniciar a cena a cada
     /// teste de balanceamento.
     ///
-    /// Provisorio. O inimigo de verdade nasce do <c>MonsterDef</c> (tarefa 1.20) com a
-    /// behavior tree da tarefa 1.21; ai a classificacao, as resistencias e a tabela de
-    /// loot saem daqui para o asset, e este componente vira apenas o que aplica dano.
-    /// A vida ja nao mora mais aqui: ela e do <see cref="CharacterVitals"/>, que o
-    /// monstro de verdade vai reusar sem mudar uma linha.
+    /// Ele ja nao guarda mais nenhum numero nem nenhuma classificacao: a vida e do
+    /// <see cref="CharacterVitals"/> e a especie e do <see cref="MonsterDef"/>. O que
+    /// sobrou aqui e o que e mesmo de sandbox, o piscar e o levantar sozinho, e a ponte
+    /// entre os dois. O inimigo de verdade da tarefa 1.21 reusa os dois assets e troca
+    /// este componente por um que tenha behavior tree.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterVitals))]
     public sealed class CombatDummy : MonoBehaviour, IDamageable
     {
-        [Header("Classificacao (migra para MonsterDef na tarefa 1.20)")]
-        [SerializeField] CreatureClass creatureClass = Combat.CreatureClass.Beast;
-        [SerializeField] StanceArchetype archetype = StanceArchetype.Agile;
-        [SerializeField] OilClass vulnerableToOil = OilClass.Beast;
+        [Header("Especie")]
+        [Tooltip("Classe, arquetipo e vulnerabilidades. Sem asset, vale o neutro de besta agil.")]
+        [SerializeField] MonsterDef monster;
 
         [Header("Sandbox")]
         [Tooltip("Segundos ate voltar de pe. Nao e balanceamento: e conveniencia de teste.")]
@@ -50,9 +49,12 @@ namespace LoboBranco.Combat
         // ---------------------------------------------------------------- leitura
 
         public StatSheet Stats => _vitals != null ? _vitals.Stats : null;
-        public CreatureClass CreatureClass => creatureClass;
-        public StanceArchetype Archetype => archetype;
-        public OilClass VulnerableToOil => vulnerableToOil;
+
+        // Sem asset de especie o alvo continua existindo, como besta agil e sem oleo que
+        // case: uma capsula muda e melhor do que uma capsula que nao aceita golpe.
+        public CreatureClass CreatureClass => monster != null ? monster.creatureClass : Combat.CreatureClass.Beast;
+        public StanceArchetype Archetype => monster != null ? monster.archetype : StanceArchetype.Agile;
+        public OilClass VulnerableToOil => monster != null ? monster.vulnerableToOil : OilClass.None;
 
         public float CurrentVitality => _vitals != null ? _vitals.CurrentVitality : 0f;
         public float MaxVitality => _vitals != null ? _vitals.MaxVitality : 0f;
@@ -104,11 +106,11 @@ namespace LoboBranco.Combat
         // ---------------------------------------------------------------- IDamageable
 
         /// <summary>
-        /// Neutro para todo tipo, por enquanto. As resistencias sao propriedade da
-        /// especie, entao elas nascem junto com o <c>MonsterDef</c> na tarefa 1.20;
-        /// inventa-las aqui seria fixar numero de balanceamento em MonoBehaviour.
+        /// Resistencia e propriedade da especie, entao ela vem do asset. Os valores em si
+        /// ainda sao neutros: quais criaturas resistem a que e decisao de balanceamento, e
+        /// ela e a tarefa 1.30, com o jogo rodando.
         /// </summary>
-        public float GetResistance(DamageType type) => 1f;
+        public float GetResistance(DamageType type) => monster != null ? monster.GetResistance(type) : 1f;
 
         public void ApplyDamage(in DamageResult result)
         {

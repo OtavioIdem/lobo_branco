@@ -84,7 +84,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | 1.17 ⚠️ | Adrenalina: ganho, três gastos. **Parcial**: recurso e ganhos prontos, e dos três gastos só o segundo suspiro. Nota no 03 §7 | M | 03 §7 |
 | 1.18 | Cinco sinais com custo, cooldown e efeito | G | 03 §8 |
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |
-| 1.20 | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
+| ~~1.20~~ ✅ | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
 | 1.21 | Behavior tree base do inimigo (patrulha, detecção, engajamento, ataque) | G | 07 §6 |
 | 1.22 | Coordenador de encontro com attack token (máximo 2) | M | 07 §6 |
 | 1.23 | Telegrafo de ataque: animação de anticipação de 0,4 a 0,9 s | M | 03 §10 |
@@ -95,6 +95,13 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | 1.28 | Slow-motion no último inimigo morto | P | 03 §11 |
 | 1.29 | Painel de debug: vitalidade, vigor, postura, Fluxo, e o log de dano | M | 11 §6 |
 | 1.30 | Balancear com os números do doc 03 §12 e ajustar até o TTD alvo | G | 03 §12 |
+
+**Sobre a ordem, 2026-09-12.** A 1.20 foi feita antes da 1.18 de propósito, e vale escrever
+por quê antes que pareça capricho. Os cinco sinais são, quase todos, efeitos sobre o inimigo:
+Aard derruba e atordoa, Igni queima, Yrden lentifica, Axii vira o lado. Cápsula de sandbox
+não cai, não queima e não muda de lado, então construir os sinais agora seria construir os
+efeitos duas vezes: uma contra a cápsula e outra quando o inimigo da 1.21 existir. A 1.18
+entra depois da 1.21, junto da 1.19, que é a regra que dá sentido a ela.
 
 | 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
 | 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |
