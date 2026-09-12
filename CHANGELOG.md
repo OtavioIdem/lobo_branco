@@ -4,6 +4,30 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-11 — M1 tarefas 1.9h e 1.9i: convite por codigo e a sala
+- `NetRelaySession`: entra anonimo no Unity Gaming Services, cria a alocacao no Relay e
+  devolve um codigo de convite. Quem recebe o codigo troca ele por um endereco de
+  retransmissao e entra. Ninguem precisa saber o IP de ninguem nem mexer no roteador.
+- Prefere DTLS quando o Relay oferece, e cai para UDP quando nao. Pegar o primeiro endereco
+  da lista funcionaria ate o dia em que a ordem mudasse.
+- O tamanho da sala sai do `NetSpawnRing`, que e onde ele ja era cobrado na aprovacao de
+  conexao. A alocacao pede conexoes e nao lugares: quatro na sala sao tres conexoes.
+- Falha de nuvem vira frase explicada em vez de excecao no Console. Projeto nao ligado ao
+  UGS e perguntado antes de sair de casa, porque esse erro chega de la como configuracao
+  generica e ninguem descobre por ele o que fazer.
+- `NetRoomPanel`, em F3: hospedar e gerar codigo, copiar, colar codigo, entrar, ver quem
+  esta dentro e sair. O IP direto continua na mesma tela, embaixo, porque e o caminho do
+  dia a dia e ele nao depende de nuvem nenhuma (risco X8).
+- A sala e IMGUI de proposito. A fundacao de UI Toolkit comeca na tarefa 2.3, com o
+  inventario, e o menu da 4.12 vai substituir esta tela de qualquer jeito. Montar UXML e
+  USS agora seria fundacao para uma tela descartavel.
+- `NetDebugHud` perdeu os botoes de conectar e virou so leitura, que e o que a tarefa 1.9g
+  pedia. Duas telas fazendo a mesma coisa e uma a mais para manter.
+- **O caminho do Relay nao foi testado de ponta a ponta.** O projeto ainda nao esta ligado
+  ao Unity Gaming Services, entao o que da para afirmar e que compila, que o caminho de
+  erro responde com a instrucao certa, e que o IP direto continua subindo. Ligar o projeto
+  em Project Settings > Services e o pre-requisito do portao da rede.
+
 ### 2026-09-11 — M1 tarefas 1.9e e 1.9f: a vida e o golpe passam a ser do host
 - `CharacterVitals`: componente novo no modulo `Combat` que carrega a folha de atributos e
   a vida atual de um personagem. A vida so muda em quem tem autoridade e chega replicada

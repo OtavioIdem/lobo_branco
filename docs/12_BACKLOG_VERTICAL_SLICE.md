@@ -59,12 +59,18 @@ Justificativa completa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-co
 | ~~1.9e~~ ✅ | `StatSheet` autoritativo no host e replicado. Cliente lê, nunca escreve | G | 13 §6 |
 | ~~1.9f~~ ✅ | Ataque vira pedido: RPC do dono, `MeleeHitbox` e `DamagePipeline` rodando só no host | G | 13 §6 |
 | ~~1.9g~~ ✅ | Painel de debug mostra papel, dono, autoridade e ida-e-volta de cada personagem | P | 13 §11 |
-| 1.9h | Relay: autenticação anônima, criar sessão, gerar e entrar por código de convite | G | ADR 0008 |
-| 1.9i | UI mínima de sala: hospedar, colar código, entrar, ver quem está dentro | M | 13 §8 |
+| ~~1.9h~~ ✅ | Relay: autenticação anônima, criar sessão, gerar e entrar por código de convite | G | ADR 0008 |
+| ~~1.9i~~ ✅ | UI mínima de sala: hospedar, colar código, entrar, ver quem está dentro | M | 13 §8 |
 
 **Portão da rede:** duas pessoas em máquinas diferentes entram na mesma `Sandbox_Combate`
 por código, batem no mesmo `CombatDummy`, e o dano bate igual nas duas telas. Só depois disso
 a tarefa 1.10 começa.
+
+O código das nove tarefas está escrito, mas **o portão continua fechado**, e ele não fecha
+sozinho: ele é um teste manual com duas pessoas. Falta também ligar o projeto ao Unity
+Gaming Services em Project Settings > Services, senão o Relay responde que o projeto não
+existe. Até isso acontecer, o caminho testável é o IP direto, que é exatamente o que o
+risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 
 | # | Tarefa | Tam. | Doc |
 |---|---|---|---|

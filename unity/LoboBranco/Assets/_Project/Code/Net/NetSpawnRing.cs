@@ -26,6 +26,13 @@ namespace LoboBranco.Net
 
         NetworkManager _net;
 
+        /// <summary>
+        /// Teto de participantes da sessao. Mora aqui porque e aqui que ele e cobrado, na
+        /// aprovacao da conexao; o Relay le este mesmo numero para nao existir uma sala de
+        /// quatro lugares com alocacao para seis.
+        /// </summary>
+        public int MaxPlayers => maxPlayers;
+
         void Awake()
         {
             _net = GetComponent<NetworkManager>();

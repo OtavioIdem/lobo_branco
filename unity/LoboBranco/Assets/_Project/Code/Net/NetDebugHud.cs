@@ -56,31 +56,7 @@ namespace LoboBranco.Net
 
             GUILayout.Label(Describe(), _style);
 
-            if (_net.IsListening) DrawSessionControls();
-            else DrawConnectControls();
-
             GUILayout.EndArea();
-        }
-
-        void DrawConnectControls()
-        {
-            if (launcher != null)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("IP", _style, GUILayout.Width(20f));
-                launcher.Address = GUILayout.TextField(launcher.Address, GUILayout.Width(120f));
-                GUILayout.EndHorizontal();
-            }
-
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Hospedar")) launcher?.StartHost();
-            if (GUILayout.Button("Entrar")) launcher?.StartClient();
-            GUILayout.EndHorizontal();
-        }
-
-        void DrawSessionControls()
-        {
-            if (GUILayout.Button("Sair")) launcher?.Shutdown();
         }
 
         string Describe()
@@ -90,6 +66,7 @@ namespace LoboBranco.Net
             if (!_net.IsListening)
             {
                 _text.Append("REDE: desligada\n");
+                _text.Append("F3 abre a sala\n");
 
                 if (launcher != null && launcher.LastError.Length > 0)
                     _text.Append(launcher.LastError).Append('\n');

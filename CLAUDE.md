@@ -102,19 +102,21 @@ Estas não são preferências de estilo, são o que mantém o projeto navegável
 
 ## Estado atual
 
-M0 fechado. M1 nas tarefas 1.1 a 1.9 e na camada de rede até a 1.9g: existe jogador com
-câmera de terceira pessoa, folha de atributos com modificadores, pipeline de dano de 11
-estágios, máquina de estados com buffer de input de 0,2 s, golpes leve e forte com hitbox
-sem alocação, e sessão por IP direto em que o dono simula o próprio bruxo enquanto o host
-resolve vida e dano. 121 testes passando, build gerando.
+M0 fechado. M1 com as tarefas 1.1 a 1.9 e a camada de rede inteira, 1.9a a 1.9i, escritas:
+existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
+de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes leve e forte
+com hitbox sem alocação, e sessão em que o dono simula o próprio bruxo enquanto o host
+resolve vida e dano, por IP direto ou por código de convite. 121 testes passando, build
+gerando.
 
-O próximo passo **não** é a tarefa 1.10. É terminar a **camada de rede** (`docs/13`,
-ADR 0008) nas tarefas 1.9h e 1.9i, Relay e UI de sala, e depois passar pelo portão da rede
-do `docs/12`: duas pessoas em máquinas diferentes batem na mesma cápsula e o dano bate igual
-nas duas telas. Esquiva, aparo e riposte só depois disso. Dois motivos: a FSM tem dois
-estados hoje e vai ter doze no fim do M1, e a janela de aparo de 0,18 s é menor que o ping
-de muita gente, o que faz de "quem decide se o aparo aconteceu" uma pergunta de rede e não
-de combate.
+O próximo passo **não** é a tarefa 1.10. É o **portão da rede** do `docs/12`: duas pessoas
+em máquinas diferentes entram na mesma `Sandbox_Combate`, batem na mesma cápsula, e o dano
+bate igual nas duas telas. Ele não fecha sozinho, porque é teste manual com duas pessoas, e
+o caminho do Relay ainda depende de ligar o projeto ao Unity Gaming Services em
+Project Settings > Services. Esquiva, aparo e riposte só depois disso. Dois motivos: a FSM
+tem dois estados hoje e vai ter doze no fim do M1, e a janela de aparo de 0,18 s é menor que
+o ping de muita gente, o que faz de "quem decide se o aparo aconteceu" uma pergunta de rede
+e não de combate.
 
 A regra prática de quem escreve sistema novo: o cliente pede, o host decide, todo mundo
 assiste. Um sistema novo começa respondendo quem tem autoridade, e a resposta vai no

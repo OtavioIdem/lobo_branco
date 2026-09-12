@@ -162,6 +162,12 @@ namespace LoboBranco.EditorTools
 
             go.AddComponent<NetLauncher>();
             go.AddComponent<NetSpawnRing>();
+
+            // O Relay entra por cima do mesmo transporte do IP direto, e o IP direto
+            // continua sendo o caminho do dia a dia (risco X8 do doc 13).
+            go.AddComponent<NetRelaySession>();
+
+            go.AddComponent<NetRoomPanel>();
             go.AddComponent<NetDebugHud>();
 
             if (playerPrefab == null)
