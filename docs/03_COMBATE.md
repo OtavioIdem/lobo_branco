@@ -59,6 +59,19 @@ concede 1,3x adicional; errar concede 0,8x.
 Isso é o motor de decisão mais importante do combate segundo a segundo, e é herança
 direta e intencional do original.
 
+**Nota de implementação, 2026-09-11 (tarefa 1.14).** A tabela acima tem uma linha por
+postura, e não uma por botão: é a postura que decide qual golpe sai. Por isso os dois
+botões de ataque do [doc 02 §4](02_GDD.md) atacam na postura corrente, em vez de o esquerdo
+dar um golpe Rápido e o direito um Forte. Se o botão direito desse um golpe Forte com a
+postura Rápida valendo, escolher postura não seria decisão nenhuma e a camada 2 do §2
+deixaria de existir na prática.
+
+Fica em aberto o que vai distinguir os dois botões **dentro** de uma mesma postura. As
+opções óbvias são um segundo golpe por postura, mais lento e mais caro, ou o botão direito
+virar outra coisa por completo. A decisão não é urgente e não deve ser tomada no escuro:
+ela pede o playtest do portão M1, com as animações do M4 ainda por cima. Até lá os dois
+botões são o mesmo golpe, o que não tira nada de quem joga.
+
 ## 5. Ações defensivas
 
 ### Esquiva (toque)

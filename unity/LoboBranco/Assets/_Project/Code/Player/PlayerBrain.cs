@@ -45,6 +45,7 @@ namespace LoboBranco.Player
         PlayerStateContext _context;
         PlayerStateMachine _machine;
         InputBuffer _buffer;
+        StanceSelector _stance;
 
         bool _drivesThisCharacter;
         bool _controlDecided;
@@ -55,6 +56,9 @@ namespace LoboBranco.Player
         public PlayerStateMachine Machine => _machine;
 
         public InputBuffer Buffer => _buffer;
+
+        /// <summary>Postura corrente e a troca em andamento. O painel de debug mostra isto.</summary>
+        public StanceSelector Stance => _stance;
 
         /// <summary>Verdadeiro no personagem que esta maquina controla. Falso nos companheiros.</summary>
         public bool DrivesThisCharacter => _drivesThisCharacter;
@@ -143,14 +147,16 @@ namespace LoboBranco.Player
                 Window = tuning != null ? tuning.inputBufferSeconds : 0.2f,
             };
 
+            _stance = new StanceSelector(tuning != null ? tuning.stanceSwitchSeconds : 0.25f);
+
             _context = new PlayerStateContext
             {
                 Locomotion = _locomotion,
                 Attacker = _attacker,
                 Buffer = _buffer,
-                LightAttack = _attacker != null ? _attacker.LightAttack : null,
-                HeavyAttack = _attacker != null ? _attacker.HeavyAttack : null,
             };
+
+            WriteStanceToContext();
 
             // O construtor da maquina escreve a si mesma no contexto.
             _machine = new PlayerStateMachine(_context);
@@ -184,6 +190,7 @@ namespace LoboBranco.Player
             _input.DodgePressed += OnDodge;
             _input.CastSignPressed += OnCastSign;
             _input.InteractPressed += OnInteract;
+            _input.StanceCycled += OnStanceCycled;
         }
 
         void OnDisable()
@@ -193,6 +200,7 @@ namespace LoboBranco.Player
             _input.DodgePressed -= OnDodge;
             _input.CastSignPressed -= OnCastSign;
             _input.InteractPressed -= OnInteract;
+            _input.StanceCycled -= OnStanceCycled;
 
             // Sem isto, um ataque guardado sai sozinho quando o controle volta.
             _buffer?.Clear();
@@ -221,6 +229,12 @@ namespace LoboBranco.Player
             _context.SprintHeld = _input.SprintHeld;
             _context.ParryHeld = _input.ParryHeld;
 
+            // A troca de postura corre em paralelo com tudo: ela pode acontecer andando
+            // (docs/03 secao 4), e o que ela nao pode e comecar durante um golpe, o que
+            // ja foi decidido no momento do input.
+            _stance.Tick(deltaTime);
+            WriteStanceToContext();
+
             _machine.Tick(deltaTime);
 
             // Envelhecer o buffer depois da maquina: assim um input que chegou neste frame
@@ -229,6 +243,26 @@ namespace LoboBranco.Player
         }
 
         // -------------------------------------------------------------- handlers
+
+        /// <summary>
+        /// A roda de postura nao passa pelo buffer de input, e isso e deliberado: o buffer
+        /// existe para um input chegar cedo demais e ainda valer, e trocar de postura cedo
+        /// demais nao e erro de timing do jogador, e sim tentar trocar no meio de um golpe.
+        /// Guardar essa troca faria a postura mudar sozinha depois, que e o oposto de uma
+        /// decisao tomada.
+        /// </summary>
+        void OnStanceCycled(int direction)
+        {
+            if (!PlayerStateRules.CanSwitchStance(_machine.Current?.IsCommitted ?? false)) return;
+
+            _stance.Cycle(direction);
+        }
+
+        void WriteStanceToContext()
+        {
+            _context.CurrentStance = _stance.Current;
+            _context.CurrentAttack = _attacker != null ? _attacker.AttackFor(_stance.Current) : null;
+        }
 
         void OnAttackLight() => _buffer.Push(BufferedAction.AttackLight);
         void OnAttackHeavy() => _buffer.Push(BufferedAction.AttackHeavy);

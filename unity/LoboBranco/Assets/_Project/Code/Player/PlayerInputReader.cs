@@ -22,6 +22,9 @@ namespace LoboBranco.Player
 
         const string MapName = "Player";
 
+        // Abaixo disto o eixo e ruido ou volta do direcional ao centro, e nao um pedido.
+        const float DeadZone = 0.5f;
+
         InputActionMap _map;
 
         InputAction _move;
@@ -34,6 +37,7 @@ namespace LoboBranco.Player
         InputAction _castSign;
         InputAction _interact;
         InputAction _witcherSenses;
+        InputAction _cycleStance;
 
         // ---------------------------------------------------------------- estado
 
@@ -50,6 +54,9 @@ namespace LoboBranco.Player
         public event Action CastSignPressed;
         public event Action InteractPressed;
         public event Action WitcherSensesPressed;
+
+        /// <summary>Roda de postura. Positivo avanca, negativo volta (docs/02 secao 4).</summary>
+        public event Action<int> StanceCycled;
 
         // ---------------------------------------------------------------- ciclo
 
@@ -74,6 +81,7 @@ namespace LoboBranco.Player
             _castSign = _map.FindAction("CastSign", true);
             _interact = _map.FindAction("Interact", true);
             _witcherSenses = _map.FindAction("WitcherSenses", true);
+            _cycleStance = _map.FindAction("CycleStance", true);
         }
 
         void OnEnable()
@@ -86,6 +94,7 @@ namespace LoboBranco.Player
             _castSign.performed += OnCastSign;
             _interact.performed += OnInteract;
             _witcherSenses.performed += OnWitcherSenses;
+            _cycleStance.performed += OnCycleStance;
 
             _map.Enable();
         }
@@ -100,6 +109,7 @@ namespace LoboBranco.Player
             _castSign.performed -= OnCastSign;
             _interact.performed -= OnInteract;
             _witcherSenses.performed -= OnWitcherSenses;
+            _cycleStance.performed -= OnCycleStance;
 
             _map.Disable();
 
@@ -125,5 +135,19 @@ namespace LoboBranco.Player
         void OnCastSign(InputAction.CallbackContext _) => CastSignPressed?.Invoke();
         void OnInteract(InputAction.CallbackContext _) => InteractPressed?.Invoke();
         void OnWitcherSenses(InputAction.CallbackContext _) => WitcherSensesPressed?.Invoke();
+
+        /// <summary>
+        /// A acao e um eixo, e nao um botao, porque roda de mouse e direcional sao eixos.
+        /// O valor bruto da roda vem em degraus grandes no Windows, entao o que interessa
+        /// e o sinal e nao a magnitude. A zona morta existe para o retorno do direcional
+        /// ao centro nao contar como uma troca a mais.
+        /// </summary>
+        void OnCycleStance(InputAction.CallbackContext context)
+        {
+            float axis = context.ReadValue<float>();
+
+            if (axis > DeadZone) StanceCycled?.Invoke(1);
+            else if (axis < -DeadZone) StanceCycled?.Invoke(-1);
+        }
     }
 }

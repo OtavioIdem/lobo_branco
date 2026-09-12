@@ -50,7 +50,18 @@ namespace LoboBranco.Player
         /// <summary>Golpe escolhido por quem pediu a transicao, consumido pelo estado de ataque.</summary>
         public AttackDef PendingAttack;
 
-        public AttackDef LightAttack;
-        public AttackDef HeavyAttack;
+        /// <summary>
+        /// O golpe da postura que esta valendo agora (docs/03 secao 4). Quem escreve e o
+        /// <see cref="PlayerBrain"/>, uma vez por frame, a partir do
+        /// <see cref="StanceSelector"/>.
+        ///
+        /// E um campo so, e nao um por botao, porque a postura e que decide o golpe: se o
+        /// botao direito desse um golpe Forte com a postura Rapida valendo, escolher
+        /// postura nao seria decisao nenhuma e a camada 2 do combate morreria.
+        /// </summary>
+        public AttackDef CurrentAttack;
+
+        /// <summary>Postura corrente, para os estados que precisam dela sem olhar o golpe.</summary>
+        public Stance CurrentStance;
     }
 }

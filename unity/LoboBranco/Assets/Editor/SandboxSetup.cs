@@ -34,6 +34,7 @@ namespace LoboBranco.EditorTools
         const string SteelSwordPath = "Assets/_Project/Data/Combat/Weapons/Weapon_SteelSword.asset";
         const string LightAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Light.asset";
         const string HeavyAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Heavy.asset";
+        const string GroupAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Group.asset";
         const string PlayerTuningPath = "Assets/_Project/Data/Player/PlayerTuning.asset";
         const string EnemyMaterialPath = "Assets/_Project/Art/Materials/M_Greybox_Enemy.mat";
 
@@ -267,8 +268,11 @@ namespace LoboBranco.EditorTools
 
             so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
             so.FindProperty("weapon").objectReferenceValue = Require<MeleeWeaponDef>(SteelSwordPath);
-            so.FindProperty("lightAttack").objectReferenceValue = Require<AttackDef>(LightAttackPath);
-            so.FindProperty("heavyAttack").objectReferenceValue = Require<AttackDef>(HeavyAttackPath);
+            // Um golpe por postura, e nao um por botao: e a postura que decide o golpe
+            // (docs/03 secao 4). O asset de cada um ja declara a propria postura.
+            so.FindProperty("fastAttack").objectReferenceValue = Require<AttackDef>(LightAttackPath);
+            so.FindProperty("strongAttack").objectReferenceValue = Require<AttackDef>(HeavyAttackPath);
+            so.FindProperty("groupAttack").objectReferenceValue = Require<AttackDef>(GroupAttackPath);
 
             // Zero significa "use GameLayers.PlayerAttackTargets", mas gravar a mascara
             // explicita aqui torna visivel no Inspector no que o golpe acerta.

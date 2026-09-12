@@ -46,12 +46,14 @@ namespace LoboBranco.Player
 
             switch (buffer.Pending)
             {
+                // Os dois botoes de ataque dao no mesmo golpe, o da postura corrente
+                // (docs/03 secao 4). A tabela do documento tem uma linha por postura e
+                // nao uma por botao, e a camada 2 do combate so existe porque e a postura
+                // que decide o golpe. O que vai distinguir os dois botoes dentro de uma
+                // mesma postura e uma pergunta de design ainda em aberto.
                 case BufferedAction.AttackLight:
-                    TryAttack(context, context.LightAttack, BufferedAction.AttackLight);
-                    break;
-
                 case BufferedAction.AttackHeavy:
-                    TryAttack(context, context.HeavyAttack, BufferedAction.AttackHeavy);
+                    TryAttack(context, context.CurrentAttack, buffer.Pending);
                     break;
 
                 // Esquiva, aparo e sinal sao as tarefas 1.10, 1.11 e 1.18. Ate la o

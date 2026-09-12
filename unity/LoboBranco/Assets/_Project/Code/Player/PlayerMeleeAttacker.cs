@@ -41,9 +41,15 @@ namespace LoboBranco.Player
         [SerializeField] CombatTuningDef tuning;
         [SerializeField] MeleeWeaponDef weapon;
 
-        [Header("Golpes")]
-        [SerializeField] AttackDef lightAttack;
-        [SerializeField] AttackDef heavyAttack;
+        [Header("Golpes por postura (docs/03 secao 4)")]
+        [Tooltip("Forte: 1,45x, lento, um alvo.")]
+        [SerializeField] AttackDef strongAttack;
+
+        [Tooltip("Rapida: 0,75x, cadencia alta, um alvo.")]
+        [SerializeField] AttackDef fastAttack;
+
+        [Tooltip("Grupo: 0,90x, ate quatro alvos em arco de 180 graus.")]
+        [SerializeField] AttackDef groupAttack;
 
         [Header("Alvos")]
         [Tooltip("Deixe em Nothing para usar a mascara padrao de GameLayers.PlayerAttackTargets.")]
@@ -102,8 +108,18 @@ namespace LoboBranco.Player
         // ---------------------------------------------------------------- leitura
 
         public StatSheet Stats => _vitals != null ? _vitals.Stats : null;
-        public AttackDef LightAttack => lightAttack;
-        public AttackDef HeavyAttack => heavyAttack;
+
+        /// <summary>
+        /// O golpe de uma postura. E por aqui que a postura vira dano: o golpe carrega a
+        /// propria postura, entao o estagio 2 e o 3 do pipeline saem do asset e nenhum
+        /// <c>if</c> de postura precisa existir em codigo de combate.
+        /// </summary>
+        public AttackDef AttackFor(Stance stance) => stance switch
+        {
+            Stance.Strong => strongAttack,
+            Stance.Group => groupAttack,
+            _ => fastAttack,
+        };
 
         /// <summary>Verdadeiro enquanto a janela de dano esta aberta. O painel de debug mostra isto.</summary>
         public bool HitboxOpen => _windowOpen;
@@ -268,24 +284,18 @@ namespace LoboBranco.Player
         void CancelSwingRpc() => ResolveCancelSwing();
 
         /// <summary>
-        /// O catalogo de golpes viaja por indice porque asset nao viaja pela rede. Dois
-        /// golpes cabem em um byte com folga; quando as posturas entrarem (tarefa 1.14)
-        /// isto vira uma tabela vinda da escola, e nao um <c>if</c> a mais.
+        /// O golpe viaja como postura, porque asset nao viaja pela rede e a postura e
+        /// exatamente o que distingue um golpe do outro (docs/03 secao 4). O host resolve
+        /// o asset do proprio lado: os dois tem o mesmo prefab, entao a mesma postura da
+        /// no mesmo golpe, e nao existe como as duas maquinas discordarem de qual foi.
+        ///
+        /// Quando as escolas entrarem (tarefa 1.31) a tabela vem do `SchoolDef` e este
+        /// metodo continua sendo uma conversao de postura para asset, sem virar `if`.
         /// </summary>
-        byte IndexOf(AttackDef attack)
-        {
-            if (attack == lightAttack) return 0;
-            if (attack == heavyAttack) return 1;
+        byte IndexOf(AttackDef attack) => attack != null ? (byte)attack.stance : NoAttack;
 
-            return NoAttack;
-        }
-
-        AttackDef FromIndex(byte index) => index switch
-        {
-            0 => lightAttack,
-            1 => heavyAttack,
-            _ => null,
-        };
+        AttackDef FromIndex(byte index)
+            => index <= (byte)Stance.Group ? AttackFor((Stance)index) : null;
 
         // -------------------------------------------------------------- resolucao
 
@@ -408,7 +418,7 @@ namespace LoboBranco.Player
         /// <summary>Desenha o alcance do golpe leve no editor. Sem isso, afinar 'reach' e adivinhacao.</summary>
         void OnDrawGizmosSelected()
         {
-            AttackDef preview = lightAttack != null ? lightAttack : heavyAttack;
+            AttackDef preview = fastAttack != null ? fastAttack : strongAttack;
             if (preview == null) return;
 
             Vector3 center = transform.position + Vector3.up * preview.heightOffset;

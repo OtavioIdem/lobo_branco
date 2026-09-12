@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: PlayerTuning
   m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerTuningDef
   inputBufferSeconds: 0.2
+  stanceSwitchSeconds: 0.25

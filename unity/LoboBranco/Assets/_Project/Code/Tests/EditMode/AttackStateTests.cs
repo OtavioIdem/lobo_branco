@@ -55,8 +55,8 @@ namespace LoboBranco.Tests
                 Locomotion = _locomocao,
                 Attacker = _atacante,
                 Buffer = _buffer,
-                LightAttack = _leve,
-                HeavyAttack = _forte,
+                CurrentAttack = _leve,
+                CurrentStance = Stance.Fast,
             };
 
             _machine = new PlayerStateMachine(_context);
@@ -352,13 +352,23 @@ namespace LoboBranco.Tests
             Assert.IsFalse(_buffer.HasPending, "O buffer so pode ser consumido uma vez.");
         }
 
+        /// <summary>
+        /// O golpe guardado sai na postura que estiver valendo quando ele sair, e nao na
+        /// que valia quando o botao foi apertado. E a consequencia direta da camada 2 do
+        /// docs/03 secao 2: quem escolhe o golpe e a postura, nao o botao.
+        /// </summary>
         [Test]
-        public void Ataque_pesado_guardado_vira_golpe_pesado()
+        public void Ataque_guardado_sai_na_postura_que_estiver_valendo()
         {
             ComecarGolpe(_leve);
             Avancar(_leve.TotalDuration - 0.05f);
 
             _buffer.Push(BufferedAction.AttackHeavy);
+
+            // A troca de postura terminou durante a recuperacao do golpe anterior.
+            _context.CurrentAttack = _forte;
+            _context.CurrentStance = Stance.Strong;
+
             Avancar(0.1f);
 
             Assert.AreEqual(2, _atacante.Golpes.Count);

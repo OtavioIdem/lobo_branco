@@ -307,8 +307,9 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   tuning: {fileID: 11400000, guid: 397b3e7a452722b469df3d82a37a5eaf, type: 2}
   weapon: {fileID: 11400000, guid: e629858392dedce4f980a1d152afdb23, type: 2}
-  lightAttack: {fileID: 11400000, guid: fc378a0de87860040a9903b886b09255, type: 2}
-  heavyAttack: {fileID: 11400000, guid: 1b64da35544b5bf408e425efa52f947b, type: 2}
+  strongAttack: {fileID: 11400000, guid: 1b64da35544b5bf408e425efa52f947b, type: 2}
+  fastAttack: {fileID: 11400000, guid: fc378a0de87860040a9903b886b09255, type: 2}
+  groupAttack: {fileID: 11400000, guid: d10c16e231809fe4c96e98a320b6c504, type: 2}
   targetMask:
     serializedVersion: 2
     m_Bits: 512

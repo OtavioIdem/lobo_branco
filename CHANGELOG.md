@@ -4,6 +4,35 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-11 — M1 tarefa 1.14: as tres posturas
+- `StanceSelector`: classe pura com a postura corrente e os 0,25 s que a troca leva. Ate a
+  troca terminar, quem vale e a postura velha: trocar no meio da luta e aposta, nao punicao.
+- Roda do mouse e direcional cima e baixo andam na roda das tres posturas. Duas voltas
+  rapidas andam dois passos, porque a roda conta a partir da postura que ja esta a caminho.
+- Trocar durante um golpe nao acontece, e a regra mora no `PlayerStateRules`, junto da
+  regra de ouro. Dois lugares decidindo o que interrompe o que viram duas regras diferentes.
+- O tempo da troca virou dado, em `stanceSwitchSeconds` no `PlayerTuningDef`. Perto de zero
+  ele apaga a camada 2 do combate, entao e um numero para julgar jogando.
+- A troca de postura nao passa pelo buffer de input, de proposito. O buffer existe para um
+  input chegar cedo demais e ainda valer; guardar uma troca faria a postura mudar sozinha
+  depois, que e o oposto de decisao tomada.
+- Os dois botoes de ataque passam a dar o golpe da postura corrente. A tabela do doc 03
+  secao 4 tem uma linha por postura e nao uma por botao: se o botao direito desse um golpe
+  Forte com a postura Rapida valendo, escolher postura nao seria decisao nenhuma. O que vai
+  distinguir os dois botoes dentro de uma mesma postura ficou registrado como pergunta em
+  aberto no doc 03 secao 4, para ser respondida com playtest e nao no escuro.
+- O golpe em grupo saiu do limbo: ele existia em asset desde a tarefa 1.8 e nao tinha como
+  ser usado. Agora ele e a postura Grupo, com os quatro alvos em arco de 180 graus.
+- O golpe passou a viajar pela rede como postura, e nao como indice de catalogo. As duas
+  maquinas tem o mesmo prefab, entao a mesma postura da no mesmo asset e nao existe como
+  elas discordarem de qual golpe foi.
+- `IsCommitted` subiu para o contrato `IPlayerState`. Perguntar isso com um cast abriria a
+  porta para uma segunda definicao de "comprometido", e ja sao dois os interessados.
+- A afinidade de arquetipo nao precisou de codigo novo: o estagio 3 do pipeline ja punia a
+  postura errada desde a tarefa 1.4, e so faltava o jogador poder escolher a postura.
+- Painel F1 mostra a postura e a troca em andamento.
+- 137 testes passando, contra 129 antes.
+
 ### 2026-09-11 — M1 tarefa 1.12: a Corrente de Fluxo
 - `FlowChain`: classe pura que conta os elos e a janela de 0,22 s que se abre no fim de
   cada golpe. Encadear dentro dela soma um elo, ate o teto de 1,35x do doc 03 secao 6.

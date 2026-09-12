@@ -119,6 +119,13 @@ namespace LoboBranco.Player
 
             GUILayout.Label($"Estado            {machine.CurrentId,-14} {machine.TimeInState,5:F2}s", _style);
 
+            StanceSelector stance = brain.Stance;
+            if (stance != null)
+                GUILayout.Label(
+                    $"Postura           {stance.Current,-14} " +
+                    (stance.IsSwitching ? $"-> {stance.Pending} em {stance.Remaining:F2}s" : "roda do mouse troca"),
+                    _style);
+
             if (machine.Current is AttackState attackState && attackState.CurrentAttack != null)
             {
                 GUILayout.Label(
