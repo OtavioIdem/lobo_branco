@@ -1,4 +1,5 @@
 using LoboBranco.CameraSystem;
+using LoboBranco.Combat;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -153,6 +154,7 @@ namespace LoboBranco.Player
             {
                 Locomotion = _locomotion,
                 Attacker = _attacker,
+                Weapons = _attacker,
                 Buffer = _buffer,
             };
 
@@ -163,6 +165,7 @@ namespace LoboBranco.Player
 
             _machine.Register(new LocomotionState());
             _machine.Register(new AttackState());
+            _machine.Register(new WeaponSwapState(tuning != null ? tuning.weaponSwapSeconds : 0.7f));
 
             // Esquiva, rolamento, aparo e riposte sao as tarefas 1.10 e 1.11; sinais sao
             // a 1.18. Ate la a maquina avisa uma vez e ignora a transicao.
@@ -191,6 +194,8 @@ namespace LoboBranco.Player
             _input.CastSignPressed += OnCastSign;
             _input.InteractPressed += OnInteract;
             _input.StanceCycled += OnStanceCycled;
+            _input.SwitchSteelPressed += OnSwitchSteel;
+            _input.SwitchSilverPressed += OnSwitchSilver;
         }
 
         void OnDisable()
@@ -201,6 +206,8 @@ namespace LoboBranco.Player
             _input.CastSignPressed -= OnCastSign;
             _input.InteractPressed -= OnInteract;
             _input.StanceCycled -= OnStanceCycled;
+            _input.SwitchSteelPressed -= OnSwitchSteel;
+            _input.SwitchSilverPressed -= OnSwitchSilver;
 
             // Sem isto, um ataque guardado sai sozinho quando o controle volta.
             _buffer?.Clear();
@@ -256,6 +263,30 @@ namespace LoboBranco.Player
             if (!PlayerStateRules.CanSwitchStance(_machine.Current?.IsCommitted ?? false)) return;
 
             _stance.Cycle(direction);
+        }
+
+        void OnSwitchSteel() => RequestWeapon(WeaponMaterial.Steel);
+
+        void OnSwitchSilver() => RequestWeapon(WeaponMaterial.Silver);
+
+        /// <summary>
+        /// Pedir a espada que ja esta na mao nao faz nada, e isso importa: sem esta
+        /// linha, apertar 1 com o aco empunhado custaria 0,7 s parado no meio da luta por
+        /// um apertao que o jogador nem lembra de ter dado.
+        ///
+        /// Nao passa pelo buffer de input pelo mesmo motivo da postura: guardar a troca
+        /// faria a espada mudar sozinha depois do golpe, e trocar de espada e a decisao
+        /// mais cara do combate para acontecer sem o jogador mandar.
+        /// </summary>
+        void RequestWeapon(WeaponMaterial material)
+        {
+            if (_attacker == null || !_attacker.Has(material)) return;
+            if (_attacker.EquippedMaterial == material) return;
+
+            _context.PendingWeapon = material;
+
+            if (!_machine.TryChangeState(PlayerStateId.SwapWeapon))
+                _context.PendingWeapon = null;
         }
 
         void WriteStanceToContext()

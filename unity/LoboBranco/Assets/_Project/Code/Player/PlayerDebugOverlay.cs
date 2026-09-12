@@ -119,6 +119,14 @@ namespace LoboBranco.Player
 
             GUILayout.Label($"Estado            {machine.CurrentId,-14} {machine.TimeInState,5:F2}s", _style);
 
+            // A espada e a decisao de maior impacto do combate, 0,35x quando errada
+            // (docs/03 secao 3), e em greybox nao ha lamina para olhar.
+            if (attacker != null)
+                GUILayout.Label(
+                    $"Espada            {attacker.EquippedMaterial,-14} " +
+                    (machine.CurrentId == PlayerStateId.SwapWeapon ? "trocando..." : "1 aco | 2 prata"),
+                    _style);
+
             StanceSelector stance = brain.Stance;
             if (stance != null)
                 GUILayout.Label(

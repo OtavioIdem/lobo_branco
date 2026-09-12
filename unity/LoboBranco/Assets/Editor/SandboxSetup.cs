@@ -32,6 +32,7 @@ namespace LoboBranco.EditorTools
         const string PlayerStatsPath = "Assets/_Project/Data/Stats/StatBlock_Player.asset";
         const string EnemyStatsPath = "Assets/_Project/Data/Stats/StatBlock_Barghest.asset";
         const string SteelSwordPath = "Assets/_Project/Data/Combat/Weapons/Weapon_SteelSword.asset";
+        const string SilverSwordPath = "Assets/_Project/Data/Combat/Weapons/Weapon_SilverSword.asset";
         const string LightAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Light.asset";
         const string HeavyAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Heavy.asset";
         const string GroupAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Group.asset";
@@ -267,7 +268,8 @@ namespace LoboBranco.EditorTools
             var so = new SerializedObject(attacker);
 
             so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
-            so.FindProperty("weapon").objectReferenceValue = Require<MeleeWeaponDef>(SteelSwordPath);
+            so.FindProperty("steelSword").objectReferenceValue = Require<MeleeWeaponDef>(SteelSwordPath);
+            so.FindProperty("silverSword").objectReferenceValue = Require<MeleeWeaponDef>(SilverSwordPath);
             // Um golpe por postura, e nao um por botao: e a postura que decide o golpe
             // (docs/03 secao 4). O asset de cada um ja declara a propria postura.
             so.FindProperty("fastAttack").objectReferenceValue = Require<AttackDef>(LightAttackPath);

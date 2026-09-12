@@ -63,5 +63,16 @@ namespace LoboBranco.Player
 
         /// <summary>Postura corrente, para os estados que precisam dela sem olhar o golpe.</summary>
         public Stance CurrentStance;
+
+        // --------------------------------------------------------------- espadas
+
+        /// <summary>Quem carrega as duas espadas. Nulo e valido: o estado de troca nao troca nada.</summary>
+        public IWeaponHolder Weapons;
+
+        /// <summary>
+        /// Espada pedida por quem iniciou a troca, consumida no fim dela. Nula quando nao
+        /// ha troca em andamento, o que e diferente de "trocar para a que ja esta na mao".
+        /// </summary>
+        public WeaponMaterial? PendingWeapon;
     }
 }

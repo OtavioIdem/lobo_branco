@@ -4,6 +4,34 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-11 — M1 tarefa 1.15: aco e prata
+- `WeaponSwapState`: 0,7 s guardando uma espada e sacando a outra, sem andar, sem atacar e
+  sem esquivar. A espada nova so entra em vigor no fim: trocar e compromisso inteiro.
+- E a unica excecao a excecao do jogo. A regra de ouro do doc 03 secao 1 deixa a esquiva
+  cortar qualquer acao comprometida, e a secao 3 declara esta troca nao-cancelavel. Sem
+  isso, esquivar viraria o jeito de pagar meio preco pela troca e a camada 1 do combate,
+  que e a decisao de maior impacto, deixaria de custar. Tem teste com esse nome.
+- Atordoamento, morte e dialogo continuam interrompendo, porque nao sao input do jogador:
+  sao o mundo agindo sobre ele. Interrompido no meio, o bruxo fica com a espada que ja tinha.
+- Ao contrario da postura, a troca de espada para o bruxo. Postura se troca andando; espada
+  ocupa as duas maos. O contraste e o que da peso a decisao.
+- `IWeaponHolder` novo, separado do `IMeleeAttacker`: desferir golpe e saber o que esta
+  empunhado sao perguntas diferentes, e o teste da troca nao precisa fingir que abre hitbox.
+- Teclas 1 e 2, e direcional esquerda e direita, conforme o doc 02 secao 4. Pedir a espada
+  que ja esta na mao nao faz nada, senao um apertao distraido custaria 0,7 s parado.
+- A troca nao passa pelo buffer de input, pelo mesmo motivo da postura: guardar a troca
+  faria a espada mudar sozinha depois do golpe.
+- O dono avisa o host quando troca, uma mensagem por troca e nao uma por golpe. O material
+  e o estagio 4 do pipeline, e sem o aviso o host resolveria o golpe com a espada errada:
+  0,35x onde deveria ser 1,0x. Ninguem mais precisa saber ainda, entao nada e replicado
+  alem disso ate a lamina ter modelo (M4).
+- A espada de prata saiu do limbo: o asset existia desde a tarefa 1.9 e nao tinha como ser
+  empunhado. Com as duas na mao, os dois cenarios de referencia do doc 03 secao 9 viraram
+  alcancaveis dentro do jogo, e nao so dentro do teste.
+- `weaponSwapSeconds` no `PlayerTuningDef`, em asset.
+- Painel F1 mostra a espada empunhada e avisa quando esta trocando.
+- 143 testes passando, contra 137 antes.
+
 ### 2026-09-11 — M1 tarefa 1.14: as tres posturas
 - `StanceSelector`: classe pura com a postura corrente e os 0,25 s que a troca leva. Ate a
   troca terminar, quem vale e a postura velha: trocar no meio da luta e aposta, nao punicao.

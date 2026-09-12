@@ -21,5 +21,10 @@ namespace LoboBranco.Player
         [Tooltip("Tempo da troca de postura. E o custo que transforma postura em decisao: " +
                  "perto de zero, trocar deixa de ser aposta e o inimigo perde o sentido.")]
         [Range(0f, 1f)] public float stanceSwitchSeconds = 0.25f;
+
+        [Header("Espada (docs/03 secao 3)")]
+        [Tooltip("Tempo de guardar uma espada e sacar a outra. Nem a esquiva corta isso: e o " +
+                 "custo que faz a escolha entre aco e prata ser um risco e nao uma conveniencia.")]
+        [Range(0f, 2f)] public float weaponSwapSeconds = 0.7f;
     }
 }

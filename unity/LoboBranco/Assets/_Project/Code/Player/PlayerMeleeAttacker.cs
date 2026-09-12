@@ -35,11 +35,20 @@ namespace LoboBranco.Player
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterVitals))]
-    public sealed class PlayerMeleeAttacker : NetworkBehaviour, IMeleeAttacker, IDamageDealer
+    public sealed class PlayerMeleeAttacker : NetworkBehaviour, IMeleeAttacker, IWeaponHolder, IDamageDealer
     {
         [Header("Dados")]
         [SerializeField] CombatTuningDef tuning;
-        [SerializeField] MeleeWeaponDef weapon;
+
+        [Header("Espadas (docs/03 secao 3)")]
+        [Tooltip("Aco: 1,0x em humanoide, 0,35x em monstro.")]
+        [SerializeField] MeleeWeaponDef steelSword;
+
+        [Tooltip("Prata: 0,5x em humanoide, 1,0x em monstro.")]
+        [SerializeField] MeleeWeaponDef silverSword;
+
+        [Tooltip("Com qual espada o bruxo entra na cena.")]
+        [SerializeField] WeaponMaterial startingMaterial = WeaponMaterial.Steel;
 
         [Header("Golpes por postura (docs/03 secao 4)")]
         [Tooltip("Forte: 1,45x, lento, um alvo.")]
@@ -105,6 +114,12 @@ namespace LoboBranco.Player
         // da janela de dano.
         float _resolvingRemaining;
 
+        // A espada na mao. Vale no dono, que escolhe, e no host, que resolve o dano com
+        // ela. Nao e replicada para os outros participantes porque ninguem ainda tem o que
+        // fazer com essa informacao: quando a lamina tiver modelo e brilho de oleo (M4),
+        // ela vira NetworkVariable como a vida e o Fluxo.
+        WeaponMaterial _equipped;
+
         // ---------------------------------------------------------------- leitura
 
         public StatSheet Stats => _vitals != null ? _vitals.Stats : null;
@@ -145,6 +160,37 @@ namespace LoboBranco.Player
         /// <summary>Quem consulta a fisica e roda o pipeline: o host, ou eu mesmo sem rede.</summary>
         public bool CanResolve => !IsSpawned || IsServer;
 
+        // ------------------------------------------------------------ IWeaponHolder
+
+        public WeaponMaterial EquippedMaterial => _equipped;
+
+        public MeleeWeaponDef EquippedWeapon => WeaponOf(_equipped);
+
+        public bool Has(WeaponMaterial material) => WeaponOf(material) != null;
+
+        /// <summary>
+        /// Troca a espada na mao, no fim dos 0,7 s do <see cref="WeaponSwapState"/>.
+        ///
+        /// O dono avisa o host, porque o material e o estagio 4 do pipeline e quem roda o
+        /// pipeline e o host: sem este aviso, o host resolveria o golpe com a espada
+        /// errada e o dano sairia 0,35x quando deveria sair 1,0x. Uma mensagem por troca,
+        /// e nao uma por golpe, porque trocar de espada custa 0,7 s e golpe nao.
+        /// </summary>
+        public void Equip(WeaponMaterial material)
+        {
+            if (!Has(material)) return;
+
+            ApplyEquip(material);
+
+            if (IsSpawned && IsOwner && !IsServer)
+                EquipRpc((byte)material);
+        }
+
+        void ApplyEquip(WeaponMaterial material) => _equipped = material;
+
+        MeleeWeaponDef WeaponOf(WeaponMaterial material)
+            => material == WeaponMaterial.Silver ? silverSword : steelSword;
+
         // ------------------------------------------------------------------ ciclo
 
         void Awake()
@@ -162,6 +208,10 @@ namespace LoboBranco.Player
             _hitbox = new MeleeHitbox(maxCollidersPerQuery, MaxTargetsPerSwing);
             _results = new IDamageable[MaxTargetsPerSwing];
             _flow = new FlowChain(tuning.flowWindowSeconds);
+
+            // Sem a espada inicial configurada, entra a que existir: uma capsula sem
+            // espada nenhuma bate zero e o sintoma parece bug de pipeline.
+            _equipped = Has(startingMaterial) ? startingMaterial : WeaponMaterial.Steel;
 
             // LayerMask.GetMask aloca um vetor de strings a cada chamada, entao ela nunca
             // pode acontecer dentro da janela de dano.
@@ -283,6 +333,9 @@ namespace LoboBranco.Player
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
         void CancelSwingRpc() => ResolveCancelSwing();
 
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        void EquipRpc(byte material) => ApplyEquip((WeaponMaterial)material);
+
         /// <summary>
         /// O golpe viaja como postura, porque asset nao viaja pela rede e a postura e
         /// exatamente o que distingue um golpe do outro (docs/03 secao 4). O host resolve
@@ -376,13 +429,18 @@ namespace LoboBranco.Player
         {
             if (target == null) return;
 
+            // A espada que conta e a que este lado acha que esta na mao. Em rede, este
+            // lado e o host, e e por isso que a troca vira aviso em vez de ficar so no
+            // dono: aqui e onde o 0,35x do aco em monstro e decidido.
+            MeleeWeaponDef blade = EquippedWeapon;
+
             var request = new DamageRequest(
                 this,
                 target,
-                weapon != null ? weapon.baseDamage : 0f,
-                weapon != null ? weapon.damageType : DamageType.Slash,
+                blade != null ? blade.baseDamage : 0f,
+                blade != null ? blade.damageType : DamageType.Slash,
                 _resolvingAttack.stance,
-                weapon != null ? weapon.material : WeaponMaterial.Steel,
+                blade != null ? blade.material : WeaponMaterial.Steel,
                 appliedOil,
                 _flow.Links,
                 isCritical: false); // Critico depende de CritChance, que entra com o equipamento
