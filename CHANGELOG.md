@@ -4,6 +4,35 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-12 — M1 tarefa 1.22: quem tem a vez de golpear
+- `AttackTokenPool`: no maximo dois atacantes por alvo ao mesmo tempo. E a regra que
+  transforma um amontoado em combate: nao ha esquiva que resolva cinco golpes simultaneos, e
+  nao ha como ler cinco telegrafos de uma vez.
+- **O teto e por alvo, e nao por encontro, e isso corrige o docs/07 secao 6 para coop.** O
+  numero 2 de la foi pensado para um jogador. Com quatro, um teto de encontro faria um grupo
+  de oito criaturas ter seis paradas assistindo, e o segundo, o terceiro e o quarto jogador
+  nunca seriam atacados. O documento foi atualizado.
+- `EncounterCoordinator`: o dono dos tokens, no mesmo objeto do `NetworkManager` porque ele e
+  do host pelo mesmo motivo que o resto dali. No cliente ninguem pede token, porque no
+  cliente ninguem decide atacar.
+- **Cena sem coordenador vira erro no Console, e nao golpe recusado.** Recusar todos os
+  golpes deixaria o combate sem inimigos, que e pior do que deixa-lo desorganizado. O aviso
+  sai uma vez so.
+- `CircleTargetAction`: quem e recusado ronda o alvo a distancia de engajamento em vez de
+  esperar parado. Sem este no o token pioraria o combate: a terceira criatura colaria no
+  bruxo sem bater, e inimigo imovel a meio metro parece travamento. Travado e pior do que
+  injusto. Metade ronda para um lado e metade para o outro, pelo identificador da propria
+  criatura, sem sorteio e sem estado guardado.
+- **A vez volta no fim de cada golpe, e nao no fim da recarga.** Uma criatura segurando o
+  token durante a pausa de 1,2 s ocuparia uma das duas vagas sem bater, e o combate ficaria
+  vazio pela metade. Quem perde o alvo de vista, cai, ou sai de cena tambem devolve.
+- `GetInstanceID` saiu de circulacao no editor 6000.6 e virou erro de compilacao. As chaves
+  do pool passaram a ser o `EntityId` convertido por `ToULong`, que e a ponte oficial entre o
+  identificador da engine e uma classe pura sem Unity.
+- 206 testes passando, contra 193 antes. Treze deles sao sobre devolver o token e nao sobre
+  conceder, de proposito: um token que vaza deixa uma vaga presa e o sintoma e um encontro
+  que para de atacar no meio, sem nada no Console.
+
 ### 2026-09-12 — M1 tarefa 1.21 (parcial): o inimigo percebe, persegue e golpeia
 - **O jogador passou a ser atingivel.** Ate aqui o pipeline de dano so tinha alvo de um
   lado: a capsula de sandbox implementava `IDamageable` e o bruxo nao implementava nada.

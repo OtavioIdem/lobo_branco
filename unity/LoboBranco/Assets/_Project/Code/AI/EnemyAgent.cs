@@ -87,6 +87,19 @@ namespace LoboBranco.AI
         /// <summary>Os sentidos, para o painel de debug e para os testes.</summary>
         public EnemySenses Senses => _senses;
 
+        /// <summary>Distancia em que ela ronda o alvo enquanto espera a vez de golpear.</summary>
+        public float EngagementDistance => monster != null ? monster.engagementDistance : 3.5f;
+
+        /// <summary>Verdadeiro enquanto ela tem permissao para golpear (docs/07 secao 6).</summary>
+        public bool HasAttackToken { get; private set; }
+
+        /// <summary>
+        /// O identificador estavel deste objeto, como numero. <c>GetInstanceID</c> saiu de
+        /// circulacao no editor 6000.6, e <see cref="EntityId"/> nao serve de chave em uma
+        /// classe pura: <c>ToULong</c> e a conversao oficial entre os dois mundos.
+        /// </summary>
+        public ulong EntityKey => EntityId.ToULong(gameObject.GetEntityId());
+
         /// <summary>Distancia no plano ate o alvo, ou infinito sem alvo.</summary>
         public float DistanceToTarget
         {
@@ -233,6 +246,16 @@ namespace LoboBranco.AI
                 return;
             }
 
+            // Quem caiu deixa de ser alvo na hora, e nao na proxima varredura: a busca
+            // roda 4 vezes por segundo, e ate um quarto de segundo batendo em um
+            // companheiro caido e um quarto de segundo de token preso.
+            if (_targetDamageable != null && _targetDamageable.IsDown)
+            {
+                EncounterCoordinator.ReleaseAllFor(EntityId.ToULong(_target.gameObject.GetEntityId()));
+                DropTarget();
+                return;
+            }
+
             Vector3 eyes = transform.position + Vector3.up * eyeHeight;
             Vector3 targetPoint = _target.position + Vector3.up * eyeHeight;
 
@@ -245,9 +268,40 @@ namespace LoboBranco.AI
 
         void DropTarget()
         {
+            // Devolver o token antes de soltar o alvo. Sem isto, uma criatura que perde o
+            // bruxo de vista no meio do golpe levaria a permissao dela embora, e a vaga
+            // ficaria bloqueada ate o fim do encontro.
+            ReleaseAttackToken();
+
             _target = null;
             _targetDamageable = null;
             _senses.Forget();
+        }
+
+        // ------------------------------------------------------------------ token
+
+        /// <summary>
+        /// Pede a vez de golpear ao coordenador do encontro (docs/07 secao 6). Devolve
+        /// falso quando o alvo ja tem o teto de atacantes, e e assim que a terceira
+        /// criatura passa a rondar em vez de somar o golpe dela ao dos outros dois.
+        /// </summary>
+        public bool TryTakeAttackToken()
+        {
+            if (_target == null) return false;
+
+            HasAttackToken = EncounterCoordinator.TryAcquire(
+                EntityKey, EntityId.ToULong(_target.gameObject.GetEntityId()));
+
+            return HasAttackToken;
+        }
+
+        /// <summary>Devolve a vez. Chamado no fim de cada golpe, tenha ele acertado ou nao.</summary>
+        public void ReleaseAttackToken()
+        {
+            if (!HasAttackToken) return;
+
+            HasAttackToken = false;
+            EncounterCoordinator.Release(EntityKey);
         }
 
         static IDamageable ResolveDamageable(Collider collider)
@@ -258,6 +312,59 @@ namespace LoboBranco.AI
         }
 
         // ------------------------------------------------------------------ corpo
+
+        void OnDisable()
+        {
+            // Sair de cena com o token na mao bloquearia a vaga de um alvo que continua
+            // vivo. Uma criatura que morre, despawna ou e desligada devolve a vez.
+            ReleaseAttackToken();
+        }
+
+        /// <summary>
+        /// O ponto do anel de engajamento em que ela deveria esperar a vez.
+        ///
+        /// Ele e calculado a partir do lado em que ela ja esta, e nao de um angulo fixo:
+        /// mandar todas as criaturas para o mesmo ponto do anel faria todas atravessarem o
+        /// alvo para chegar la, o que e pior do que amontoar. O deslocamento angular
+        /// separa duas que estejam no mesmo lado.
+        /// </summary>
+        public Vector3 CirclePosition(float angleOffsetDegrees)
+        {
+            if (_target == null) return transform.position;
+
+            Vector3 fromTarget = transform.position - _target.position;
+            fromTarget.y = 0f;
+
+            // Em cima do alvo nao ha lado. Sair pela frente dele e melhor do que sortear:
+            // e de onde o bruxo consegue ver a criatura recuando.
+            if (fromTarget.sqrMagnitude < 0.0001f) fromTarget = _target.forward;
+
+            fromTarget.Normalize();
+
+            Vector3 rotated = Quaternion.Euler(0f, angleOffsetDegrees, 0f) * fromTarget;
+
+            return _target.position + rotated * EngagementDistance;
+        }
+
+        /// <summary>
+        /// Manda a criatura para um ponto. Devolve falso quando nao ha NavMeshAgent ou
+        /// quando ela esta fora da malha, e nesse caso quem chamou move pelo transform.
+        /// </summary>
+        public bool MoveTo(Vector3 destination)
+        {
+            if (_navAgent == null || !_navAgent.enabled || !_navAgent.isOnNavMesh) return false;
+
+            _navAgent.SetDestination(destination);
+            return true;
+        }
+
+        /// <summary>Para de andar, sem desligar o agente.</summary>
+        public void StopMoving()
+        {
+            if (_navAgent == null || !_navAgent.enabled || !_navAgent.isOnNavMesh) return;
+
+            _navAgent.ResetPath();
+        }
 
         /// <summary>
         /// Gira em direcao ao alvo. Devolve verdadeiro quando ja esta encarando dentro da

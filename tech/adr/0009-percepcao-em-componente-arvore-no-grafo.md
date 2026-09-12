@@ -33,8 +33,9 @@ Na pratica, a divisao e esta:
 | `EnemySenses` | a matematica do cone, do circulo e da memoria. Classe pura, testada |
 | `EnemyAgent` | busca de alvo, linha de visao, giro, velocidade do NavMeshAgent |
 | `EnemyMeleeAttacker` | linha do tempo do golpe, hitbox, pipeline de dano |
-| Nos customizados | quatro verbos finos que so repassam: pegar alvo, esta cacando, ao alcance, golpear |
-| Grafo | a arvore: patrulhar, ou perseguir, ou golpear |
+| `AttackTokenPool` | quem tem a vez de golpear. Classe pura, testada |
+| Nos customizados | verbos finos que so repassam: pegar alvo, esta cacando, ao alcance, golpear, rondar |
+| Grafo | a arvore: patrulhar, ou perseguir, ou golpear, ou rondar esperando a vez |
 
 A percepcao roda no `Update` do `EnemyAgent`, e nao dentro de um no, pelo fato 1.
 
@@ -61,16 +62,26 @@ automatizado, e ele precisa estar escrito em algum lugar antes de ser esquecido.
 ```
 Repeat Forever
 └── Selector
-    ├── Sequence                              ← o ramo de combate
-    │   ├── [Self] esta cacando alguem        ← condição, categoria Lobo Branco
-    │   ├── [Self] pega o alvo em [Target]    ← ação, categoria Lobo Branco
+    ├── Sequence                                  ← o ramo de combate
+    │   ├── [Self] esta cacando alguem            ← condição, categoria Lobo Branco
+    │   ├── [Self] pega o alvo em [Target]        ← ação, categoria Lobo Branco
     │   └── Selector
-    │       ├── Sequence
+    │       ├── Sequence                          ← já está perto o bastante
     │       │   ├── [Self] esta ao alcance do golpe
-    │       │   └── [Self] golpeia
-    │       └── Navigate To Target             ← nó do próprio pacote
-    └── Wait                                   ← ocioso; vira patrulha quando houver rota
+    │       │   └── Selector
+    │       │       ├── [Self] golpeia            ← falha quando não tem a vez
+    │       │       └── [Self] ronda o alvo       ← espera a vez rondando
+    │       └── Navigate To Target                 ← nó do pacote; ainda longe
+    └── Wait                                       ← ocioso; vira patrulha quando houver rota
 ```
+
+A ordem dos dois últimos filhos do Selector interno é o que faz o token funcionar: `golpeia`
+pede a vez ao coordenador e devolve falha quando o alvo já tem dois atacantes, e é essa falha
+que manda a criatura rondar em vez de bater.
+
+No `Navigate To Target`, ponha `Distance Threshold` em torno de 1,6, que é a distância de
+engajamento do barghest. Maior que o alcance do golpe faz a criatura parar longe demais para
+acertar.
 
 4. Abra `Assets/_Project/Prefabs/Characters/Enemy_Barghest.prefab` e arraste `BT_Barghest`
    para o campo `Behavior Graph` do componente `Behavior Agent`. Não mexa em
@@ -78,6 +89,8 @@ Repeat Forever
    no cliente e os dois lados decidem coisas diferentes.
 5. Rode a `Sandbox_Combate`, ande até 18 m de um caçador e confira três coisas: ele vira,
    vem, e para a 0,65 s antes de acertar.
+6. Duplique os caçadores até ter quatro em cima de você e confira a quarta: no máximo dois
+   golpeiam de cada vez, e os outros dois rondam.
 
 ## Alternativas consideradas
 - **Tudo dentro do grafo**, com nos que fazem a conta de percepcao. Descartada pelo fato 1:

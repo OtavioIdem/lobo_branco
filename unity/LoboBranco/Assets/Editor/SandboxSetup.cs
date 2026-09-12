@@ -196,6 +196,15 @@ namespace LoboBranco.EditorTools
             go.AddComponent<NetRoomPanel>();
             go.AddComponent<NetDebugHud>();
 
+            // O coordenador de encontro mora aqui, e nao em um objeto proprio, porque ele
+            // e do host como o resto deste objeto: no cliente ninguem pede token, porque
+            // no cliente ninguem decide atacar (docs/07 secao 6).
+            var coordinator = go.AddComponent<EncounterCoordinator>();
+
+            var so = new SerializedObject(coordinator);
+            so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
+            so.ApplyModifiedPropertiesWithoutUndo();
+
             if (playerPrefab == null)
                 Debug.LogError($"[Sandbox] Nao achei {PlayerPrefabPath}. Nenhum jogador vai nascer.");
         }

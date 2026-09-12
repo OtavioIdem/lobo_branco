@@ -86,7 +86,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |
 | ~~1.20~~ ✅ | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
 | 1.21 ⚠️ | Behavior tree base do inimigo. **Parcial**: sentidos, aquisição de alvo, golpe, nós customizados, prefab e NavMesh prontos; falta desenhar o grafo no editor gráfico. Nota abaixo | G | 07 §6 |
-| 1.22 | Coordenador de encontro com attack token (máximo 2) | M | 07 §6 |
+| ~~1.22~~ ✅ | Coordenador de encontro com attack token. **Máximo 2 por alvo**, e não por encontro: nota abaixo | M | 07 §6 |
 | 1.23 | Telegrafo de ataque: animação de anticipação de 0,4 a 0,9 s | M | 03 §10 |
 | 1.24 | Ataques `Unblockable` com tell vermelho | P | 03 §5 |
 | 1.25 | Hitstop, screen shake por Cinemachine Impulse, camera punch | M | 03 §11 |
@@ -114,6 +114,18 @@ o que vive no grafo e o que vive em componente está na
 
 O jogador passou a ser atingível na mesma tarefa, pelo `DamageReceiver`. Isso não era um
 item do backlog e deveria ter sido: até aqui, o pipeline de dano só tinha alvo de um lado.
+
+**Sobre o token da 1.22 ser por alvo, 2026-09-12.** O `docs/07` §6 escreve "um coordenador
+por encontro concede no máximo 2 tokens", e esse número foi pensado para um jogador. Em coop
+de quatro, um teto global de dois faria um encontro de oito criaturas ter seis paradas
+assistindo, e o segundo, o terceiro e o quarto jogador nunca seriam atacados. O teto passou a
+valer **por alvo**: cada bruxo enfrenta no máximo dois de cada vez, e um grupo grande continua
+sendo um grupo grande. O número em si está no `CombatTuningDef`.
+
+O token só melhora o combate com o `CircleTargetAction` do lado dele. Sem ter para onde
+esperar, a terceira criatura seria recusada, cairia no galho de perseguir e ficaria encostada
+no bruxo sem bater, e inimigo parado a meio metro parece travado. Rondando, a espera vira
+ameaça.
 
 | 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
 | 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |

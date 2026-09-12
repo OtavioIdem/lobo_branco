@@ -42,11 +42,23 @@ namespace LoboBranco.AI
 
             if (m_Enemy == null || m_Attacker == null) return Status.Failure;
 
+            // A vez de golpear vem antes de tudo (docs/07 secao 6). Falhar aqui e o caso
+            // normal quando o alvo ja tem dois atacantes, e e a falha que manda o galho
+            // seguinte da arvore rondar em vez de bater.
+            if (!m_Enemy.TryTakeAttackToken()) return Status.Failure;
+
             // Encarar antes de comecar evita o golpe que nasce de lado e nao acerta nada
             // por causa do filtro de arco da hitbox.
             m_Enemy.FaceTarget(Time.deltaTime);
 
-            return m_Attacker.TryBeginSwing() ? Status.Running : Status.Failure;
+            if (m_Attacker.TryBeginSwing()) return Status.Running;
+
+            // Nao deu para comecar, quase sempre por causa da pausa entre golpes. Devolver
+            // a vez aqui e essencial: uma criatura em recarga segurando o token ocuparia
+            // uma das duas vagas do alvo sem nunca bater, e o combate ficaria vazio.
+            m_Enemy.ReleaseAttackToken();
+
+            return Status.Failure;
         }
 
         protected override Status OnUpdate()
@@ -68,6 +80,11 @@ namespace LoboBranco.AI
             // a criatura acertaria enquanto recua.
             if (m_Attacker != null && m_Attacker.Swinging)
                 m_Attacker.EndSwing();
+
+            // A vez volta para o encontro assim que o golpe acaba, tenha ele acertado ou
+            // nao. Segurar o token durante a pausa entre golpes faria duas criaturas
+            // monopolizarem o alvo e as outras nunca chegarem a atacar.
+            if (m_Enemy != null) m_Enemy.ReleaseAttackToken();
 
             m_Enemy = null;
             m_Attacker = null;

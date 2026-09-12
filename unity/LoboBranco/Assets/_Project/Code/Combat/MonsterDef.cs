@@ -83,6 +83,11 @@ namespace LoboBranco.Combat
         [Tooltip("Segundos de pausa entre um golpe e a proxima tentativa, alem da recuperacao.")]
         [Min(0f)] public float attackCooldown = 1.2f;
 
+        [Tooltip("A que distancia ela ronda o alvo enquanto espera a vez de golpear. " +
+                 "Tem que caber dentro do alcance do golpe: rondando para fora dele, ela sai " +
+                 "de alcance, a arvore manda aproximar de novo, e a criatura fica indo e vindo.")]
+        [Min(0.5f)] public float engagementDistance = 1.6f;
+
         [Header("Vulnerabilidades")]
         [Tooltip("Classe de oleo que multiplica o dano contra ela. None se nenhuma.")]
         public OilClass vulnerableToOil = OilClass.None;
@@ -108,10 +113,22 @@ namespace LoboBranco.Combat
 #if UNITY_EDITOR
         void OnValidate()
         {
+            WarnDuplicateResistances();
+
+            // Rondar fora do alcance do golpe produz o pior defeito de IA que da para ter
+            // sem erro nenhum no Console: a criatura recua para esperar a vez, sai de
+            // alcance, a arvore manda aproximar, ela aproxima, e o ciclo recomeca. Em tela
+            // isso parece um bicho tremendo, e ninguem liga a causa ao valor deste campo.
+            if (meleeAttack != null && engagementDistance > meleeAttack.reach)
+                Debug.LogWarning(
+                    $"{name}: a distancia de engajamento ({engagementDistance:0.##} m) e maior que o " +
+                    $"alcance do golpe ({meleeAttack.reach:0.##} m). A criatura vai ficar indo e vindo.", this);
+        }
+
+        void WarnDuplicateResistances()
+        {
             if (resistances == null) return;
 
-            // Tipo duplicado nao quebra nada (o primeiro vence), mas quase sempre e engano
-            // de quem editou, e o sintoma aparece muito depois, em balanceamento.
             for (int i = 0; i < resistances.Length; i++)
             for (int j = i + 1; j < resistances.Length; j++)
                 if (resistances[i].type == resistances[j].type)

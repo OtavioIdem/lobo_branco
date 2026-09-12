@@ -87,6 +87,11 @@ namespace LoboBranco.Combat
         [Tooltip("Piso de dano depois da subtracao de armadura. Sem piso, um alvo muito blindado vira imune.")]
         public float minimumDamage = 1.0f;
 
+        [Header("Encontro (docs/07 secao 6)")]
+        [Tooltip("Quantas criaturas podem estar golpeando o mesmo alvo ao mesmo tempo. " +
+                 "Dois e o numero do documento, e ele e por alvo e nao por encontro.")]
+        [Min(1)] public int maxAttackersPerTarget = 2;
+
         public float StanceMultiplier(Stance stance)
         {
             switch (stance)

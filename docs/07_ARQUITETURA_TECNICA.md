@@ -411,6 +411,14 @@ de ataque simultâneos. Sem isso, 5 barghests atacam ao mesmo tempo e o combate 
 ilegível. Isso é o truque mais importante de IA de combate, e quase todo jogo de ação bom
 faz alguma versão dele.
 
+**Corrigido em coop (2026-09-12, tarefa 1.22): o teto é por alvo, não por encontro.** O
+número 2 acima foi pensado para um jogador. Com quatro, um teto de encontro faria um grupo
+de oito criaturas ter seis paradas assistindo, e o segundo, o terceiro e o quarto jogador
+nunca seriam atacados. Cada alvo tem as próprias duas vagas, e o número vive no
+`CombatTuningDef`. Quem é recusado não fica parado: ronda o alvo à distância de engajamento
+da espécie, porque inimigo imóvel a meio metro parece travamento, e travado é pior do que
+injusto.
+
 **O que fica fora do grafo (2026-09-12, tarefa 1.21).** O grafo carrega só a estrutura de
 decisão. Percepção, busca de alvo, giro e golpe são componentes, porque um nó só executa
 enquanto o galho dele está ativo: com a percepção dentro de um nó, a criatura enxergaria
