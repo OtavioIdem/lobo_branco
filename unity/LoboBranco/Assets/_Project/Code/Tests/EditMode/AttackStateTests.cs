@@ -113,7 +113,44 @@ namespace LoboBranco.Tests
             _machine.TryChangeState(PlayerStateId.Attack);
         }
 
+        // --------------------------------------------------------------- vigor
+
+        /// <summary>
+        /// Faltar vigor nao perde o input: ele fica guardado e o golpe sai sozinho quando
+        /// o vigor voltar, dentro da janela de 0,2 s do buffer. E a diferenca entre o
+        /// combate parecer lento e parecer quebrado (docs/03 secao 7).
+        /// </summary>
+        [Test]
+        public void Sem_vigor_o_golpe_espera_em_vez_de_sumir()
+        {
+            var vigor = new VigorFalso { Disponivel = 2f };
+            _context.Vitals = vigor;
+            _context.AttackStaminaCost = 4f;
+
+            _buffer.Push(BufferedAction.AttackLight);
+            Avancar(0.05f);
+
+            Assert.AreEqual(PlayerStateId.Locomotion, _machine.CurrentId, "Sem vigor, o golpe nao comeca.");
+            Assert.IsTrue(_buffer.HasPending, "E o input continua guardado.");
+
+            vigor.Disponivel = 10f;
+            Avancar(0.05f);
+
+            Assert.AreEqual(PlayerStateId.Attack, _machine.CurrentId);
+            Assert.AreEqual(1, _atacante.Golpes.Count);
+        }
+
         // ------------------------------------------------------------ dublês
+
+        sealed class VigorFalso : IStaminaSource
+        {
+            public float Disponivel;
+
+            public float CurrentStamina => Disponivel;
+            public float MaxStamina => 100f;
+
+            public bool CanAfford(float cost) => cost <= Disponivel;
+        }
 
         sealed class LocomocaoFalsa : ILocomotionDriver
         {

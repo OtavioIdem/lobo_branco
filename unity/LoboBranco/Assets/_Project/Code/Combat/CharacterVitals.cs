@@ -24,11 +24,14 @@ namespace LoboBranco.Combat
     /// a Sandbox_Combate tem que continuar jogavel sozinha, sem NetworkManager nenhum.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class CharacterVitals : NetworkBehaviour
+    public sealed class CharacterVitals : NetworkBehaviour, IStaminaSource
     {
         [Header("Dados")]
         [Tooltip("Valores base da criatura. docs/03 secao 12.")]
         [SerializeField] StatBlockDef statBlock;
+
+        [Tooltip("Tempos do Vigor. Sem asset, valem os do docs/03 secao 7.")]
+        [SerializeField] CombatTuningDef tuning;
 
         // Server como permissao de escrita e o que faz a regra da ADR 0008 ser cobrada
         // pela biblioteca: um cliente que tentar escrever leva erro do proprio NGO, em
@@ -43,6 +46,22 @@ namespace LoboBranco.Combat
         // propriedade abaixo decide de qual dos dois se le.
         float _soloVitality;
 
+        // O Vigor tem a mesma divisao da vida, com uma diferenca: ele muda todo quadro,
+        // porque regenera. Por isso quem conta e a classe pura, e a variavel replicada so
+        // recebe o valor quando ele andou o bastante para alguem perceber.
+        readonly NetworkVariable<float> _replicatedStamina = new NetworkVariable<float>(
+            0f,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
+        /// <summary>
+        /// Meio ponto de vigor ninguem ve, e escrever todo quadro encheria a rede com
+        /// diferencas de 0,3. O cheio e o zero sempre passam, porque sao os dois valores
+        /// em que a barra muda de significado.
+        /// </summary>
+        const float StaminaWriteEpsilon = 0.5f;
+
+        StaminaPool _stamina;
         StatSheet _stats;
 
         // ---------------------------------------------------------------- leitura
@@ -69,6 +88,53 @@ namespace LoboBranco.Combat
         /// </summary>
         public event Action<float, float> VitalityChanged;
 
+        // ------------------------------------------------------------------ vigor
+
+        public float MaxStamina => _stats?.Get(StatType.MaxStamina) ?? 0f;
+
+        public float CurrentStamina => IsSpawned ? _replicatedStamina.Value : _stamina.Current;
+
+        /// <summary>Verdadeiro durante o silencio de 1,5 s depois de um gasto. Vale em quem conta.</summary>
+        public bool StaminaRegenBlocked => _stamina.RegenBlocked;
+
+        /// <summary>Heuristica de "esta lutando", ate a tarefa 1.22. Vale em quem conta.</summary>
+        public bool InCombat => _stamina.InCombat;
+
+        /// <summary>
+        /// Se o vigor da para a acao. Quem pergunta e o dono, antes de pedir, e ele le a
+        /// copia replicada: pode estar uma viagem de ida e volta atrasada, e em jogo
+        /// cooperativo contra IA essa diferenca nao muda nada (ADR 0008).
+        /// </summary>
+        public bool CanAfford(float cost) => cost <= 0f || CurrentStamina >= cost;
+
+        /// <summary>
+        /// Cobra o vigor. So quem resolve chama, e o host sempre cobra o que tem: recusar
+        /// um golpe que ja saiu na tela do dono trocaria um problema invisivel por um bem
+        /// visivel. Devolve falso quando faltou, para quem quiser saber.
+        /// </summary>
+        public bool TrySpendStamina(float cost)
+        {
+            if (!CanResolve)
+            {
+                Debug.LogError($"{name}: cliente tentou gastar vigor. Recurso e do host (ADR 0008).", this);
+                return false;
+            }
+
+            bool paid = _stamina.TrySpend(cost);
+            WriteStamina(_stamina.Current, force: true);
+
+            return paid;
+        }
+
+        /// <summary>Devolve vigor. Segundo suspiro e pocoes chamam isto (tarefas 1.17 e M2).</summary>
+        public void RestoreStamina(float amount)
+        {
+            if (!CanResolve) return;
+
+            _stamina.Restore(amount);
+            WriteStamina(_stamina.Current, force: true);
+        }
+
         // ------------------------------------------------------------------ ciclo
 
         void Awake()
@@ -78,6 +144,47 @@ namespace LoboBranco.Combat
 
             _stats = statBlock != null ? statBlock.CreateSheet() : new StatSheet();
             _soloVitality = MaxVitality;
+
+            _stamina = new StaminaPool(
+                tuning != null ? tuning.staminaRegenDelay : 1.5f,
+                tuning != null ? tuning.combatMemorySeconds : 5f);
+
+            RefreshStaminaFromStats();
+        }
+
+        /// <summary>
+        /// Le teto e taxas da folha de atributos. Separado do <c>Awake</c> porque o dia em
+        /// que uma pocao mexer em <c>MaxStamina</c>, e so chamar isto de novo.
+        /// </summary>
+        void RefreshStaminaFromStats()
+        {
+            _stamina.RegenPerSecond = _stats.Get(StatType.StaminaRegen);
+            _stamina.CombatRegenPerSecond = _stats.Get(StatType.StaminaRegenInCombat);
+            _stamina.Reset(MaxStamina);
+        }
+
+        /// <summary>
+        /// So quem resolve conta o vigor. No cliente, a copia replicada e a verdade e o
+        /// contador local ficaria inventando uma segunda.
+        /// </summary>
+        void Update()
+        {
+            if (!CanResolve) return;
+
+            _stamina.Tick(Time.deltaTime);
+            WriteStamina(_stamina.Current, force: false);
+        }
+
+        void WriteStamina(float value, bool force)
+        {
+            if (!IsSpawned) return;
+
+            bool atEdge = value <= 0f || value >= MaxStamina;
+
+            if (!force && !atEdge && Mathf.Abs(value - _replicatedStamina.Value) < StaminaWriteEpsilon)
+                return;
+
+            _replicatedStamina.Value = value;
         }
 
         public override void OnNetworkSpawn()
@@ -87,7 +194,10 @@ namespace LoboBranco.Combat
             // O host semeia o valor inicial. O cliente recebe o estado no proprio spawn,
             // entao um jogador que entra no meio da luta ve a vida como ela esta.
             if (IsServer)
+            {
                 _replicatedVitality.Value = _soloVitality;
+                _replicatedStamina.Value = _stamina.Current;
+            }
         }
 
         public override void OnNetworkDespawn()
@@ -111,6 +221,10 @@ namespace LoboBranco.Combat
 
             if (amount <= 0f || IsDown) return 0f;
 
+            // Apanhar e luta tanto quanto bater: sem isto, quem so defende regeneraria
+            // vigor na taxa de fora de combate no meio da briga.
+            _stamina.NoteCombat();
+
             float before = CurrentVitality;
             Write(Mathf.Max(0f, before - amount));
 
@@ -127,6 +241,11 @@ namespace LoboBranco.Combat
             }
 
             Write(MaxVitality);
+
+            // Quem volta de pe volta inteiro. Levantar com o vigor de quando caiu faria a
+            // capsula de sandbox reviver sem poder fazer nada.
+            _stamina.Reset(MaxStamina);
+            WriteStamina(_stamina.Current, force: true);
         }
 
         // ---------------------------------------------------------------- interno

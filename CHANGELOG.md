@@ -4,6 +4,33 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-12 — M1 tarefa 1.16: Vigor
+- `StaminaPool`: classe pura com os numeros do doc 03 secao 7. Cem de base, 18 por segundo
+  descansando, 6 em combate, e nada durante 1,5 s depois de cada gasto.
+- O atraso de 1,5 s e o sistema inteiro. Sem ele o recurso vira um contador que sempre
+  volta e gastar deixa de ser escolha; com ele, cada gasto abre uma janela sem rede de
+  protecao. Sinal e defesa saem do mesmo bolso, e e esse o dilema que o documento chama
+  de central.
+- O custo de vigor dos golpes estava escrito nos tres assets de postura desde a tarefa 1.8
+  e nunca tinha sido cobrado. Agora e: 4 na Rapida, 8 na Forte, 12 na Grupo.
+- Com tres elos de Fluxo o golpe custa 20 por cento menos, a outra metade do bonus do
+  doc 03 secao 6 que estava esperando o vigor existir.
+- Faltar vigor nao perde o input. O golpe fica guardado no buffer de 0,2 s e sai sozinho
+  quando o vigor voltar, entao faltar vigor parece atraso e nao parece clique ignorado.
+- O dono pergunta se da, o host cobra. Ele cobra o que tem em vez de recusar um golpe que
+  ja saiu na tela de quem pediu: trocar um problema invisivel por um bem visivel seria
+  piorar. Quem tenta gastar vigor fora do host leva erro no Console.
+- O vigor vai replicado como a vida, mas so quando anda meio ponto, porque ele muda todo
+  quadro e escrever todo quadro encheria a rede com diferenca de 0,3. O cheio e o zero
+  sempre passam, que sao os dois valores em que a barra muda de significado.
+- "Em combate" e uma heuristica por enquanto: alguns segundos depois de gastar ou de
+  apanhar. Quem vai saber isso de verdade e o coordenador de encontro da tarefa 1.22, e
+  o numero esta em asset com esse aviso.
+- Apanhar conta como combate tanto quanto bater. Sem isso, quem so defende regeneraria na
+  taxa de descanso no meio da briga.
+- Painel F1 mostra o vigor e o estado da regeneracao: parado, em combate ou descansando.
+- 153 testes passando, contra 143 antes.
+
 ### 2026-09-11 — M1 tarefa 1.15: aco e prata
 - `WeaponSwapState`: 0,7 s guardando uma espada e sacando a outra, sem andar, sem atacar e
   sem esquivar. A espada nova so entra em vigor no fim: trocar e compromisso inteiro.

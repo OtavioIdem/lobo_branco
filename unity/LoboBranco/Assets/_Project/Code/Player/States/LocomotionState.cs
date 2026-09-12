@@ -65,6 +65,11 @@ namespace LoboBranco.Player
         {
             if (attack == null) return;
 
+            // Sem vigor o golpe nao comeca, e o input continua guardado: dentro da janela
+            // de 0,2 s do buffer, o golpe sai sozinho assim que o vigor voltar. E por isso
+            // que faltar vigor parece atraso e nao parece input perdido (docs/03 secao 7).
+            if (context.Vitals != null && !context.Vitals.CanAfford(context.AttackStaminaCost)) return;
+
             // Consumir so depois de saber que a transicao aconteceu: se o ataque for
             // recusado, o input continua guardado e tenta de novo no frame seguinte,
             // que e exatamente o que o jogador espera de um buffer.

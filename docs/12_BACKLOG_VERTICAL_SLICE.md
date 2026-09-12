@@ -80,7 +80,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | 1.13 | Indicador visual do Fluxo (brilho na lâmina, via Shader Graph) | M | 03 §6 |
 | ~~1.14~~ ✅ | Três posturas, com troca e afinidade de arquétipo | M | 03 §4 |
 | ~~1.15~~ ✅ | Aço e prata, com a troca de 0,7 s não-cancelável | M | 03 §3 |
-| 1.16 | Vigor: consumo, regeneração, atraso de 1,5 s | M | 03 §7 |
+| ~~1.16~~ ✅ | Vigor: consumo, regeneração, atraso de 1,5 s | M | 03 §7 |
 | 1.17 | Adrenalina: ganho, três gastos | M | 03 §7 |
 | 1.18 | Cinco sinais com custo, cooldown e efeito | G | 03 §8 |
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |

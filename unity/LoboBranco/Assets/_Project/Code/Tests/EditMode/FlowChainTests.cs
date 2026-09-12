@@ -1,5 +1,6 @@
 using LoboBranco.Combat;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace LoboBranco.Tests
 {
@@ -123,6 +124,23 @@ namespace LoboBranco.Tests
             Assert.AreEqual(0, corrente.Links);
             Assert.IsFalse(corrente.WindowOpen);
             Assert.AreEqual(1, corrente.Begin());
+        }
+
+        /// <summary>
+        /// A outra metade do bonus de tres elos: o golpe tambem fica mais barato
+        /// (docs/03 secao 6). O custo sai do mesmo asset que os multiplicadores, senao
+        /// o dono e o host poderiam cobrar contas diferentes pelo mesmo golpe.
+        /// </summary>
+        [Test]
+        public void A_partir_de_tres_elos_o_golpe_custa_menos_vigor()
+        {
+            var tuning = ScriptableObject.CreateInstance<CombatTuningDef>();
+
+            Assert.AreEqual(8f, tuning.StaminaCost(8f, 2), 0.001f, "Dois elos ainda pagam inteiro.");
+            Assert.AreEqual(6.4f, tuning.StaminaCost(8f, 3), 0.001f, "Tres elos pagam 20 por cento menos.");
+            Assert.AreEqual(6.4f, tuning.StaminaCost(8f, 9), 0.001f, "O desconto nao cresce depois.");
+
+            Object.DestroyImmediate(tuning);
         }
 
         [Test]

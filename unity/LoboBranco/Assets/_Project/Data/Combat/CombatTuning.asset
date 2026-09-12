@@ -22,6 +22,10 @@ MonoBehaviour:
   silverVsHumanoid: 0.5
   silverVsMonster: 1
   flowWindowSeconds: 0.22
+  flowStaminaDiscountChain: 3
+  flowStaminaDiscount: 0.2
+  staminaRegenDelay: 1.5
+  combatMemorySeconds: 5
   flowBonusByChain:
   - 1
   - 1

@@ -69,6 +69,21 @@ namespace LoboBranco.Player
         /// <summary>Quem carrega as duas espadas. Nulo e valido: o estado de troca nao troca nada.</summary>
         public IWeaponHolder Weapons;
 
+        // ----------------------------------------------------------------- vigor
+
+        /// <summary>
+        /// So para perguntar se da. Nulo e valido, e significa "vigor ainda nao cobra
+        /// nada", que e como o jogo estava ate a tarefa 1.16.
+        /// </summary>
+        public IStaminaSource Vitals;
+
+        /// <summary>
+        /// Custo de vigor do golpe corrente, ja com o desconto de Fluxo. Escrito pelo
+        /// <see cref="PlayerBrain"/> uma vez por frame, junto da postura, porque ele muda
+        /// quando a corrente muda e nao so quando a postura muda.
+        /// </summary>
+        public float AttackStaminaCost;
+
         /// <summary>
         /// Espada pedida por quem iniciou a troca, consumida no fim dela. Nula quando nao
         /// ha troca em andamento, o que e diferente de "trocar para a que ja esta na mao".

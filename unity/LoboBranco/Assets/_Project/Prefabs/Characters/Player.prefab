@@ -292,6 +292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.CharacterVitals
   ShowTopMostFoldoutHeaderGroup: 1
   statBlock: {fileID: 11400000, guid: ef2157e2dfb2ff14b81a8b4016ae0d11, type: 2}
+  tuning: {fileID: 11400000, guid: 397b3e7a452722b469df3d82a37a5eaf, type: 2}
 --- !u!114 &8258041469082970047
 MonoBehaviour:
   m_ObjectHideFlags: 0

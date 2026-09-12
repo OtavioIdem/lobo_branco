@@ -67,10 +67,19 @@ namespace LoboBranco.Player
             // Quem escreve esta vida e o host (ADR 0008). Mostrar de onde ela vem junto
             // com o numero e o que separa "levei dano" de "o host acha que levei".
             if (vitals != null)
+            {
                 GUILayout.Label(
                     $"Vida              {vitals.CurrentVitality,6:F0} / {vitals.MaxVitality:F0}   " +
                     (vitals.CanResolve ? "[eu resolvo]" : "[o host manda]"),
                     _style);
+
+                // Vigor sem o estado da regeneracao e um numero que sobe e desce sem
+                // explicacao. O silencio de 1,5 s do docs/03 secao 7 e o que se sente.
+                GUILayout.Label(
+                    $"Vigor             {vitals.CurrentStamina,6:F0} / {vitals.MaxStamina:F0}   " +
+                    (vitals.StaminaRegenBlocked ? "parado" : vitals.InCombat ? "em combate" : "descansando"),
+                    _style);
+            }
 
             DrawStateMachine();
 

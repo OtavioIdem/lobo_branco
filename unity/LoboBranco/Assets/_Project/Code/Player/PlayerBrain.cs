@@ -41,6 +41,7 @@ namespace LoboBranco.Player
         PlayerInputReader _input;
         PlayerLocomotion _locomotion;
         PlayerMeleeAttacker _attacker;
+        CharacterVitals _vitals;
         PlayerDebugOverlay _overlay;
 
         PlayerStateContext _context;
@@ -71,6 +72,7 @@ namespace LoboBranco.Player
             _input = GetComponent<PlayerInputReader>();
             _locomotion = GetComponent<PlayerLocomotion>();
             _attacker = GetComponent<PlayerMeleeAttacker>();
+            _vitals = GetComponent<CharacterVitals>();
             _overlay = GetComponent<PlayerDebugOverlay>();
 
             BuildStateMachine();
@@ -155,10 +157,11 @@ namespace LoboBranco.Player
                 Locomotion = _locomotion,
                 Attacker = _attacker,
                 Weapons = _attacker,
+                Vitals = _vitals,
                 Buffer = _buffer,
             };
 
-            WriteStanceToContext();
+            WriteCombatToContext();
 
             // O construtor da maquina escreve a si mesma no contexto.
             _machine = new PlayerStateMachine(_context);
@@ -240,7 +243,7 @@ namespace LoboBranco.Player
             // (docs/03 secao 4), e o que ela nao pode e comecar durante um golpe, o que
             // ja foi decidido no momento do input.
             _stance.Tick(deltaTime);
-            WriteStanceToContext();
+            WriteCombatToContext();
 
             _machine.Tick(deltaTime);
 
@@ -289,10 +292,14 @@ namespace LoboBranco.Player
                 _context.PendingWeapon = null;
         }
 
-        void WriteStanceToContext()
+        void WriteCombatToContext()
         {
             _context.CurrentStance = _stance.Current;
             _context.CurrentAttack = _attacker != null ? _attacker.AttackFor(_stance.Current) : null;
+
+            // O custo muda com a corrente de Fluxo, e nao so com a postura, entao ele e
+            // reescrito todo frame junto com o resto.
+            _context.AttackStaminaCost = _attacker != null ? _attacker.StaminaCostFor(_context.CurrentAttack) : 0f;
         }
 
         void OnAttackLight() => _buffer.Push(BufferedAction.AttackLight);

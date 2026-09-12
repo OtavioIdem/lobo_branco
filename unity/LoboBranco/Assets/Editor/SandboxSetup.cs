@@ -291,6 +291,10 @@ namespace LoboBranco.EditorTools
         {
             var so = new SerializedObject(vitals);
             so.FindProperty("statBlock").objectReferenceValue = Require<StatBlockDef>(statBlockPath);
+
+            // Os tempos do Vigor (docs/03 secao 7) valem para bruxo e para monstro, entao
+            // eles vivem no mesmo asset de afinacao do combate.
+            so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

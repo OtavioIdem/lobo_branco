@@ -148,6 +148,13 @@ namespace LoboBranco.Player
         /// <summary>Verdadeiro enquanto da para encadear. Vale so em quem resolve.</summary>
         public bool FlowWindowOpen => _flow != null && _flow.WindowOpen;
 
+        /// <summary>
+        /// Custo de vigor do golpe agora, ja com o desconto de Fluxo (docs/03 secao 6).
+        /// O dono consulta para saber se pode pedir, e o host cobra o mesmo numero.
+        /// </summary>
+        public float StaminaCostFor(AttackDef attack)
+            => attack != null && tuning != null ? tuning.StaminaCost(attack.staminaCost, FlowLinks) : 0f;
+
         /// <summary>Resumo do ultimo golpe conectado. Vazio enquanto <c>logDamageBreakdown</c> estiver desligado.</summary>
         public string LastHitSummary { get; private set; } = string.Empty;
 
@@ -360,6 +367,11 @@ namespace LoboBranco.Player
             _hitbox?.BeginSwing();
 
             WriteFlowLinks(_flow.Begin());
+
+            // Cobrar depois do Begin e de proposito: o desconto de Fluxo vale para o golpe
+            // que fecha a corrente, e nao para o seguinte (docs/03 secao 6).
+            if (_vitals != null)
+                _vitals.TrySpendStamina(StaminaCostFor(attack));
 
             _resolvingRemaining = attack != null ? attack.TotalDuration : 0f;
         }
