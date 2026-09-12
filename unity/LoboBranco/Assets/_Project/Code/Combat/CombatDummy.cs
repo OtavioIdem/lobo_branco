@@ -5,6 +5,10 @@ using UnityEngine;
 namespace LoboBranco.Combat
 {
     /// <summary>
+    /// Autoridade: o host, por meio do <see cref="CharacterVitals"/> ao lado. Quem tira
+    /// vida e quem conta o tempo de levantar e so ele; piscar, tombar e ficar de pe de
+    /// novo sao reacao local ao numero que chegou replicado.
+    ///
     /// Alvo greybox da cena de sandbox: uma capsula que recebe dano, mostra que recebeu e
     /// volta a ficar de pe depois de um tempo, para nao ter que reiniciar a cena a cada
     /// teste de balanceamento.
@@ -12,15 +16,13 @@ namespace LoboBranco.Combat
     /// Provisorio. O inimigo de verdade nasce do <c>MonsterDef</c> (tarefa 1.20) com a
     /// behavior tree da tarefa 1.21; ai a classificacao, as resistencias e a tabela de
     /// loot saem daqui para o asset, e este componente vira apenas o que aplica dano.
-    /// Ate la, os unicos numeros vivem no <see cref="StatBlockDef"/>, em asset.
+    /// A vida ja nao mora mais aqui: ela e do <see cref="CharacterVitals"/>, que o
+    /// monstro de verdade vai reusar sem mudar uma linha.
     /// </summary>
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(CharacterVitals))]
     public sealed class CombatDummy : MonoBehaviour, IDamageable
     {
-        [Header("Dados")]
-        [Tooltip("Vitalidade e armadura. docs/03 secao 12.")]
-        [SerializeField] StatBlockDef statBlock;
-
         [Header("Classificacao (migra para MonsterDef na tarefa 1.20)")]
         [SerializeField] CreatureClass creatureClass = Combat.CreatureClass.Beast;
         [SerializeField] StanceArchetype archetype = StanceArchetype.Agile;
@@ -37,33 +39,36 @@ namespace LoboBranco.Combat
 
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
-        StatSheet _stats;
+        CharacterVitals _vitals;
         Renderer[] _renderers;
         MaterialPropertyBlock _block;
         Color _restColor = Color.red;
         float _flashRemaining;
         float _reviveRemaining;
+        bool _down;
 
         // ---------------------------------------------------------------- leitura
 
-        public StatSheet Stats => _stats;
+        public StatSheet Stats => _vitals != null ? _vitals.Stats : null;
         public CreatureClass CreatureClass => creatureClass;
         public StanceArchetype Archetype => archetype;
         public OilClass VulnerableToOil => vulnerableToOil;
 
-        public float CurrentVitality { get; private set; }
-        public float MaxVitality => _stats?.Get(StatType.MaxVitality) ?? 0f;
-        public bool IsDown => CurrentVitality <= 0f;
+        public float CurrentVitality => _vitals != null ? _vitals.CurrentVitality : 0f;
+        public float MaxVitality => _vitals != null ? _vitals.MaxVitality : 0f;
+        public bool IsDown => _vitals != null && _vitals.IsDown;
 
-        /// <summary>Dispara a cada golpe recebido. O painel de debug escuta isto.</summary>
+        /// <summary>
+        /// Dispara a cada golpe recebido, so em quem resolveu o golpe. Quem quiser reagir
+        /// em todas as maquinas escuta <see cref="CharacterVitals.VitalityChanged"/>.
+        /// </summary>
         public event Action<CombatDummy, DamageResult> Damaged;
 
         // ---------------------------------------------------------------- ciclo
 
         void Awake()
         {
-            _stats = statBlock != null ? statBlock.CreateSheet() : new StatSheet();
-            CurrentVitality = _stats.Get(StatType.MaxVitality);
+            _vitals = GetComponent<CharacterVitals>();
 
             _renderers = GetComponentsInChildren<Renderer>(includeInactive: true);
             _block = new MaterialPropertyBlock();
@@ -72,6 +77,10 @@ namespace LoboBranco.Combat
                 _renderers[0].sharedMaterial.HasProperty(BaseColorId))
                 _restColor = _renderers[0].sharedMaterial.GetColor(BaseColorId);
         }
+
+        void OnEnable() => _vitals.VitalityChanged += OnVitalityChanged;
+
+        void OnDisable() => _vitals.VitalityChanged -= OnVitalityChanged;
 
         void Update()
         {
@@ -83,10 +92,12 @@ namespace LoboBranco.Combat
                 if (_flashRemaining <= 0f) Paint(_restColor);
             }
 
-            if (_reviveRemaining > 0f)
+            // Levantar e decisao, e decisao e do host. O cliente nao conta este tempo:
+            // ele so ve a vida voltar e poe a capsula de pe.
+            if (_reviveRemaining > 0f && _vitals.CanResolve)
             {
                 _reviveRemaining -= deltaTime;
-                if (_reviveRemaining <= 0f) Revive();
+                if (_reviveRemaining <= 0f) _vitals.RestoreToFull();
             }
         }
 
@@ -101,23 +112,42 @@ namespace LoboBranco.Combat
 
         public void ApplyDamage(in DamageResult result)
         {
+            // Chegar aqui sem autoridade significa que alguem rodou o pipeline no lugar
+            // errado. Recusar e melhor do que tirar vida que o host nunca vai confirmar.
+            if (!_vitals.CanResolve)
+            {
+                Debug.LogError($"{name}: dano resolvido fora do host. Ver ADR 0008.", this);
+                return;
+            }
+
             if (IsDown) return;
 
-            CurrentVitality = Mathf.Max(0f, CurrentVitality - result.Amount);
-
-            Paint(hitFlashColor);
-            _flashRemaining = hitFlashDuration;
+            _vitals.ApplyDamage(result.Amount);
 
             Damaged?.Invoke(this, result);
-
-            if (CurrentVitality <= 0f)
-                GoDown();
         }
 
         // ---------------------------------------------------------------- interno
 
+        /// <summary>
+        /// Roda em todas as maquinas, porque a vida chega replicada em todas elas. E o que
+        /// faz o piscar do companheiro aparecer na sua tela sem custar um RPC.
+        /// </summary>
+        void OnVitalityChanged(float before, float after)
+        {
+            if (after < before)
+            {
+                Paint(hitFlashColor);
+                _flashRemaining = hitFlashDuration;
+            }
+
+            if (after <= 0f && !_down) GoDown();
+            else if (after > 0f && _down) StandUp();
+        }
+
         void GoDown()
         {
+            _down = true;
             _reviveRemaining = reviveDelay;
 
             // Deita a capsula em vez de destrui-la: o alvo continua existindo para
@@ -128,9 +158,11 @@ namespace LoboBranco.Combat
             if (collider != null) collider.enabled = false;
         }
 
-        void Revive()
+        void StandUp()
         {
-            CurrentVitality = _stats.Get(StatType.MaxVitality);
+            _down = false;
+            _reviveRemaining = 0f;
+
             transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
             Paint(_restColor);
 

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using LoboBranco.CameraSystem;
 using LoboBranco.Combat;
 using LoboBranco.Core;
@@ -105,8 +106,42 @@ namespace LoboBranco.EditorTools
             GameObject saved = PrefabUtility.SaveAsPrefabAsset(player, PlayerPrefabPath);
             Object.DestroyImmediate(player);
 
+            EnsureNetworkPrefabHash(saved);
+
             Debug.Log($"[Sandbox] Prefab de jogador gravado em {PlayerPrefabPath}.");
             return saved;
+        }
+
+        /// <summary>
+        /// O <see cref="NetworkObject"/> calcula o proprio identificador de rede dentro do
+        /// <c>OnValidate</c>, a partir do caminho do asset. O objeto temporario que vira o
+        /// prefab ainda nao tem caminho, entao o identificador sai zero e fica zero no
+        /// arquivo. No editor isso nao aparece, porque abrir o prefab dispara o
+        /// <c>OnValidate</c> de novo e conserta em memoria; no build nao ha
+        /// <c>OnValidate</c>, e o sintoma e o jogador nao nascer so no executavel, que e o
+        /// pior lugar para descobrir qualquer coisa (item 1 da definicao de pronto).
+        ///
+        /// O metodo e interno ao pacote, entao a chamada e por reflexao. Recalcular a
+        /// mesma conta aqui seria pior: ela mudaria de lado quando o pacote mudasse.
+        /// </summary>
+        static void EnsureNetworkPrefabHash(GameObject prefab)
+        {
+            var networkObject = prefab != null ? prefab.GetComponent<NetworkObject>() : null;
+            if (networkObject == null) return;
+
+            MethodInfo validate = typeof(NetworkObject).GetMethod(
+                "OnValidate", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            if (validate == null)
+            {
+                Debug.LogError("[Sandbox] NetworkObject.OnValidate sumiu do pacote. O prefab pode ficar com hash zero.");
+                return;
+            }
+
+            validate.Invoke(networkObject, null);
+
+            EditorUtility.SetDirty(prefab);
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary>
@@ -154,6 +189,10 @@ namespace LoboBranco.EditorTools
 
             player.AddComponent<PlayerInputReader>();
             player.AddComponent<PlayerLocomotion>();
+
+            // Antes do atacante, e nao depois: a folha de atributos do bruxo mora aqui, e
+            // e dela que o pipeline de dano le quando o host resolve o golpe (ADR 0008).
+            player.AddComponent<CharacterVitals>();
             player.AddComponent<PlayerMeleeAttacker>();
             player.AddComponent<PlayerBrain>();
             player.AddComponent<PlayerDebugOverlay>();
@@ -205,8 +244,10 @@ namespace LoboBranco.EditorTools
             overlay.FindProperty("input").objectReferenceValue = player.GetComponent<PlayerInputReader>();
             overlay.FindProperty("brain").objectReferenceValue = player.GetComponent<PlayerBrain>();
             overlay.FindProperty("attacker").objectReferenceValue = player.GetComponent<PlayerMeleeAttacker>();
+            overlay.FindProperty("vitals").objectReferenceValue = player.GetComponent<CharacterVitals>();
             overlay.ApplyModifiedPropertiesWithoutUndo();
 
+            WireVitals(player.GetComponent<CharacterVitals>(), PlayerStatsPath);
             WireAttacker(player.GetComponent<PlayerMeleeAttacker>());
         }
 
@@ -219,7 +260,6 @@ namespace LoboBranco.EditorTools
             var so = new SerializedObject(attacker);
 
             so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
-            so.FindProperty("statBlock").objectReferenceValue = Require<StatBlockDef>(PlayerStatsPath);
             so.FindProperty("weapon").objectReferenceValue = Require<MeleeWeaponDef>(SteelSwordPath);
             so.FindProperty("lightAttack").objectReferenceValue = Require<AttackDef>(LightAttackPath);
             so.FindProperty("heavyAttack").objectReferenceValue = Require<AttackDef>(HeavyAttackPath);
@@ -228,6 +268,17 @@ namespace LoboBranco.EditorTools
             // explicita aqui torna visivel no Inspector no que o golpe acerta.
             so.FindProperty("targetMask").intValue = GameLayers.PlayerAttackTargets;
 
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>
+        /// Liga o bloco de atributos de quem tem vida. E o mesmo componente no bruxo e na
+        /// capsula, e e de proposito: vida replicada e um problema so, resolvido uma vez.
+        /// </summary>
+        static void WireVitals(CharacterVitals vitals, string statBlockPath)
+        {
+            var so = new SerializedObject(vitals);
+            so.FindProperty("statBlock").objectReferenceValue = Require<StatBlockDef>(statBlockPath);
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -259,11 +310,14 @@ namespace LoboBranco.EditorTools
             if (renderer != null)
                 renderer.sharedMaterial = LoadOrCreateEnemyMaterial();
 
-            var dummy = enemy.AddComponent<CombatDummy>();
+            // Objeto de rede posto na cena, e nao criado pelo host: o alvo ja esta la
+            // quando a sessao sobe, e o que ele precisa e que a vida dele seja a mesma nas
+            // quatro telas. Sem NetworkObject, cada participante mata a propria capsula.
+            enemy.AddComponent<NetworkObject>();
 
-            var so = new SerializedObject(dummy);
-            so.FindProperty("statBlock").objectReferenceValue = Require<StatBlockDef>(EnemyStatsPath);
-            so.ApplyModifiedPropertiesWithoutUndo();
+            enemy.AddComponent<CombatDummy>();
+
+            WireVitals(enemy.GetComponent<CharacterVitals>(), EnemyStatsPath);
         }
 
         static Material LoadOrCreateEnemyMaterial()

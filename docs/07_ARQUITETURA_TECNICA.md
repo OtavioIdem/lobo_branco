@@ -185,6 +185,13 @@ Três módulos merecem explicação, porque não são óbvios:
   e **não conhece nenhum sistema de jogo**: quem conhece rede é o sistema, nunca o contrário.
   Se `Net` precisar referenciar `Player` ou `Combat`, a dependência está invertida.
 
+**O pacote do Netcode não é um módulo nosso e não entra nessa tabela.** Qualquer módulo que
+tenha estado replicado referencia `Unity.Netcode.Runtime` direto, sem passar por `Net`, do
+mesmo jeito que já referencia `UnityEngine`. `Combat` é o primeiro caso: o `CharacterVitals`
+é um `NetworkBehaviour` porque a vida é do host (ADR 0008), e fazer essa vida passar por
+`Net` seria exatamente a inversão que o parágrafo acima proíbe. O que continua valendo é o
+sentido da seta: `Combat` sabe que existe rede, `Net` não sabe que existe combate.
+
 ## 4. Padrões de código
 
 ### 4.1 Dados em ScriptableObject, comportamento em MonoBehaviour

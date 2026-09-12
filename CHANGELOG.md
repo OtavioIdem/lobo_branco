@@ -4,6 +4,41 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-11 — M1 tarefas 1.9e e 1.9f: a vida e o golpe passam a ser do host
+- `CharacterVitals`: componente novo no modulo `Combat` que carrega a folha de atributos e
+  a vida atual de um personagem. A vida so muda em quem tem autoridade e chega replicada
+  nos outros. Cliente le e nunca escreve, e quem cobra isso e o proprio NGO.
+- O bruxo e a capsula usam o mesmo componente. Vida replicada e um problema so, resolvido
+  uma vez, e o `MonsterDef` da tarefa 1.20 vai herdar ele pronto.
+- Os valores base nao viajam pela rede: saem do mesmo `StatBlockDef` em todas as maquinas.
+  O que viaja e o que diverge, e hoje isso e so a vida. Pocoes e talentos entram no M2.
+- `CombatDummy` perdeu a vida propria. Piscar, tombar e levantar viraram reacao local ao
+  numero que o host mudou, o que custa zero RPC e vale para as quatro telas.
+- O ataque virou pedido: tres mensagens por golpe, comecou, abriu e fechou, em vez de uma
+  por quadro. Entre abrir e fechar, quem consulta a fisica e o host, no proprio `Update`,
+  usando a posicao que o `NetworkTransform` ja traz do dono.
+- `MeleeHitbox` e `DamagePipeline` rodam so no host. Duas maquinas resolvendo o mesmo golpe
+  tiram vida duas vezes, ou nenhuma.
+- Um golpe cujo abrir e fechar chegam no mesmo quadro do host ainda produz exatamente uma
+  consulta. Sem isso, quem joga com ping alto teria golpe que as vezes nao sai.
+- `IMeleeAttacker` nao mudou uma linha: o `AttackState` continua sem saber que rede existe,
+  e os eventos de animacao do M4 (ADR 0007) entram por onde sempre iam entrar.
+- Sem rede, o caminho e o de antes: quem pede e quem resolve sao o mesmo objeto, e a maquina
+  de estados dirige a janela quadro a quadro. A `Sandbox_Combate` continua jogavel sozinha.
+- O prefab de jogador estava sendo gravado com identificador de rede zero. No editor isso
+  nao aparece, porque o `OnValidate` do `NetworkObject` conserta em memoria ao abrir o
+  asset; no build nao ha `OnValidate`, e o jogador simplesmente nao nasceria no executavel.
+  O `SandboxSetup` agora forca o calculo depois de gravar o prefab.
+- As tres capsulas da sandbox ganharam `NetworkObject`. Sem isso cada participante mataria
+  a propria copia do alvo e o dano nao bateria entre as telas.
+- Painel F1 mostra a vida e de onde ela vem, `[eu resolvo]` ou `[o host manda]`.
+- `docs/07` secao 3: o pacote do Netcode nao e modulo nosso e nao entra na tabela de niveis.
+  Modulo com estado replicado referencia ele direto, sem passar pelo `Net`. `Combat` e o
+  primeiro caso, e a seta continua apontando para o mesmo lado.
+- `docs/13` secao 7: nota de implementacao sobre por que o `CombatDummy` nao virou
+  `NetworkBehaviour` e a vida saiu para um componente proprio.
+- 121 testes passando, contra 115 antes.
+
 ### 2026-09-10 — M1 tarefas 1.9a a 1.9d e 1.9g: a rede entra
 - Pacotes de rede instalados contra o editor 6000.6.0f1: NGO 2.13.2, Transport 6.6.0,
   Services Core 1.18.0, Authentication 3.7.4, Relay 1.2.0 e Multiplayer Play Mode 3.0.0.

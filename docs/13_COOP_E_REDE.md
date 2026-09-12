@@ -137,11 +137,25 @@ para isso, a preparação exata que rede exige.
 | `Camera/ThirdPersonCameraRig` | **Integral** | Local por natureza |
 | `Player/PlayerInputReader` | **Ajuste** | Passa a rodar só no dono |
 | `Player/PlayerMeleeAttacker` | **Ajuste** | Dispara pedido; quem resolve o acerto é o host |
-| `Combat/CombatDummy` | **Ajuste** | Vira `NetworkBehaviour` |
+| `Combat/CombatDummy` | **Ajuste** | Perde a vida para um `CharacterVitals` ao lado. Ver nota abaixo |
 | `Player/PlayerBrain` | **Reescrever** | É o único que junta input, câmera e FSM. É onde a autoridade entra |
 | `Tests/*` | **Integral** | Os 115 testes continuam valendo. Testam lógica pura, que é justamente o que não muda |
 
 Nada é jogado fora. Um arquivo é reescrito.
+
+**Nota de 2026-09-11, escrita ao implementar as tarefas 1.9e e 1.9f.** A auditoria previa que
+o `CombatDummy` virasse `NetworkBehaviour`. Ele não virou, e a razão é que a vida replicada
+não é um problema do alvo de sandbox: é o mesmo problema do bruxo, do barghest e da Besta.
+Ela saiu para um componente próprio, `Combat/CharacterVitals`, que carrega a folha de
+atributos e a vida atual, e que o jogador e a cápsula usam sem diferença nenhuma. Quem vira
+`NetworkBehaviour` é ele. O `CombatDummy` continua sendo o que sempre foi, um `MonoBehaviour`
+que classifica a criatura e pisca quando apanha, e o `MonsterDef` da tarefa 1.20 vai herdar
+a vida replicada de graça.
+
+Os valores base não são replicados, e isso não é economia de banda: eles saem do mesmo
+`StatBlockDef` em todas as máquinas. O que viaja é o que diverge, e hoje isso é só a vida.
+Quando poções e talentos entrarem no M2, eles nascem no host e os modificadores passam a
+viajar junto.
 
 ## 8. Escopo revisto
 

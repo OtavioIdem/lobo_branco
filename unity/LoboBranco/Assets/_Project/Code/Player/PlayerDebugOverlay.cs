@@ -1,4 +1,5 @@
 using LoboBranco.CameraSystem;
+using LoboBranco.Combat;
 using UnityEngine.InputSystem;
 using UnityEngine;
 
@@ -20,6 +21,7 @@ namespace LoboBranco.Player
         [SerializeField] PlayerInputReader input;
         [SerializeField] PlayerBrain brain;
         [SerializeField] PlayerMeleeAttacker attacker;
+        [SerializeField] CharacterVitals vitals;
 
         [Tooltip("F1 alterna o painel em tempo de execucao.")]
         [SerializeField] bool visible = true;
@@ -33,6 +35,7 @@ namespace LoboBranco.Player
             if (input == null) input = GetComponent<PlayerInputReader>();
             if (brain == null) brain = GetComponent<PlayerBrain>();
             if (attacker == null) attacker = GetComponent<PlayerMeleeAttacker>();
+            if (vitals == null) vitals = GetComponent<CharacterVitals>();
             if (cameraRig == null) cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
         }
 
@@ -60,6 +63,14 @@ namespace LoboBranco.Player
             GUILayout.Space(4f);
 
             GUILayout.Label($"FPS               {_fps,6:F0}", _style);
+
+            // Quem escreve esta vida e o host (ADR 0008). Mostrar de onde ela vem junto
+            // com o numero e o que separa "levei dano" de "o host acha que levei".
+            if (vitals != null)
+                GUILayout.Label(
+                    $"Vida              {vitals.CurrentVitality,6:F0} / {vitals.MaxVitality:F0}   " +
+                    (vitals.CanResolve ? "[eu resolvo]" : "[o host manda]"),
+                    _style);
 
             DrawStateMachine();
 

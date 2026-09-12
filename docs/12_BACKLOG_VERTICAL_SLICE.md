@@ -53,12 +53,12 @@ Justificativa completa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-co
 | # | Tarefa | Tam. | Doc |
 |---|---|---|---|
 | ~~1.9a~~ ✅ | Instalar NGO, Transport, Services Core, Authentication, Relay e Multiplayer Play Mode | P | ADR 0008 |
-| 1.9b | `NetworkManager` na cena de bootstrap, transporte direto por IP, duas cápsulas na mesma cena | M | ADR 0008 |
-| 1.9c | Prefab de jogador em rede: `NetworkObject`, spawn por conexão, câmera e input só do dono | M | 13 §6 |
-| 1.9d | `PlayerBrain` reescrito com autoridade. É o único arquivo que a rede obriga a reescrever | G | 13 §7 |
-| 1.9e | `StatSheet` autoritativo no host e replicado. Cliente lê, nunca escreve | G | 13 §6 |
-| 1.9f | Ataque vira pedido: RPC do dono, `MeleeHitbox` e `DamagePipeline` rodando só no host | G | 13 §6 |
-| 1.9g | Painel de debug mostra papel, dono, autoridade e ida-e-volta de cada personagem | P | 13 §11 |
+| ~~1.9b~~ ✅ | `NetworkManager` na cena de bootstrap, transporte direto por IP, duas cápsulas na mesma cena | M | ADR 0008 |
+| ~~1.9c~~ ✅ | Prefab de jogador em rede: `NetworkObject`, spawn por conexão, câmera e input só do dono | M | 13 §6 |
+| ~~1.9d~~ ✅ | `PlayerBrain` reescrito com autoridade. É o único arquivo que a rede obriga a reescrever | G | 13 §7 |
+| ~~1.9e~~ ✅ | `StatSheet` autoritativo no host e replicado. Cliente lê, nunca escreve | G | 13 §6 |
+| ~~1.9f~~ ✅ | Ataque vira pedido: RPC do dono, `MeleeHitbox` e `DamagePipeline` rodando só no host | G | 13 §6 |
+| ~~1.9g~~ ✅ | Painel de debug mostra papel, dono, autoridade e ida-e-volta de cada personagem | P | 13 §11 |
 | 1.9h | Relay: autenticação anônima, criar sessão, gerar e entrar por código de convite | G | ADR 0008 |
 | 1.9i | UI mínima de sala: hospedar, colar código, entrar, ver quem está dentro | M | 13 §8 |
 

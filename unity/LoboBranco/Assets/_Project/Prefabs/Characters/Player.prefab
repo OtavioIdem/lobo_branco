@@ -192,6 +192,7 @@ GameObject:
   - component: {fileID: 6834202278134985837}
   - component: {fileID: 247516077312927388}
   - component: {fileID: 8786517083574299696}
+  - component: {fileID: 2653360688372698588}
   - component: {fileID: 8258041469082970047}
   - component: {fileID: 1665933002941387394}
   - component: {fileID: 8824558061825589091}
@@ -277,6 +278,20 @@ MonoBehaviour:
   turnSmoothTime: 0.1
   gravity: -19.62
   groundedStick: -2
+--- !u!114 &2653360688372698588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415091062731458965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd641c1a899058446b09ea8308c083bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.CharacterVitals
+  ShowTopMostFoldoutHeaderGroup: 1
+  statBlock: {fileID: 11400000, guid: ef2157e2dfb2ff14b81a8b4016ae0d11, type: 2}
 --- !u!114 &8258041469082970047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,8 +304,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4c5579274c68246a2042744362acae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerMeleeAttacker
+  ShowTopMostFoldoutHeaderGroup: 1
   tuning: {fileID: 11400000, guid: 397b3e7a452722b469df3d82a37a5eaf, type: 2}
-  statBlock: {fileID: 11400000, guid: ef2157e2dfb2ff14b81a8b4016ae0d11, type: 2}
   weapon: {fileID: 11400000, guid: e629858392dedce4f980a1d152afdb23, type: 2}
   lightAttack: {fileID: 11400000, guid: fc378a0de87860040a9903b886b09255, type: 2}
   heavyAttack: {fileID: 11400000, guid: 1b64da35544b5bf408e425efa52f947b, type: 2}
@@ -334,6 +349,7 @@ MonoBehaviour:
   input: {fileID: 247516077312927388}
   brain: {fileID: 1665933002941387394}
   attacker: {fileID: 8258041469082970047}
+  vitals: {fileID: 2653360688372698588}
   visible: 1
 --- !u!114 &2105638426287146009
 MonoBehaviour:
@@ -347,7 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 2390274916
   InScenePlacedSourceGlobalObjectIdHash: 0
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
