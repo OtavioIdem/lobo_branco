@@ -4,6 +4,28 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-11 — M1 tarefa 1.12: a Corrente de Fluxo
+- `FlowChain`: classe pura que conta os elos e a janela de 0,22 s que se abre no fim de
+  cada golpe. Encadear dentro dela soma um elo, ate o teto de 1,35x do doc 03 secao 6.
+- Atacar fora da janela nao pune: a corrente reinicia em um elo e nada mais acontece. Tem
+  teste com esse nome, porque e a regra que separa homenagem de defeito restaurado.
+- A janela e dado, nao codigo: `flowWindowSeconds` entrou no `CombatTuningDef`, ao lado da
+  tabela de bonus que ja estava la desde a tarefa 1.4.
+- Quem conta e o host, porque a corrente muda o dano. O host mede o intervalo entre dois
+  pedidos do mesmo jogador, e nao o proprio relogio: a latencia atrasa os dois pedidos
+  junto, entao o intervalo sobrevive ao ping.
+- Os elos viajam replicados para o dono ver. Quem decide se ataca agora ou espera e ele, e
+  decidir sem ver a corrente seria adivinhar.
+- O golpe interrompido nunca chega ao fim, entao a janela dele nunca abre e o proximo golpe
+  ja recomeca do primeiro elo. `Break` existe so para o numero na tela concordar na hora.
+- `DamageRequest` parou de receber zero fixo no campo de Fluxo. O cenario de referencia do
+  doc 03 secao 9, o que define a razao de 5,3 vezes, pressupoe tres elos: ate hoje nenhum
+  golpe dentro do jogo podia ter mais que zero, entao metade da conta de balanceamento era
+  inalcancavel na pratica. Rebalancear com isso ligado e a tarefa 1.30.
+- Painel F1 mostra elos e a janela aberta. E o unico retorno de Fluxo ate o brilho na
+  lamina da tarefa 1.13.
+- 129 testes passando, contra 121 antes.
+
 ### 2026-09-11 — M1 tarefas 1.9h e 1.9i: convite por codigo e a sala
 - `NetRelaySession`: entra anonimo no Unity Gaming Services, cria a alocacao no Relay e
   devolve um codigo de convite. Quem recebe o codigo troca ele por um endereco de

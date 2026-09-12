@@ -21,6 +21,7 @@ MonoBehaviour:
   steelVsMonster: 0.35
   silverVsHumanoid: 0.5
   silverVsMonster: 1
+  flowWindowSeconds: 0.22
   flowBonusByChain:
   - 1
   - 1

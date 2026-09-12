@@ -133,7 +133,16 @@ namespace LoboBranco.Player
                 GUILayout.Label($"Buffer            {buffer.Pending,-14} {buffer.Remaining,5:F2}s", _style);
 
             if (attacker != null)
+            {
                 GUILayout.Label($"Alvos no golpe    {attacker.HitsThisSwing,6}", _style);
+
+                // Ate o brilho na lamina da tarefa 1.13 existir, esta linha e a unica
+                // forma de ver a corrente de Fluxo e conferir a janela de 0,22 s.
+                GUILayout.Label(
+                    $"Fluxo             {attacker.FlowLinks,6} elos   " +
+                    (attacker.FlowWindowOpen ? "ENCADEIA" : string.Empty),
+                    _style);
+            }
         }
     }
 }

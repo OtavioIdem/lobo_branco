@@ -76,7 +76,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 |---|---|---|---|
 | 1.10 | Estados `Dodge` e `Roll` com frames de invulnerabilidade | M | 03 §5 |
 | 1.11 | Estados `Parry` e `Riposte` com a janela de 0,18 s | G | 03 §5 |
-| 1.12 | Sistema de Fluxo com a janela de 0,22 s e os cinco níveis de bônus | M | 03 §6 |
+| ~~1.12~~ ✅ | Sistema de Fluxo com a janela de 0,22 s e os cinco níveis de bônus | M | 03 §6 |
 | 1.13 | Indicador visual do Fluxo (brilho na lâmina, via Shader Graph) | M | 03 §6 |
 | 1.14 | Três posturas, com troca e afinidade de arquétipo | M | 03 §4 |
 | 1.15 | Aço e prata, com a troca de 0,7 s não-cancelável | M | 03 §3 |

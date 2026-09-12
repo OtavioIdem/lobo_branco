@@ -72,15 +72,32 @@ namespace LoboBranco.Player
         IDamageable[] _results;
         CharacterVitals _vitals;
         LayerMask _resolvedMask;
+        FlowChain _flow;
+
+        // A corrente de Fluxo e contada por quem resolve, mas quem precisa ver e o dono:
+        // e o dono que decide se ataca de novo agora ou espera. Mesmo arranjo da vida em
+        // CharacterVitals, e pelo mesmo motivo: sem rede, o campo solo; com rede, a
+        // variavel replicada, porque escrever nela antes do spawn gera aviso do NGO.
+        readonly NetworkVariable<byte> _replicatedFlowLinks = new NetworkVariable<byte>(
+            0,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
+        byte _soloFlowLinks;
 
         // Estado do lado de quem pede. Serve so para o painel de debug do dono.
         bool _windowOpen;
 
-        // Estado do lado de quem resolve. Em uma sessao de quatro, estes tres campos no
-        // host sao a unica verdade sobre quem esta acertando o que.
+        // Estado do lado de quem resolve. Em uma sessao de quatro, estes campos no host
+        // sao a unica verdade sobre quem esta acertando o que.
         AttackDef _resolvingAttack;
         bool _resolvingWindowOpen;
         bool _queriedSinceOpen;
+
+        // Quanto falta do golpe corrente, na contagem de quem resolve. Chegar a zero e o
+        // que abre a janela de Fluxo, entao ela abre no fim do golpe inteiro e nao no fim
+        // da janela de dano.
+        float _resolvingRemaining;
 
         // ---------------------------------------------------------------- leitura
 
@@ -93,6 +110,12 @@ namespace LoboBranco.Player
 
         /// <summary>Quantos alvos distintos o golpe corrente ja acertou. So o host conta.</summary>
         public int HitsThisSwing => _hitbox?.HitCount ?? 0;
+
+        /// <summary>Elos da corrente de Fluxo, contados pelo host e visiveis para todos.</summary>
+        public int FlowLinks => IsSpawned ? _replicatedFlowLinks.Value : _soloFlowLinks;
+
+        /// <summary>Verdadeiro enquanto da para encadear. Vale so em quem resolve.</summary>
+        public bool FlowWindowOpen => _flow != null && _flow.WindowOpen;
 
         /// <summary>Resumo do ultimo golpe conectado. Vazio enquanto <c>logDamageBreakdown</c> estiver desligado.</summary>
         public string LastHitSummary { get; private set; } = string.Empty;
@@ -122,6 +145,7 @@ namespace LoboBranco.Player
             _pipeline = new DamagePipeline(tuning) { LoggingEnabled = logDamageBreakdown };
             _hitbox = new MeleeHitbox(maxCollidersPerQuery, MaxTargetsPerSwing);
             _results = new IDamageable[MaxTargetsPerSwing];
+            _flow = new FlowChain(tuning.flowWindowSeconds);
 
             // LayerMask.GetMask aloca um vetor de strings a cada chamada, entao ela nunca
             // pode acontecer dentro da janela de dano.
@@ -130,11 +154,50 @@ namespace LoboBranco.Player
 
         void Update()
         {
-            // Com rede, a janela do host anda sozinha entre o pedido de abrir e o de
-            // fechar. Sem rede, quem chama TickHitbox e a maquina de estados, e entrar
-            // aqui tambem consultaria a fisica duas vezes no mesmo quadro.
-            if (IsSpawned && IsServer)
+            if (!CanResolve) return;
+
+            AdvanceFlow(Time.deltaTime);
+
+            // Com rede, a janela de dano do host anda sozinha entre o pedido de abrir e o
+            // de fechar. Sem rede, quem chama TickHitbox e a maquina de estados, e
+            // consultar aqui tambem bateria na fisica duas vezes no mesmo quadro.
+            if (IsSpawned)
                 ResolveTick();
+        }
+
+        /// <summary>
+        /// Conta o golpe corrente ate o fim e so entao abre a janela de encadear. O tempo
+        /// sai do proprio <see cref="AttackDef"/>, que quem resolve tambem tem em maos:
+        /// assim o host nao precisa de um pedido a mais so para saber que o golpe acabou.
+        /// </summary>
+        void AdvanceFlow(float deltaTime)
+        {
+            if (_resolvingRemaining > 0f)
+            {
+                _resolvingRemaining -= deltaTime;
+
+                if (_resolvingRemaining <= 0f)
+                {
+                    _resolvingRemaining = 0f;
+                    _flow.Open();
+                }
+
+                return;
+            }
+
+            int before = _flow.Links;
+            _flow.Tick(deltaTime);
+
+            if (_flow.Links != before)
+                WriteFlowLinks(_flow.Links);
+        }
+
+        void WriteFlowLinks(int links)
+        {
+            var value = (byte)Mathf.Min(links, byte.MaxValue);
+
+            if (IsSpawned) _replicatedFlowLinks.Value = value;
+            else _soloFlowLinks = value;
         }
 
         // ------------------------------------------------------------ IMeleeAttacker
@@ -232,6 +295,10 @@ namespace LoboBranco.Player
             _resolvingWindowOpen = false;
             _queriedSinceOpen = false;
             _hitbox?.BeginSwing();
+
+            WriteFlowLinks(_flow.Begin());
+
+            _resolvingRemaining = attack != null ? attack.TotalDuration : 0f;
         }
 
         void ResolveSetWindow(bool open)
@@ -258,6 +325,10 @@ namespace LoboBranco.Player
         {
             _resolvingWindowOpen = false;
             _resolvingAttack = null;
+            _resolvingRemaining = 0f;
+
+            _flow.Break();
+            WriteFlowLinks(0);
         }
 
         void ResolveTick()
@@ -303,7 +374,7 @@ namespace LoboBranco.Player
                 _resolvingAttack.stance,
                 weapon != null ? weapon.material : WeaponMaterial.Steel,
                 appliedOil,
-                flowChain: 0,      // Fluxo e a tarefa 1.12; ate la toda corrente vale 1,0x
+                _flow.Links,
                 isCritical: false); // Critico depende de CritChance, que entra com o equipamento
 
             // Reavaliado a cada golpe para que o interruptor do Inspector valha durante

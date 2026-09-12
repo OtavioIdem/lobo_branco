@@ -32,6 +32,9 @@ namespace LoboBranco.Combat
         public float silverVsMonster = 1.0f;
 
         [Header("Estagio 5 — Fluxo (docs/03 secao 6)")]
+        [Tooltip("Janela no fim de cada golpe para encadear o proximo. docs/03 secao 6.")]
+        public float flowWindowSeconds = 0.22f;
+
         [Tooltip("Indexado pelo numero de elos da corrente. Acima do tamanho do vetor, usa o ultimo.")]
         public float[] flowBonusByChain = { 1.00f, 1.00f, 1.10f, 1.20f, 1.30f, 1.35f };
 
