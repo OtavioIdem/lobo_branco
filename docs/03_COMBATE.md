@@ -126,6 +126,17 @@ Um indicador discreto (um brilho na lâmina, não um ícone de HUD) marca a jane
 - **Sinal reforçado** (1 carga): dobra a intensidade do sinal
 - **Segundo suspiro** (2 cargas): recupera 40% do vigor instantaneamente
 
+**Nota de implementação, 2026-09-12 (tarefa 1.17).** O recurso existe e os ganhos funcionam:
+corrente de Fluxo alta e morte causada rendem carga, e o riposte vai render quando existir
+(tarefa 1.11). Dos três gastos, só o **segundo suspiro** foi implementado, porque é o único
+que não depende de sistema ausente: a finalização precisa de um estado de execução e o sinal
+reforçado precisa dos sinais (tarefa 1.18). Os dois entram junto com o que eles gastam.
+
+Falta também decidir **por onde o jogador gasta**. A tabela de controles do
+[doc 02 §4](02_GDD.md) não tem tecla para nenhum dos três, e inventar uma agora seria
+decidir no escuro uma coisa que o playtest do portão M1 responde melhor. Até lá o segundo
+suspiro é uma chamada que ninguém dispara, e o painel de debug mostra as cargas.
+
 ## 8. Sinais reequilibrados (resolve D6)
 
 Custo em vigor, escalado por Inteligência. Os sinais deixam de ser dano e passam a ser

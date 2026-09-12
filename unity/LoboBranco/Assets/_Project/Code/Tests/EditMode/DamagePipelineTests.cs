@@ -373,6 +373,9 @@ namespace LoboBranco.Tests
             public int HitsTaken { get; private set; }
             public float TotalDamageTaken { get; private set; }
 
+            /// <summary>O dublê do pipeline nunca cai: ele existe para somar dano, nao para morrer.</summary>
+            public bool IsDown => false;
+
             public float GetResistance(DamageType type)
                 => Resistances.TryGetValue(type, out float value) ? value : 1f;
 

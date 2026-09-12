@@ -4,6 +4,27 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-12 — M1 tarefa 1.17 (parcial): Adrenalina
+- `AdrenalinePool`: tres cargas que nao regeneram sozinhas. A diferenca para o Vigor e o
+  que define o recurso: Vigor volta com o tempo, Adrenalina so entra quando o bruxo faz
+  alguma coisa bem feita, entao gastar uma carga e gastar uma luta que ja aconteceu.
+- Ganha com corrente de Fluxo alta, uma carga no quinto elo e uma a cada dois dali para
+  frente, e com morte causada. O ganho por riposte entra junto com o riposte (tarefa 1.11).
+- Cair leva a adrenalina junto: a conta da luta encerra quando o bruxo encerra.
+- Replicada como a vida e o vigor, em um byte, sem epsilon: ela muda de um em um e cada
+  mudanca importa.
+- **Dos tres gastos, so o segundo suspiro existe**: duas cargas viram 40 por cento do vigor
+  maximo, na hora. Finalizacao precisa de um estado de execucao e sinal reforcado precisa
+  dos sinais, entao os dois entram junto com o que eles gastam (tarefas 1.11 e 1.18).
+- **E nenhum dos tres tem tecla.** A tabela de controles do doc 02 secao 4 nao tem botao
+  para adrenalina, e inventar um agora seria decidir no escuro o que o playtest do portao
+  M1 responde melhor. Ficou registrado no doc 03 secao 7, e a tarefa 1.17 esta marcada
+  como parcial no doc 12 em vez de fechada.
+- `IDamageable` ganhou `IsDown`. Quem desfere o golpe precisa saber se o alvo caiu, porque
+  morte causada e uma das tres fontes de adrenalina.
+- Painel F1 mostra as cargas.
+- 162 testes passando, contra 153 antes.
+
 ### 2026-09-12 — M1 tarefa 1.16: Vigor
 - `StaminaPool`: classe pura com os numeros do doc 03 secao 7. Cem de base, 18 por segundo
   descansando, 6 em combate, e nada durante 1,5 s depois de cada gasto.

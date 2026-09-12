@@ -366,7 +366,12 @@ namespace LoboBranco.Player
             _queriedSinceOpen = false;
             _hitbox?.BeginSwing();
 
-            WriteFlowLinks(_flow.Begin());
+            int links = _flow.Begin();
+            WriteFlowLinks(links);
+
+            // Corrente alta rende adrenalina (docs/03 secao 6). Quem conta elos e este
+            // lado, entao a carga nasce aqui e vai replicada como o resto.
+            if (_vitals != null) _vitals.NoteFlowLinks(links);
 
             // Cobrar depois do Begin e de proposito: o desconto de Fluxo vale para o golpe
             // que fecha a corrente, e nao para o seguinte (docs/03 secao 6).
@@ -462,6 +467,11 @@ namespace LoboBranco.Player
             _pipeline.LoggingEnabled = logDamageBreakdown;
 
             DamageResult result = _pipeline.Deal(request);
+
+            // Morte causada rende uma carga (docs/03 secao 7). A pergunta e feita depois do
+            // golpe: antes dele o alvo estava de pe, senao nao teria sido acertado.
+            if (target.IsDown && _vitals != null)
+                _vitals.GainAdrenaline();
 
             if (_pipeline.LoggingEnabled)
                 RecordSummary(target, result);

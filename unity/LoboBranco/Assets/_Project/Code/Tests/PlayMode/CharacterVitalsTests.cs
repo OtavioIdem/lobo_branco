@@ -115,6 +115,40 @@ namespace LoboBranco.Tests
         }
 
         /// <summary>
+        /// O segundo suspiro do docs/03 secao 7: duas cargas viram 40 por cento do vigor
+        /// maximo, na hora. E o unico dos tres gastos de adrenalina que ja pode existir;
+        /// finalizacao e sinal reforcado esperam as tarefas 1.11 e 1.18.
+        /// </summary>
+        [Test]
+        public void Segundo_suspiro_troca_duas_cargas_por_quarenta_por_cento_do_vigor()
+        {
+            CharacterVitals vitals = CriarVitals();
+            vitals.Stats.SetBase(StatType.MaxStamina, 100f);
+            vitals.RestoreToFull();
+
+            vitals.TrySpendStamina(80f);
+            vitals.GainAdrenaline(2);
+
+            Assert.IsTrue(vitals.TrySecondWind());
+            Assert.AreEqual(60f, vitals.CurrentStamina, 0.001f);
+            Assert.AreEqual(0, vitals.CurrentAdrenaline, "Duas cargas foram embora.");
+        }
+
+        [Test]
+        public void Sem_duas_cargas_nao_ha_segundo_suspiro()
+        {
+            CharacterVitals vitals = CriarVitals();
+            vitals.Stats.SetBase(StatType.MaxStamina, 100f);
+            vitals.RestoreToFull();
+            vitals.TrySpendStamina(80f);
+            vitals.GainAdrenaline(1);
+
+            Assert.IsFalse(vitals.TrySecondWind());
+            Assert.AreEqual(20f, vitals.CurrentStamina, 0.001f, "Nada foi devolvido.");
+            Assert.AreEqual(1, vitals.CurrentAdrenaline, "E a carga que havia continua la.");
+        }
+
+        /// <summary>
         /// O alvo de sandbox nao guarda mais vida propria. Se ele voltar a guardar, o
         /// host e o cliente passam a contar vidas diferentes para a mesma capsula.
         /// </summary>

@@ -57,6 +57,22 @@ namespace LoboBranco.Combat
                  "Heuristica: quem vai saber isso de verdade e o coordenador de encontro da tarefa 1.22.")]
         [Min(0f)] public float combatMemorySeconds = 5f;
 
+        [Header("Adrenalina (docs/03 secao 7)")]
+        [Tooltip("Cargas maximas. Tres, e elas nao regeneram sozinhas.")]
+        [Min(0)] public int adrenalineMaxCharges = 3;
+
+        [Tooltip("A partir de quantos elos de Fluxo nasce a primeira carga. docs/03 secao 6: cinco.")]
+        [Min(1)] public int adrenalineFlowLinksForFirstCharge = 5;
+
+        [Tooltip("Dali para frente, uma carga a cada tantos elos.")]
+        [Min(1)] public int adrenalineFlowLinksPerCharge = 2;
+
+        [Tooltip("Custo do segundo suspiro, em cargas.")]
+        [Min(0)] public int secondWindCost = 2;
+
+        [Tooltip("Quanto do vigor maximo o segundo suspiro devolve. 0,40 e os 40 por cento do documento.")]
+        [Range(0f, 1f)] public float secondWindStaminaFraction = 0.40f;
+
         [Header("Estagio 6 — oleo de lamina")]
         public float oilMatchMultiplier = 1.5f;
 

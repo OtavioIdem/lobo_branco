@@ -79,6 +79,9 @@ namespace LoboBranco.Player
                     $"Vigor             {vitals.CurrentStamina,6:F0} / {vitals.MaxStamina:F0}   " +
                     (vitals.StaminaRegenBlocked ? "parado" : vitals.InCombat ? "em combate" : "descansando"),
                     _style);
+
+                GUILayout.Label(
+                    $"Adrenalina        {vitals.CurrentAdrenaline,6} / {vitals.MaxAdrenaline}", _style);
             }
 
             DrawStateMachine();

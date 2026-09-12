@@ -106,7 +106,7 @@ M0 fechado. M1 com as tarefas 1.1 a 1.9 e a camada de rede inteira, 1.9a a 1.9i,
 existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
 de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes leve e forte
 com hitbox sem alocação, e sessão em que o dono simula o próprio bruxo enquanto o host
-resolve vida e dano, por IP direto ou por código de convite. 153 testes passando, build
+resolve vida e dano, por IP direto ou por código de convite. 162 testes passando, build
 gerando.
 
 O próximo passo **não** é a tarefa 1.10. É o **portão da rede** do `docs/12`: duas pessoas

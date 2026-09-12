@@ -61,6 +61,14 @@ namespace LoboBranco.Combat
         /// </summary>
         const float StaminaWriteEpsilon = 0.5f;
 
+        // Adrenalina e inteira e pequena, entao ela cabe em um byte e nao precisa de
+        // epsilon nenhum: ela muda de um em um, e cada mudanca importa.
+        readonly NetworkVariable<byte> _replicatedAdrenaline = new NetworkVariable<byte>(
+            0,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
+        AdrenalinePool _adrenaline;
         StaminaPool _stamina;
         StatSheet _stats;
 
@@ -126,13 +134,83 @@ namespace LoboBranco.Combat
             return paid;
         }
 
-        /// <summary>Devolve vigor. Segundo suspiro e pocoes chamam isto (tarefas 1.17 e M2).</summary>
+        /// <summary>Devolve vigor. Segundo suspiro e pocoes chamam isto.</summary>
         public void RestoreStamina(float amount)
         {
             if (!CanResolve) return;
 
             _stamina.Restore(amount);
             WriteStamina(_stamina.Current, force: true);
+        }
+
+        // ------------------------------------------------------------- adrenalina
+
+        public int CurrentAdrenaline => IsSpawned ? _replicatedAdrenaline.Value : _adrenaline.Charges;
+
+        public int MaxAdrenaline => _adrenaline.MaxCharges;
+
+        public bool CanAffordAdrenaline(int cost) => cost <= 0 || CurrentAdrenaline >= cost;
+
+        /// <summary>Uma carga por morte causada e por riposte (tarefa 1.11). So o host.</summary>
+        public bool GainAdrenaline(int charges = 1)
+        {
+            if (!CanResolve) return false;
+
+            bool gained = _adrenaline.Gain(charges);
+            if (gained) WriteAdrenaline();
+
+            return gained;
+        }
+
+        /// <summary>
+        /// Avisa a corrente de Fluxo do golpe. A partir do quinto elo, a cada dois elos
+        /// nasce uma carga (docs/03 secao 6). So o host conta elos, entao so ele ganha.
+        /// </summary>
+        public bool NoteFlowLinks(int links)
+        {
+            if (!CanResolve) return false;
+
+            bool gained = _adrenaline.NoteFlowLinks(links);
+            if (gained) WriteAdrenaline();
+
+            return gained;
+        }
+
+        public bool TrySpendAdrenaline(int cost)
+        {
+            if (!CanResolve)
+            {
+                Debug.LogError($"{name}: cliente tentou gastar adrenalina. Recurso e do host (ADR 0008).", this);
+                return false;
+            }
+
+            if (!_adrenaline.TrySpend(cost)) return false;
+
+            WriteAdrenaline();
+            return true;
+        }
+
+        /// <summary>
+        /// Segundo suspiro: duas cargas viram 40 por cento do vigor maximo, na hora
+        /// (docs/03 secao 7). E o unico dos tres gastos que ja da para existir: finalizacao
+        /// depende de execucao e sinal reforcado depende dos sinais (tarefas 1.11 e 1.18).
+        /// </summary>
+        public bool TrySecondWind()
+        {
+            int cost = tuning != null ? tuning.secondWindCost : 2;
+            float fraction = tuning != null ? tuning.secondWindStaminaFraction : 0.4f;
+
+            if (!TrySpendAdrenaline(cost)) return false;
+
+            RestoreStamina(MaxStamina * fraction);
+            return true;
+        }
+
+        void WriteAdrenaline()
+        {
+            if (!IsSpawned) return;
+
+            _replicatedAdrenaline.Value = (byte)Mathf.Clamp(_adrenaline.Charges, 0, byte.MaxValue);
         }
 
         // ------------------------------------------------------------------ ciclo
@@ -148,6 +226,11 @@ namespace LoboBranco.Combat
             _stamina = new StaminaPool(
                 tuning != null ? tuning.staminaRegenDelay : 1.5f,
                 tuning != null ? tuning.combatMemorySeconds : 5f);
+
+            _adrenaline = new AdrenalinePool(
+                tuning != null ? tuning.adrenalineMaxCharges : 3,
+                tuning != null ? tuning.adrenalineFlowLinksForFirstCharge : 5,
+                tuning != null ? tuning.adrenalineFlowLinksPerCharge : 2);
 
             RefreshStaminaFromStats();
         }
@@ -197,6 +280,7 @@ namespace LoboBranco.Combat
             {
                 _replicatedVitality.Value = _soloVitality;
                 _replicatedStamina.Value = _stamina.Current;
+                _replicatedAdrenaline.Value = (byte)_adrenaline.Charges;
             }
         }
 
@@ -227,6 +311,13 @@ namespace LoboBranco.Combat
 
             float before = CurrentVitality;
             Write(Mathf.Max(0f, before - amount));
+
+            // A adrenalina e o que a luta rendeu ate aqui, e cair encerra a conta.
+            if (IsDown)
+            {
+                _adrenaline.Clear();
+                WriteAdrenaline();
+            }
 
             return before - CurrentVitality;
         }
