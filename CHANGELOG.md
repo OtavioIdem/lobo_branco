@@ -4,6 +4,16 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-12 — Primeiro blockout 3D do personagem Lobo
+- Criado no Blender 5.2.1 LTS um fan model de Geralt inteiramente novo, sem reutilizar
+  geometria, textura, rig, animação ou material do jogo/REDkit.
+- O proxy tem 1,85 m, 6.500 triângulos, cinco materiais planos, pivô no chão e volumes
+  simplificados para cabelo, barba, armadura, cota de malha, medalhão e duas espadas.
+- O FBX passou no round-trip do Blender sem alterar altura ou pivô e foi importado pela
+  Unity com escala 1. A compilação batch terminou limpa.
+- Ainda não há rig, UV, texturas, LOD, animação ou prefab jogável; esta entrega valida
+  apenas a modelagem inicial e o pipeline Blender → Unity.
+
 ### 2026-09-12 — M1 tarefa 1.20: MonsterDef
 - `MonsterDef`: a especie em asset. Classe da criatura, arquetipo de postura, oleo que casa
   e resistencia por tipo de dano. O `CombatDummy` parou de declarar essas quatro coisas em
