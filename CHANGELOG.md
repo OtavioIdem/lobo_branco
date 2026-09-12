@@ -4,6 +4,62 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-12 — M1 tarefa 1.21 (parcial): o inimigo percebe, persegue e golpeia
+- **O jogador passou a ser atingivel.** Ate aqui o pipeline de dano so tinha alvo de um
+  lado: a capsula de sandbox implementava `IDamageable` e o bruxo nao implementava nada.
+  Um inimigo que persegue e golpeia atravessaria o jogador sem tirar um ponto de vida, e
+  sem uma linha no Console. Isso nao era item do backlog e deveria ter sido.
+- `DamageReceiver`: a porta do dano, agora um componente so, usado pelo bruxo e pela
+  criatura. Ele saiu de dentro do `CombatDummy`, que e greybox de sandbox: copiar a ponte
+  para o lado do jogador criaria duas implementacoes do mesmo contrato, e a segunda
+  esqueceria de recusar dano resolvido fora do host.
+- `Combatant_Witcher.asset`: o perfil de combate do bruxo. Humanoide nao e detalhe de
+  fantasia, e o numero mais pesado que incide sobre o jogador: sem ele o alvo vira besta
+  agil e o aco de um bandido cai de 1,0x para 0,35x, o que deixaria o bruxo quase
+  invulneravel a metade dos inimigos do capitulo.
+- `AttackTimeline`: a linha do tempo de um golpe virou classe propria no modulo de combate,
+  porque o bruxo e o monstro desferem o mesmo golpe. Ela estava dentro do `AttackState`, e
+  copia-la para a IA daria duas contagens que envelheceriam separadas: no dia em que o
+  Animator entrar, so uma das duas mudaria.
+- `EnemySenses`: cone de visao, circulo de audicao e memoria, em classe pura e testada.
+  As tres regras que importam sao as tres decisoes de jogo. Contornar um grupo funciona,
+  porque a visao e um cone. Colar pelas costas nao e invisibilidade, porque o ouvido nao
+  depende de estar olhando. E perder de vista nao e esquecer: ela caca por mais 4 s, o que
+  impede o comportamento que mais denuncia IA ruim, o inimigo que desiste no instante em
+  que voce quebra a linha de visao com ele a dois metros.
+- `EnemyAgent`: busca de alvo, linha de visao, giro e velocidade. A percepcao roda no
+  `Update` dele e nao dentro de um no da arvore, e esse e o ponto: um no so executa
+  enquanto o galho dele esta ativo, e uma criatura que so percebesse no ramo de patrulha
+  ficaria cega justamente enquanto persegue. A busca acontece 4 vezes por segundo, e nao
+  todo quadro: e mais reacao do que qualquer um percebe, por um quarto do custo.
+- `EnemyMeleeAttacker`: o golpe da criatura, pela mesma hitbox sem alocacao e pelo mesmo
+  pipeline de onze estagios do jogador. Ele e bem menor que o do bruxo porque nao ha
+  autoridade dividida: quem decide, quem conta e quem resolve e o host, sempre.
+- **Em coop, ela persegue quem chegou mais perto, e nao quem viu primeiro.** Sem isso, dois
+  jogadores dividiriam a atencao de um monstro pela ordem de chegada em vez de pelo que
+  estao fazendo, e flanquear deixaria de significar alguma coisa.
+- `Attack_Barghest_Claw.asset`: 0,65 s de anticipacao antes da janela de 0,20 s. O numero
+  esta na faixa de 0,4 a 0,9 s que o docs/03 secao 10 pede, e ele e o tempo que a esquiva
+  da tarefa 1.10 vai ter para acontecer. Encurtar isso torna o combate injusto, nao dificil.
+- **A criatura so gira durante a anticipacao.** E a regra que faz o telegrafo significar
+  alguma coisa: um monstro que corrige a mira ate o ultimo instante transforma o tell em
+  decoracao, porque sair de linha nao adianta. Parando de girar quando a lamina compromete,
+  ler o tell vira a resposta certa.
+- `Weapon_BarghestClaws.asset` bate zero de dano cru, e isso esta certo: os 16 da tabela do
+  docs/03 secao 12 ja moram no `AttackDamage` do bloco de atributos, e o estagio 1 soma os
+  dois. Repetir os 16 no asset dobraria o dano da criatura, e o sintoma apareceria so no
+  playtest.
+- Quatro nos customizados de behavior tree, prefab `Enemy_Barghest` com autoridade de
+  posicao no servidor, malha de navegacao da sandbox assada por script, e dois cacadores na
+  cena, longe o bastante para o jogador nascer fora do campo de visao deles.
+- 193 testes passando, contra 165 antes.
+- **Parcial, e falta uma coisa so: o grafo.** O asset de arvore do `com.unity.behavior` e
+  authoring do editor grafico, e o tipo dele e interno ao pacote, entao nao ha como monta-lo
+  por script como o resto do projeto e montado. Os nos, o prefab, o NavMesh e todos os
+  numeros estao prontos; falta arrastar os nos uma vez e apontar o grafo no prefab. A
+  divisao entre o que vive no grafo e o que vive em componente esta na
+  `tech/adr/0009`.
+
 ### 2026-09-12 — Primeiro blockout 3D do personagem Lobo
 - Criado no Blender 5.2.1 LTS um fan model de Geralt inteiramente novo, sem reutilizar
   geometria, textura, rig, animação ou material do jogo/REDkit.

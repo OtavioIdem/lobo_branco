@@ -411,6 +411,13 @@ de ataque simultâneos. Sem isso, 5 barghests atacam ao mesmo tempo e o combate 
 ilegível. Isso é o truque mais importante de IA de combate, e quase todo jogo de ação bom
 faz alguma versão dele.
 
+**O que fica fora do grafo (2026-09-12, tarefa 1.21).** O grafo carrega só a estrutura de
+decisão. Percepção, busca de alvo, giro e golpe são componentes, porque um nó só executa
+enquanto o galho dele está ativo: com a percepção dentro de um nó, a criatura enxergaria
+apenas enquanto patrulha e ficaria cega enquanto persegue. Os números de percepção moram
+no `MonsterDef` e a matemática do cone mora numa classe pura com teste em EditMode.
+Justificativa completa na [ADR 0009](../tech/adr/0009-percepcao-em-componente-arvore-no-grafo.md).
+
 ## 7. Câmera
 
 **Cinemachine 3.x.** Três câmeras virtuais, com blends:

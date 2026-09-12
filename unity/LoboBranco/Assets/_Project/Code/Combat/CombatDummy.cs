@@ -1,5 +1,3 @@
-using System;
-using LoboBranco.Stats;
 using UnityEngine;
 
 namespace LoboBranco.Combat
@@ -9,24 +7,21 @@ namespace LoboBranco.Combat
     /// vida e quem conta o tempo de levantar e so ele; piscar, tombar e ficar de pe de
     /// novo sao reacao local ao numero que chegou replicado.
     ///
-    /// Alvo greybox da cena de sandbox: uma capsula que recebe dano, mostra que recebeu e
-    /// volta a ficar de pe depois de um tempo, para nao ter que reiniciar a cena a cada
-    /// teste de balanceamento.
+    /// Alvo greybox da cena de sandbox: uma capsula que mostra que recebeu golpe e volta
+    /// a ficar de pe depois de um tempo, para nao ter que reiniciar a cena a cada teste de
+    /// balanceamento.
     ///
-    /// Ele ja nao guarda mais nenhum numero nem nenhuma classificacao: a vida e do
-    /// <see cref="CharacterVitals"/> e a especie e do <see cref="MonsterDef"/>. O que
-    /// sobrou aqui e o que e mesmo de sandbox, o piscar e o levantar sozinho, e a ponte
-    /// entre os dois. O inimigo de verdade da tarefa 1.21 reusa os dois assets e troca
-    /// este componente por um que tenha behavior tree.
+    /// Ele nao e mais a porta do dano. Receber golpe e do <see cref="DamageReceiver"/>,
+    /// que o bruxo tambem usa, e a especie e do <see cref="MonsterDef"/>. O que sobrou
+    /// aqui e so o que e mesmo de sandbox, e e por isso que o inimigo de verdade da tarefa
+    /// 1.21 nao carrega este componente: ele nao pisca, nao levanta sozinho, e a morte
+    /// dele importa.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterVitals))]
-    public sealed class CombatDummy : MonoBehaviour, IDamageable
+    [RequireComponent(typeof(DamageReceiver))]
+    public sealed class CombatDummy : MonoBehaviour
     {
-        [Header("Especie")]
-        [Tooltip("Classe, arquetipo e vulnerabilidades. Sem asset, vale o neutro de besta agil.")]
-        [SerializeField] MonsterDef monster;
-
         [Header("Sandbox")]
         [Tooltip("Segundos ate voltar de pe. Nao e balanceamento: e conveniencia de teste.")]
         [SerializeField] float reviveDelay = 4f;
@@ -48,23 +43,11 @@ namespace LoboBranco.Combat
 
         // ---------------------------------------------------------------- leitura
 
-        public StatSheet Stats => _vitals != null ? _vitals.Stats : null;
-
-        // Sem asset de especie o alvo continua existindo, como besta agil e sem oleo que
-        // case: uma capsula muda e melhor do que uma capsula que nao aceita golpe.
-        public CreatureClass CreatureClass => monster != null ? monster.creatureClass : Combat.CreatureClass.Beast;
-        public StanceArchetype Archetype => monster != null ? monster.archetype : StanceArchetype.Agile;
-        public OilClass VulnerableToOil => monster != null ? monster.vulnerableToOil : OilClass.None;
-
         public float CurrentVitality => _vitals != null ? _vitals.CurrentVitality : 0f;
-        public float MaxVitality => _vitals != null ? _vitals.MaxVitality : 0f;
-        public bool IsDown => _vitals != null && _vitals.IsDown;
 
-        /// <summary>
-        /// Dispara a cada golpe recebido, so em quem resolveu o golpe. Quem quiser reagir
-        /// em todas as maquinas escuta <see cref="CharacterVitals.VitalityChanged"/>.
-        /// </summary>
-        public event Action<CombatDummy, DamageResult> Damaged;
+        public float MaxVitality => _vitals != null ? _vitals.MaxVitality : 0f;
+
+        public bool IsDown => _vitals != null && _vitals.IsDown;
 
         // ---------------------------------------------------------------- ciclo
 
@@ -101,32 +84,6 @@ namespace LoboBranco.Combat
                 _reviveRemaining -= deltaTime;
                 if (_reviveRemaining <= 0f) _vitals.RestoreToFull();
             }
-        }
-
-        // ---------------------------------------------------------------- IDamageable
-
-        /// <summary>
-        /// Resistencia e propriedade da especie, entao ela vem do asset. Os valores em si
-        /// ainda sao neutros: quais criaturas resistem a que e decisao de balanceamento, e
-        /// ela e a tarefa 1.30, com o jogo rodando.
-        /// </summary>
-        public float GetResistance(DamageType type) => monster != null ? monster.GetResistance(type) : 1f;
-
-        public void ApplyDamage(in DamageResult result)
-        {
-            // Chegar aqui sem autoridade significa que alguem rodou o pipeline no lugar
-            // errado. Recusar e melhor do que tirar vida que o host nunca vai confirmar.
-            if (!_vitals.CanResolve)
-            {
-                Debug.LogError($"{name}: dano resolvido fora do host. Ver ADR 0008.", this);
-                return;
-            }
-
-            if (IsDown) return;
-
-            _vitals.ApplyDamage(result.Amount);
-
-            Damaged?.Invoke(this, result);
         }
 
         // ---------------------------------------------------------------- interno

@@ -6,8 +6,13 @@ namespace LoboBranco.Combat
 {
     /// <summary>
     /// Uma especie, em asset (docs/07 secao 4.1). E o que separa "o que esta criatura e"
-    /// de "como ela se comporta": aqui ficam classe, arquetipo, vulnerabilidades e
-    /// resistencias; a behavior tree (tarefa 1.21) e o resto.
+    /// de "como ela decide": aqui ficam classe, arquetipo, vulnerabilidades, resistencias,
+    /// o alcance dos sentidos e qual golpe ela desfere; quem escolhe entre patrulhar,
+    /// perseguir e bater e o grafo de behavior tree (ADR 0004), e nao este asset.
+    ///
+    /// Sentidos e golpe entraram na tarefa 1.21, e nao antes, pelo mesmo criterio que
+    /// deixou bestiario e loot de fora: campo de dado para sistema inexistente e promessa,
+    /// nao dado. Agora a IA existe e le estes numeros.
     ///
     /// Duas coisas que o esboco do docs/07 previa e que aqui saem diferentes, de proposito:
     ///
@@ -47,6 +52,36 @@ namespace LoboBranco.Combat
         [Header("Numeros")]
         [Tooltip("Vitalidade, dano e armadura da especie. docs/03 secao 12.")]
         public StatBlockDef statBlock;
+
+        [Header("Sentidos (docs/07 secao 6)")]
+        [Tooltip("Ate onde ela enxerga, em metros. Fora disso o bruxo nao existe para ela.")]
+        [Min(0f)] public float sightRange = 18f;
+
+        [Tooltip("Metade da abertura do cone de visao, em graus. 60 da um campo de 120.")]
+        [Range(1f, 180f)] public float sightHalfAngle = 60f;
+
+        [Tooltip("Raio em que ela percebe sem ver, inclusive pelas costas. Zero desliga o ouvido.")]
+        [Min(0f)] public float hearingRange = 6f;
+
+        [Tooltip("Segundos que ela continua cacando depois de perder o alvo de vista.")]
+        [Min(0f)] public float loseTargetAfter = 4f;
+
+        [Tooltip("Velocidade de deslocamento em m/s. O MoveSpeed da folha de atributos " +
+                 "multiplica este numero, e e por ali que uma poeira de Yrden vai lentificar.")]
+        [Min(0f)] public float moveSpeed = 3.5f;
+
+        [Header("Ataque")]
+        [Tooltip("O golpe da criatura, com o proprio telegrafo na anticipacao (docs/03 secao 10). " +
+                 "Sem asset ela persegue e nao bate.")]
+        public AttackDef meleeAttack;
+
+        [Tooltip("Garra, mordida ou lamina. O dano cru vem do AttackDamage do bloco de " +
+                 "atributos, entao o campo de dano deste asset fica em zero: e dele que " +
+                 "saem o tipo de dano e o material do estagio 4.")]
+        public MeleeWeaponDef naturalWeapon;
+
+        [Tooltip("Segundos de pausa entre um golpe e a proxima tentativa, alem da recuperacao.")]
+        [Min(0f)] public float attackCooldown = 1.2f;
 
         [Header("Vulnerabilidades")]
         [Tooltip("Classe de oleo que multiplica o dano contra ela. None se nenhuma.")]

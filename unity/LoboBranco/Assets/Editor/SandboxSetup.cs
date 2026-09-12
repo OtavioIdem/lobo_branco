@@ -1,12 +1,14 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using LoboBranco.AI;
 using LoboBranco.CameraSystem;
 using LoboBranco.Combat;
 using LoboBranco.Core;
 using LoboBranco.Net;
 using LoboBranco.Player;
 using LoboBranco.Stats;
+using Unity.AI.Navigation;
 using Unity.Cinemachine;
 using Unity.Cinemachine.TargetTracking;
 using Unity.Netcode;
@@ -15,6 +17,7 @@ using Unity.Netcode.Transports.UTP;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace LoboBranco.EditorTools
 {
@@ -41,8 +44,14 @@ namespace LoboBranco.EditorTools
         const string EnemyMaterialPath = "Assets/_Project/Art/Materials/M_Greybox_Enemy.mat";
 
         const string PlayerPrefabPath = "Assets/_Project/Prefabs/Characters/Player.prefab";
+        const string EnemyPrefabPath = "Assets/_Project/Prefabs/Characters/Enemy_Barghest.prefab";
+
+        const string WitcherProfilePath = "Assets/_Project/Data/Monsters/Combatant_Witcher.asset";
+        const string NavMeshDataPath = "Assets/_Project/Scenes/Sandbox_Combate_NavMesh.asset";
 
         const string EnemyRoot = "Enemies";
+        const string HunterRoot = "Cacadores";
+        const string NavMeshRoot = "NavMesh";
         const string NetworkRoot = "NetworkManager";
 
         // Escalas fixas do projeto (docs/08_PIPELINE_ARTE_E_AUDIO.md secao 2).
@@ -51,11 +60,17 @@ namespace LoboBranco.EditorTools
         const float StepOffset = 0.4f;
         const float CameraDistance = 4.5f;
 
+        // O barghest e uma besta baixa e larga, e nao um humanoide: a altura menor que a
+        // do bruxo e o que faz o golpe dele parecer vir de baixo.
+        const float HunterHeight = 1.4f;
+        const float HunterRadius = 0.4f;
+
         [MenuItem("Lobo Branco/Setup/5. Montar sandbox de combate")]
         public static void BuildSandbox()
         {
-            // O prefab primeiro: o NetworkManager da cena precisa apontar para ele.
+            // Os prefabs primeiro: o NetworkManager da cena precisa apontar para eles.
             GameObject prefab = BuildPlayerPrefab();
+            GameObject enemyPrefab = BuildEnemyPrefab();
 
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
@@ -63,6 +78,8 @@ namespace LoboBranco.EditorTools
             DestroyIfPresent("CameraPivot");
             DestroyIfPresent("CM_Exploration");
             DestroyIfPresent(EnemyRoot);
+            DestroyIfPresent(HunterRoot);
+            DestroyIfPresent(NavMeshRoot);
             DestroyIfPresent(NetworkRoot);
 
             // O jogador nao mora mais na cena: quem o cria e o host, um por conexao
@@ -73,6 +90,12 @@ namespace LoboBranco.EditorTools
             EnsureBrainOnMainCamera();
             CreateNetworkManager(prefab);
             CreateEnemies();
+
+            // A malha de navegacao antes dos cacadores: um NavMeshAgent que nasce fora da
+            // malha reclama no Console a cada quadro, e a definicao de pronto do docs/00
+            // pede cinco minutos sem uma linha de erro.
+            BakeNavMesh();
+            CreateHunters(enemyPrefab);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -202,6 +225,11 @@ namespace LoboBranco.EditorTools
             // Antes do atacante, e nao depois: a folha de atributos do bruxo mora aqui, e
             // e dela que o pipeline de dano le quando o host resolve o golpe (ADR 0008).
             player.AddComponent<CharacterVitals>();
+
+            // A porta pela qual o bruxo apanha. Sem ela o golpe do inimigo da tarefa 1.21
+            // atravessa o jogador sem tirar nada, e nada aparece no Console.
+            player.AddComponent<DamageReceiver>();
+
             player.AddComponent<PlayerMeleeAttacker>();
             player.AddComponent<PlayerBrain>();
             player.AddComponent<PlayerDebugOverlay>();
@@ -257,7 +285,22 @@ namespace LoboBranco.EditorTools
             overlay.ApplyModifiedPropertiesWithoutUndo();
 
             WireVitals(player.GetComponent<CharacterVitals>(), PlayerStatsPath);
+            WireProfile(player.GetComponent<DamageReceiver>(), WitcherProfilePath);
             WireAttacker(player.GetComponent<PlayerMeleeAttacker>());
+        }
+
+        /// <summary>
+        /// Liga o perfil de combate de quem recebe golpe. Sem perfil o alvo vira besta
+        /// agil, e no bruxo isso significa aco valendo 0,35x contra ele: metade dos
+        /// inimigos do capitulo mal arranharia o jogador (docs/03 secao 3).
+        /// </summary>
+        static void WireProfile(DamageReceiver receiver, string profilePath)
+        {
+            if (receiver == null) return;
+
+            var so = new SerializedObject(receiver);
+            so.FindProperty("profile").objectReferenceValue = Require<MonsterDef>(profilePath);
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>
@@ -332,15 +375,207 @@ namespace LoboBranco.EditorTools
             // quatro telas. Sem NetworkObject, cada participante mata a propria capsula.
             enemy.AddComponent<NetworkObject>();
 
-            var dummy = enemy.AddComponent<CombatDummy>();
+            // O alvo de sandbox nao recebe mais golpe por conta propria: quem recebe e o
+            // DamageReceiver, que o RequireComponent traz junto com o CharacterVitals.
+            enemy.AddComponent<CombatDummy>();
 
             // A especie e o bloco de atributos apontam para os mesmos numeros: o
             // MonsterDef descreve o barghest e referencia o StatBlock dele.
-            var so = new SerializedObject(dummy);
-            so.FindProperty("monster").objectReferenceValue = Require<MonsterDef>(EnemyMonsterPath);
-            so.ApplyModifiedPropertiesWithoutUndo();
-
+            WireProfile(enemy.GetComponent<DamageReceiver>(), EnemyMonsterPath);
             WireVitals(enemy.GetComponent<CharacterVitals>(), EnemyStatsPath);
+        }
+
+        // --------------------------------------------------------------- cacadores
+
+        /// <summary>
+        /// O inimigo de verdade da tarefa 1.21, em prefab. Ele nao e o alvo de sandbox com
+        /// IA por cima: o alvo pisca, tomba e levanta sozinho, e nada disso e comportamento
+        /// de criatura. Sao dois objetos diferentes que reusam a mesma vida, o mesmo perfil
+        /// de dano e a mesma especie.
+        ///
+        /// Autoridade de posicao no servidor, e nao no dono como no jogador: quem simula o
+        /// monstro e o host, e o cliente so assiste (ADR 0008).
+        ///
+        /// O grafo de behavior tree fica <b>vazio</b> aqui, e isso e limitacao de
+        /// ferramenta e nao esquecimento: o asset de grafo do <c>com.unity.behavior</c> e
+        /// authoring do editor grafico e o tipo dele e interno ao pacote, entao nao ha como
+        /// monta-lo por script. Os nos, esses sim, estao todos escritos em
+        /// <c>Assets/_Project/Code/AI/Nodes</c>. Falta arrasta-los uma vez e apontar o
+        /// grafo resultante neste prefab.
+        /// </summary>
+        [MenuItem("Lobo Branco/Setup/8. Montar prefab de inimigo")]
+        public static GameObject BuildEnemyPrefab()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(EnemyPrefabPath) ?? string.Empty);
+
+            GameObject enemy = CreateHunterBody();
+
+            enemy.AddComponent<NetworkObject>();
+
+            var netTransform = enemy.AddComponent<NetworkTransform>();
+            netTransform.AuthorityMode = NetworkTransform.AuthorityModes.Server;
+            netTransform.SyncScaleX = false;
+            netTransform.SyncScaleY = false;
+            netTransform.SyncScaleZ = false;
+
+            WireHunter(enemy);
+
+            GameObject saved = PrefabUtility.SaveAsPrefabAsset(enemy, EnemyPrefabPath);
+            Object.DestroyImmediate(enemy);
+
+            EnsureNetworkPrefabHash(saved);
+
+            Debug.Log($"[Sandbox] Prefab de inimigo gravado em {EnemyPrefabPath}.");
+            return saved;
+        }
+
+        static GameObject CreateHunterBody()
+        {
+            var enemy = new GameObject("Enemy_Barghest")
+            {
+                layer = LayerMask.NameToLayer(GameLayers.Enemy),
+            };
+
+            // O colisor vive na raiz porque e por ele que a hitbox do bruxo acha o
+            // IDamageable, e a busca sobe a hierarquia a partir do colisor atingido.
+            var capsule = enemy.AddComponent<CapsuleCollider>();
+            capsule.height = HunterHeight;
+            capsule.radius = HunterRadius;
+            capsule.center = new Vector3(0f, HunterHeight * 0.5f, 0f);
+
+            var nav = enemy.AddComponent<NavMeshAgent>();
+            nav.radius = HunterRadius;
+            nav.height = HunterHeight;
+            nav.speed = 3.5f;               // sobrescrito pelo MonsterDef em tempo de execucao
+            nav.acceleration = 12f;
+            nav.angularSpeed = 480f;
+            nav.stoppingDistance = 0f;
+            nav.autoBraking = true;
+
+            enemy.AddComponent<CharacterVitals>();
+            enemy.AddComponent<DamageReceiver>();
+            enemy.AddComponent<EnemyMeleeAttacker>();
+            enemy.AddComponent<EnemyAgent>();
+
+            // O grafo so roda em quem e dono, e o dono de um monstro e o host. E a mesma
+            // regra da ADR 0008 cobrada pelo proprio pacote, sem um if nosso.
+            var graphAgent = enemy.AddComponent<Unity.Behavior.BehaviorGraphAgent>();
+            graphAgent.NetcodeRunOnlyOnOwner = true;
+
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "Body_Greybox";
+            body.transform.SetParent(enemy.transform, false);
+            body.transform.localPosition = new Vector3(0f, HunterHeight * 0.5f, 0f);
+            body.transform.localScale = new Vector3(
+                HunterRadius * 2f, HunterHeight * 0.5f, HunterRadius * 2f);
+            Object.DestroyImmediate(body.GetComponent<Collider>());
+            body.layer = enemy.layer;
+
+            var renderer = body.GetComponent<Renderer>();
+            if (renderer != null)
+                renderer.sharedMaterial = LoadOrCreateEnemyMaterial();
+
+            // Indicador de frente. Em greybox e a unica forma de ver para onde a criatura
+            // esta virada, e para onde ela esta virada e metade do que o telegrafo comunica.
+            var nose = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            nose.name = "Facing_Greybox";
+            nose.transform.SetParent(enemy.transform, false);
+            nose.transform.localPosition = new Vector3(0f, HunterHeight * 0.7f, HunterRadius + 0.1f);
+            nose.transform.localScale = new Vector3(0.12f, 0.12f, 0.3f);
+            Object.DestroyImmediate(nose.GetComponent<Collider>());
+            nose.layer = enemy.layer;
+
+            return enemy;
+        }
+
+        static void WireHunter(GameObject enemy)
+        {
+            WireVitals(enemy.GetComponent<CharacterVitals>(), EnemyStatsPath);
+            WireProfile(enemy.GetComponent<DamageReceiver>(), EnemyMonsterPath);
+
+            var attacker = new SerializedObject(enemy.GetComponent<EnemyMeleeAttacker>());
+            attacker.FindProperty("monster").objectReferenceValue = Require<MonsterDef>(EnemyMonsterPath);
+            attacker.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
+
+            // Zero significaria "use o padrao do GameLayers", mas gravar a mascara
+            // explicita deixa visivel no Inspector em quem a criatura acerta.
+            attacker.FindProperty("targetMask").intValue = GameLayers.EnemyAttackTargets;
+            attacker.ApplyModifiedPropertiesWithoutUndo();
+
+            var agent = new SerializedObject(enemy.GetComponent<EnemyAgent>());
+            agent.FindProperty("monster").objectReferenceValue = Require<MonsterDef>(EnemyMonsterPath);
+            agent.FindProperty("targetMask").intValue = GameLayers.EnemyAttackTargets;
+            agent.FindProperty("sightBlockers").intValue = GameLayers.Walkable;
+            agent.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>
+        /// Dois cacadores, nos flancos e atras dos alvos parados. Ficam longe o bastante
+        /// para o jogador nascer fora do alcance de visao deles: a criatura tem que ser
+        /// vista chegando, e nao ja estar em cima de quem entrou na sessao.
+        /// </summary>
+        static void CreateHunters(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                Debug.LogError($"[Sandbox] Nao achei {EnemyPrefabPath}. Nenhum cacador na cena.");
+                return;
+            }
+
+            var root = new GameObject(HunterRoot);
+
+            CreateHunter(prefab, root.transform, "Enemy_Cacador_A", new Vector3(-6f, 0f, 6f));
+            CreateHunter(prefab, root.transform, "Enemy_Cacador_B", new Vector3(6f, 0f, 6f));
+        }
+
+        static void CreateHunter(GameObject prefab, Transform parent, string name, Vector3 position)
+        {
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            instance.name = name;
+            instance.transform.SetParent(parent, false);
+            instance.transform.position = position;
+
+            // Viradas para o centro da arena, que e para onde o jogador nasce.
+            Vector3 toCenter = -position;
+            toCenter.y = 0f;
+            if (toCenter.sqrMagnitude > 0.0001f)
+                instance.transform.rotation = Quaternion.LookRotation(toCenter, Vector3.up);
+        }
+
+        // ---------------------------------------------------------------- navmesh
+
+        /// <summary>
+        /// Assa a malha de navegacao sobre o chao da sandbox e grava o resultado como
+        /// asset ao lado da cena.
+        ///
+        /// Assar por script e nao pelo botao da janela de navegacao e a mesma regra do
+        /// resto deste arquivo: o que e montado a mao nao e reproduzivel e nao aparece em
+        /// diff. A malha cobre so a layer Environment, porque assar sobre o proprio
+        /// jogador e os inimigos produziria buracos moveis na malha.
+        /// </summary>
+        static void BakeNavMesh()
+        {
+            var go = new GameObject(NavMeshRoot);
+
+            var surface = go.AddComponent<NavMeshSurface>();
+            surface.collectObjects = CollectObjects.All;
+            surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+            surface.layerMask = GameLayers.Walkable;
+            surface.agentTypeID = 0;
+
+            surface.BuildNavMesh();
+
+            if (surface.navMeshData == null)
+            {
+                Debug.LogError("[Sandbox] A malha de navegacao saiu vazia. O chao esta na layer Environment?");
+                return;
+            }
+
+            var existing = AssetDatabase.LoadAssetAtPath<NavMeshData>(NavMeshDataPath);
+            if (existing != null) AssetDatabase.DeleteAsset(NavMeshDataPath);
+
+            AssetDatabase.CreateAsset(surface.navMeshData, NavMeshDataPath);
+            Debug.Log($"[Sandbox] Malha de navegacao gravada em {NavMeshDataPath}.");
         }
 
         static Material LoadOrCreateEnemyMaterial()

@@ -193,6 +193,7 @@ GameObject:
   - component: {fileID: 247516077312927388}
   - component: {fileID: 8786517083574299696}
   - component: {fileID: 2653360688372698588}
+  - component: {fileID: 7014330983529522248}
   - component: {fileID: 8258041469082970047}
   - component: {fileID: 1665933002941387394}
   - component: {fileID: 8824558061825589091}
@@ -293,6 +294,19 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   statBlock: {fileID: 11400000, guid: ef2157e2dfb2ff14b81a8b4016ae0d11, type: 2}
   tuning: {fileID: 11400000, guid: 397b3e7a452722b469df3d82a37a5eaf, type: 2}
+--- !u!114 &7014330983529522248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415091062731458965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77562c3da44db7c448c68344fb91a228, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.DamageReceiver
+  profile: {fileID: 11400000, guid: 5292136a90d39d34eb237896902ab8de, type: 2}
 --- !u!114 &8258041469082970047
 MonoBehaviour:
   m_ObjectHideFlags: 0

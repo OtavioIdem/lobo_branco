@@ -85,7 +85,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | 1.18 | Cinco sinais com custo, cooldown e efeito | G | 03 §8 |
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |
 | ~~1.20~~ ✅ | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
-| 1.21 | Behavior tree base do inimigo (patrulha, detecção, engajamento, ataque) | G | 07 §6 |
+| 1.21 ⚠️ | Behavior tree base do inimigo. **Parcial**: sentidos, aquisição de alvo, golpe, nós customizados, prefab e NavMesh prontos; falta desenhar o grafo no editor gráfico. Nota abaixo | G | 07 §6 |
 | 1.22 | Coordenador de encontro com attack token (máximo 2) | M | 07 §6 |
 | 1.23 | Telegrafo de ataque: animação de anticipação de 0,4 a 0,9 s | M | 03 §10 |
 | 1.24 | Ataques `Unblockable` com tell vermelho | P | 03 §5 |
@@ -102,6 +102,18 @@ Aard derruba e atordoa, Igni queima, Yrden lentifica, Axii vira o lado. Cápsula
 não cai, não queima e não muda de lado, então construir os sinais agora seria construir os
 efeitos duas vezes: uma contra a cápsula e outra quando o inimigo da 1.21 existir. A 1.18
 entra depois da 1.21, junto da 1.19, que é a regra que dá sentido a ela.
+
+**Sobre a 1.21 ficar parcial, 2026-09-12.** Tudo que é código está escrito e testado: o
+cone de visão com memória, a busca de alvo, o golpe com telegrafo de 0,65 s, os quatro nós
+customizados, o prefab do barghest e a malha de navegação da sandbox. O que falta é o
+próprio grafo, e ele **não pode ser montado por script**: o tipo de asset de autoria do
+`com.unity.behavior` é interno ao pacote. Resta uma sessão no editor gráfico, arrastando os
+nós que já existem, e apontar o grafo resultante no prefab `Enemy_Barghest`. A divisão entre
+o que vive no grafo e o que vive em componente está na
+[ADR 0009](../tech/adr/0009-percepcao-em-componente-arvore-no-grafo.md).
+
+O jogador passou a ser atingível na mesma tarefa, pelo `DamageReceiver`. Isso não era um
+item do backlog e deveria ter sido: até aqui, o pipeline de dano só tinha alvo de um lado.
 
 | 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
 | 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |

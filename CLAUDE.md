@@ -102,21 +102,31 @@ Estas não são preferências de estilo, são o que mantém o projeto navegável
 
 ## Estado atual
 
-M0 fechado. M1 com as tarefas 1.1 a 1.9 e a camada de rede inteira, 1.9a a 1.9i, escritas:
-existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
-de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes leve e forte
-com hitbox sem alocação, e sessão em que o dono simula o próprio bruxo enquanto o host
-resolve vida e dano, por IP direto ou por código de convite. 165 testes passando, build
+M0 fechado. Do M1 estão escritas as tarefas 1.1 a 1.9, a camada de rede inteira (1.9a a
+1.9i), o Fluxo (1.12), as três posturas (1.14), aço e prata (1.15), o Vigor (1.16), a
+Adrenalina parcial (1.17), o `MonsterDef` (1.20) e a IA de inimigo parcial (1.21).
+Existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
+de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes por postura
+com hitbox sem alocação, sessão em que o dono simula o próprio bruxo enquanto o host resolve
+vida e dano (por IP direto ou por código de convite), e uma criatura que percebe por cone e
+por som, persegue por NavMesh e golpeia com telegrafo de 0,65 s. 193 testes passando, build
 gerando.
 
-O próximo passo **não** é a tarefa 1.10. É o **portão da rede** do `docs/12`: duas pessoas
-em máquinas diferentes entram na mesma `Sandbox_Combate`, batem na mesma cápsula, e o dano
-bate igual nas duas telas. Ele não fecha sozinho, porque é teste manual com duas pessoas, e
-o caminho do Relay ainda depende de ligar o projeto ao Unity Gaming Services em
-Project Settings > Services. Esquiva, aparo e riposte só depois disso. Dois motivos: a FSM
-tem dois estados hoje e vai ter doze no fim do M1, e a janela de aparo de 0,18 s é menor que
-o ping de muita gente, o que faz de "quem decide se o aparo aconteceu" uma pergunta de rede
-e não de combate.
+Duas coisas estão pendentes e **nenhuma delas é código**.
+
+A primeira é o **grafo de behavior tree** da tarefa 1.21. O asset de árvore do
+`com.unity.behavior` é authoring do editor gráfico e o tipo dele é interno ao pacote, então
+ele é a única coisa do projeto que não pode ser montada por script. Os quatro nós
+customizados, o prefab `Enemy_Barghest` e a malha de navegação já existem: falta abrir o
+editor, montar a árvore com eles e apontar o grafo no prefab (`tech/adr/0009`).
+
+A segunda é o **portão da rede** do `docs/12`: duas pessoas em máquinas diferentes entram na
+mesma `Sandbox_Combate`, batem na mesma cápsula, e o dano bate igual nas duas telas. Ele não
+fecha sozinho, porque é teste manual com duas pessoas, e o caminho do Relay ainda depende de
+ligar o projeto ao Unity Gaming Services em Project Settings > Services. Esquiva, aparo e
+riposte só depois disso. Dois motivos: a FSM tem poucos estados hoje e vai ter doze no fim do
+M1, e a janela de aparo de 0,18 s é menor que o ping de muita gente, o que faz de "quem
+decide se o aparo aconteceu" uma pergunta de rede e não de combate.
 
 A regra prática de quem escreve sistema novo: o cliente pede, o host decide, todo mundo
 assiste. Um sistema novo começa respondendo quem tem autoridade, e a resposta vai no

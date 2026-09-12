@@ -149,27 +149,33 @@ namespace LoboBranco.Tests
         }
 
         /// <summary>
-        /// O alvo de sandbox nao guarda mais vida propria. Se ele voltar a guardar, o
-        /// host e o cliente passam a contar vidas diferentes para a mesma capsula.
+        /// Quem recebe golpe nao guarda vida propria. Se voltar a guardar, o host e o
+        /// cliente passam a contar vidas diferentes para o mesmo personagem.
+        ///
+        /// A porta do dano e o <see cref="DamageReceiver"/>, e nao o alvo de sandbox: e o
+        /// mesmo componente no bruxo e na capsula, e e isso que torna o bruxo atingivel
+        /// pelo inimigo da tarefa 1.21.
         /// </summary>
         [Test]
-        public void Alvo_de_sandbox_tira_vida_do_componente_replicado()
+        public void Quem_recebe_golpe_tira_vida_do_componente_replicado()
         {
             var go = new GameObject("Capsula");
             _criados.Add(go);
 
             var dummy = go.AddComponent<CombatDummy>();
+            var receiver = go.GetComponent<DamageReceiver>();
             CharacterVitals vitals = go.GetComponent<CharacterVitals>();
 
+            Assert.IsNotNull(receiver, "CombatDummy exige DamageReceiver ao lado.");
             Assert.IsNotNull(vitals, "CombatDummy exige CharacterVitals ao lado.");
 
             vitals.Stats.SetBase(StatType.MaxVitality, VidaMaxima);
             vitals.RestoreToFull();
 
             DamageResult recebido = default;
-            dummy.Damaged += (_, result) => recebido = result;
+            receiver.Damaged += (_, result) => recebido = result;
 
-            dummy.ApplyDamage(new DamageResult(25f, DamageType.Slash, wasCritical: false, totalMultiplier: 1f));
+            receiver.ApplyDamage(new DamageResult(25f, DamageType.Slash, wasCritical: false, totalMultiplier: 1f));
 
             Assert.AreEqual(75f, vitals.CurrentVitality, 0.001f);
             Assert.AreEqual(75f, dummy.CurrentVitality, 0.001f);

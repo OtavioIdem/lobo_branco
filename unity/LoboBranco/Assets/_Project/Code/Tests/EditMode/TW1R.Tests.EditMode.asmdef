@@ -8,6 +8,7 @@
         "TW1R.Stats",
         "TW1R.Camera",
         "TW1R.Combat",
+        "TW1R.AI",
         "TW1R.Player",
         "TW1R.Inventory",
         "TW1R.Alchemy",

@@ -239,7 +239,7 @@ namespace LoboBranco.Tests
 
             Assert.AreEqual(0, _atacante.Aberturas, "Nao existe golpe sem anticipacao (docs/03 secao 11).");
             Assert.AreEqual(0, _atacante.Consultas);
-            Assert.AreEqual(AttackState.Phase.Anticipation, _attackState.CurrentPhase);
+            Assert.AreEqual(AttackPhase.Anticipation, _attackState.CurrentPhase);
         }
 
         [Test]
@@ -261,7 +261,7 @@ namespace LoboBranco.Tests
 
             Assert.AreEqual(1, _atacante.Fechamentos);
             Assert.IsFalse(_atacante.JanelaAberta);
-            Assert.AreEqual(AttackState.Phase.Recovery, _attackState.CurrentPhase);
+            Assert.AreEqual(AttackPhase.Recovery, _attackState.CurrentPhase);
         }
 
         [Test]
