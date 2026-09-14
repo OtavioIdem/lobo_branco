@@ -99,5 +99,31 @@ namespace LoboBranco.Player
         /// depois de a esquiva cortar o golpe nao tem o que congelar.
         /// </summary>
         public float PendingHitstop;
+
+        // ----------------------------------------------------------- habilidades
+
+        /// <summary>Vaga nenhuma. Valor de <see cref="PendingAbilitySlot"/> fora de uma transicao.</summary>
+        public const int NoAbilitySlot = -1;
+
+        /// <summary>
+        /// Quem conjura (tarefa 1.32). Nulo e valido: o botao de sinal nao faz nada, como era
+        /// antes de a habilidade existir.
+        /// </summary>
+        public IAbilityCaster Abilities;
+
+        /// <summary>
+        /// A vaga que o botao de sinal usa. Escrita pelo <see cref="PlayerBrain"/>. Ate a roda de
+        /// sinais do docs/02 secao 4 existir, e sempre a primeira.
+        /// </summary>
+        public int SelectedAbilitySlot;
+
+        /// <summary>Vaga escolhida por quem pediu a transicao, consumida pelo estado de sinal.</summary>
+        public int PendingAbilitySlot = NoAbilitySlot;
+
+        /// <summary>
+        /// O host recusou a conjuracao em andamento (tech/adr/0011). Escrito pelo
+        /// <see cref="PlayerBrain"/> quando a recusa chega, consumido pelo estado de sinal.
+        /// </summary>
+        public bool CastRefused;
     }
 }

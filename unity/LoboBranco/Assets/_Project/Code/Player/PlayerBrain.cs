@@ -41,6 +41,7 @@ namespace LoboBranco.Player
         PlayerInputReader _input;
         PlayerLocomotion _locomotion;
         PlayerMeleeAttacker _attacker;
+        PlayerAbilityCaster _caster;
         CharacterVitals _vitals;
         PlayerDebugOverlay _overlay;
 
@@ -62,6 +63,9 @@ namespace LoboBranco.Player
         /// <summary>Postura corrente e a troca em andamento. O painel de debug mostra isto.</summary>
         public StanceSelector Stance => _stance;
 
+        /// <summary>A vaga de habilidade que o botao de sinal usa. O painel de debug mostra isto.</summary>
+        public int SelectedAbilitySlot => _context != null ? _context.SelectedAbilitySlot : 0;
+
         /// <summary>Verdadeiro no personagem que esta maquina controla. Falso nos companheiros.</summary>
         public bool DrivesThisCharacter => _drivesThisCharacter;
 
@@ -72,6 +76,7 @@ namespace LoboBranco.Player
             _input = GetComponent<PlayerInputReader>();
             _locomotion = GetComponent<PlayerLocomotion>();
             _attacker = GetComponent<PlayerMeleeAttacker>();
+            _caster = GetComponent<PlayerAbilityCaster>();
             _vitals = GetComponent<CharacterVitals>();
             _overlay = GetComponent<PlayerDebugOverlay>();
 
@@ -166,6 +171,7 @@ namespace LoboBranco.Player
                 Weapons = _attacker,
                 Vitals = _vitals,
                 Buffer = _buffer,
+                Abilities = _caster,
             };
 
             WriteCombatToContext();
@@ -176,9 +182,10 @@ namespace LoboBranco.Player
             _machine.Register(new LocomotionState());
             _machine.Register(new AttackState());
             _machine.Register(new WeaponSwapState(tuning != null ? tuning.weaponSwapSeconds : 0.7f));
+            _machine.Register(new CastState());
 
-            // Esquiva, rolamento, aparo e riposte sao as tarefas 1.10 e 1.11; sinais sao
-            // a 1.18. Ate la a maquina avisa uma vez e ignora a transicao.
+            // Esquiva, rolamento, aparo e riposte sao as tarefas 1.10 e 1.11. Ate la a
+            // maquina avisa uma vez e ignora a transicao.
 
             _machine.Start(PlayerStateId.Locomotion);
         }
@@ -208,6 +215,19 @@ namespace LoboBranco.Player
             _input.SwitchSilverPressed += OnSwitchSilver;
 
             if (_attacker != null) _attacker.HitConfirmed += OnHitConfirmed;
+            if (_caster != null) _caster.CastRefused += OnCastRefused;
+        }
+
+        /// <summary>
+        /// O host recusou a conjuracao (tech/adr/0011). Mesmo caminho da confirmacao de acerto:
+        /// o pedido vai para o contexto, e quem corta a conjuracao e o estado de sinal. Uma recusa
+        /// que chega com o bruxo ja fora do estado nao tem o que cortar.
+        /// </summary>
+        void OnCastRefused(AbilityRefusal refusal)
+        {
+            if (_machine == null || _machine.CurrentId != PlayerStateId.CastSign) return;
+
+            _context.CastRefused = true;
         }
 
         /// <summary>
@@ -229,6 +249,7 @@ namespace LoboBranco.Player
         void OnDisable()
         {
             if (_attacker != null) _attacker.HitConfirmed -= OnHitConfirmed;
+            if (_caster != null) _caster.CastRefused -= OnCastRefused;
 
             _input.AttackLightPressed -= OnAttackLight;
             _input.AttackHeavyPressed -= OnAttackHeavy;

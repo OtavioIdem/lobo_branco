@@ -240,6 +240,10 @@ namespace LoboBranco.EditorTools
             player.AddComponent<DamageReceiver>();
 
             player.AddComponent<PlayerMeleeAttacker>();
+
+            // Nao tem nada para ligar: as habilidades sao da escola, e o conjurador pergunta a ela.
+            player.AddComponent<PlayerAbilityCaster>();
+
             player.AddComponent<PlayerBrain>();
             player.AddComponent<PlayerDebugOverlay>();
 
@@ -291,6 +295,7 @@ namespace LoboBranco.EditorTools
             overlay.FindProperty("brain").objectReferenceValue = player.GetComponent<PlayerBrain>();
             overlay.FindProperty("attacker").objectReferenceValue = player.GetComponent<PlayerMeleeAttacker>();
             overlay.FindProperty("vitals").objectReferenceValue = player.GetComponent<CharacterVitals>();
+            overlay.FindProperty("caster").objectReferenceValue = player.GetComponent<PlayerAbilityCaster>();
             overlay.ApplyModifiedPropertiesWithoutUndo();
 
             WireVitals(player.GetComponent<CharacterVitals>(), PlayerStatsPath);

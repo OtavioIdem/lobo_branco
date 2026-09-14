@@ -195,6 +195,7 @@ GameObject:
   - component: {fileID: 2653360688372698588}
   - component: {fileID: 7014330983529522248}
   - component: {fileID: 8258041469082970047}
+  - component: {fileID: 6328317272013361893}
   - component: {fileID: 1665933002941387394}
   - component: {fileID: 8824558061825589091}
   - component: {fileID: 2105638426287146009}
@@ -335,6 +336,19 @@ MonoBehaviour:
   assumeBestiaryKnowledge: 0
   appliedOil: 0
   feedback: {fileID: 11400000, guid: cef021565843a154c824877ecfa354c9, type: 2}
+--- !u!114 &6328317272013361893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415091062731458965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 344b6ff33478e7c4190c5f3949924e22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerAbilityCaster
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &1665933002941387394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,6 +383,7 @@ MonoBehaviour:
   brain: {fileID: 1665933002941387394}
   attacker: {fileID: 8258041469082970047}
   vitals: {fileID: 2653360688372698588}
+  caster: {fileID: 6328317272013361893}
   visible: 1
 --- !u!114 &2105638426287146009
 MonoBehaviour:

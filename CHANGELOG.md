@@ -4,6 +4,28 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+- 2026-09-14: PlayerWolf v03 de acabamento no Blender, com rosto e materiais detalhados, cota volumetrica e fonte de alta resolucao; v02 preservada e FBX validado.
+
+- 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
+
+### 2026-09-14 — M1 tarefa 1.32: habilidade com custo e recarga
+- `AbilityDef`: habilidade em asset, com custo de vigor, recarga, tempo de conjurar e
+  recuperacao. A escola lista as dela por vaga, e a vaga e o que viaja pela rede.
+- **Q passa a conjurar, e o sinal ainda nao faz nada.** O Lobo ganhou o abridor do docs/03
+  secao 8, com os 30 de vigor e os 4 s de recarga do documento. Ele cobra, recarrega e
+  compromete o bruxo por 0,7 s; o efeito e da tarefa 1.18. Os 0,3 s de conjuracao e os 0,4 s
+  de recuperacao nao estao no documento e foram decididos aqui.
+- **O host cobra no inicio e pode recusar** (`tech/adr/0011`). Ao contrario do vigor do golpe,
+  que o host cobra sempre, um sinal de graca e uma janela de graca. O dono confere com a mesma
+  regra antes de pedir, entao a recusa quase nunca acontece; quando acontece, a conjuracao corta
+  e o efeito nao sai.
+- **A recarga viaja como o instante em que volta**, no relogio do servidor, e cada maquina
+  calcula quanto falta. Nenhuma mensagem por quadro: 40 bytes por conjuracao aceita.
+- `CastState`: conjuracao comprometida, como o golpe. A esquiva corta, e vigor e recarga ficam
+  pagos. Recarga que volta dentro dos 0,2 s do buffer solta o sinal sozinha.
+- O painel de debug mostra o sinal selecionado, a recarga, o instante do efeito e a recusa do host.
+- 292 testes passando, contra 248 antes. Build de Windows gerando.
+
 ### 2026-09-14 — M1 tarefa 1.31: a escola vira dado
 - `SchoolDef`: uma escola de bruxo em asset. Bloco de atributos, os tres golpes por postura e
   a postura favorecida. E a regra 7 do CLAUDE.md feita tipo: nenhum `if` de escola em codigo.

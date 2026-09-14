@@ -24,9 +24,12 @@ namespace LoboBranco.Player
     /// muda e o <see cref="AttackDef"/> e nao um bonus de dano, a razao de 5,3 vezes do
     /// docs/03 fica intacta.
     ///
-    /// Custo de sinal e filtro de vestigio (docs/13 secao 4.1) nao estao aqui, porque sinais e
-    /// investigacao ainda nao existem (tarefas 1.18 e M3). Campo para sistema inexistente e
-    /// promessa, nao dado.
+    /// As habilidades, desde a tarefa 1.32. Custo e recarga moram em cada <see cref="AbilityDef"/>,
+    /// e a escola so diz quais ela tem e em que vaga. A vaga e o que viaja pela rede, pelo mesmo
+    /// motivo da postura: o host resolve o asset do proprio lado.
+    ///
+    /// O filtro de vestigio (docs/13 secao 4.1) nao esta aqui, porque investigacao ainda nao
+    /// existe (M3). Campo para sistema inexistente e promessa, nao dado.
     /// </summary>
     [CreateAssetMenu(menuName = "LoboBranco/Player/School", fileName = "School_")]
     public sealed class SchoolDef : ScriptableObject
@@ -51,6 +54,19 @@ namespace LoboBranco.Player
 
         [Tooltip("Golpe da postura Grupo. Tem que declarar a postura Grupo.")]
         public AttackDef groupAttack;
+
+        [Header("Habilidades (tarefa 1.32)")]
+        [Tooltip("Uma habilidade por vaga, na ordem da roda de sinais. No maximo cinco, os sinais do docs/03 secao 8.")]
+        public AbilityDef[] abilities;
+
+        /// <summary>Quantas vagas a recarga replicada tem. Ver <see cref="AbilityReadyTimes"/>.</summary>
+        public const int MaxAbilities = AbilityReadyTimes.Capacity;
+
+        /// <summary>Vagas usaveis. As que passam do maximo nao existem em jogo, e o Inspector avisa.</summary>
+        public int AbilityCount => abilities != null ? Mathf.Min(abilities.Length, MaxAbilities) : 0;
+
+        /// <summary>A habilidade de uma vaga, ou nulo se a vaga nao existir ou estiver vazia.</summary>
+        public AbilityDef AbilityAt(int slot) => slot >= 0 && slot < AbilityCount ? abilities[slot] : null;
 
         /// <summary>O golpe desta escola para uma postura, ou nulo se a vaga estiver vazia.</summary>
         public AttackDef AttackFor(Stance stance) => stance switch
@@ -82,6 +98,42 @@ namespace LoboBranco.Player
 
             if (AttackFor(favoredStance) == null)
                 problems.Add($"a postura favorecida {favoredStance} nao tem golpe");
+
+            CheckAbilities(problems);
+        }
+
+        /// <summary>
+        /// Uma escola sem habilidade nenhuma e valida. A mesma habilidade em duas vagas nao e: cada
+        /// vaga tem a propria recarga, entao o sinal sairia duas vezes seguidas pelo preco de um
+        /// tempo de espera.
+        /// </summary>
+        void CheckAbilities(List<string> problems)
+        {
+            if (abilities == null) return;
+
+            if (abilities.Length > MaxAbilities)
+                problems.Add($"tem {abilities.Length} habilidades, e a recarga replicada so tem {MaxAbilities} vagas");
+
+            for (int i = 0; i < abilities.Length; i++)
+            {
+                AbilityDef ability = abilities[i];
+
+                if (ability == null)
+                {
+                    problems.Add($"a vaga de habilidade {i} esta vazia");
+                    continue;
+                }
+
+                for (int j = 0; j < i; j++)
+                    if (abilities[j] == ability)
+                        problems.Add($"a habilidade '{ability.name}' esta nas vagas {j} e {i}, com duas recargas");
+
+                int before = problems.Count;
+                ability.CollectProblems(problems);
+
+                for (int k = before; k < problems.Count; k++)
+                    problems[k] = $"a habilidade '{ability.name}' {problems[k]}";
+            }
         }
 
         static void CheckSlot(Stance slot, AttackDef attack, List<string> problems)

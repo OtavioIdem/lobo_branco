@@ -56,9 +56,33 @@ namespace LoboBranco.Player
                     TryAttack(context, context.CurrentAttack, buffer.Pending);
                     break;
 
-                // Esquiva, aparo e sinal sao as tarefas 1.10, 1.11 e 1.18. Ate la o
-                // buffer guarda o input e ele expira sozinho, sem virar transicao.
+                case BufferedAction.CastSign:
+                    TryCast(context);
+                    break;
+
+                // Esquiva e aparo sao as tarefas 1.10 e 1.11. Ate la o buffer guarda o
+                // input e ele expira sozinho, sem virar transicao.
             }
+        }
+
+        /// <summary>
+        /// Recusado fica guardado, como o golpe sem vigor: uma recarga que volta dentro dos 0,2 s
+        /// do buffer solta o sinal sozinha, e apertar um pouco cedo nao vira apertar em vao.
+        /// </summary>
+        static void TryCast(PlayerStateContext context)
+        {
+            IAbilityCaster caster = context.Abilities;
+            if (caster == null) return;
+
+            int slot = context.SelectedAbilitySlot;
+            if (caster.CanCast(slot) != AbilityRefusal.None) return;
+
+            context.PendingAbilitySlot = slot;
+
+            if (context.Machine.TryChangeState(PlayerStateId.CastSign))
+                context.Buffer.TryConsume(BufferedAction.CastSign);
+            else
+                context.PendingAbilitySlot = PlayerStateContext.NoAbilitySlot;
         }
 
         static void TryAttack(PlayerStateContext context, AttackDef attack, BufferedAction action)

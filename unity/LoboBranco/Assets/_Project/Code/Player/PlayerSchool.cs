@@ -17,8 +17,8 @@ namespace LoboBranco.Player
     /// andamento.
     ///
     /// E o unico lugar do personagem que sabe qual e a escola. A folha de atributos pergunta
-    /// por <see cref="IStatBlockProvider"/>, o atacante pergunta pelos golpes, e o cerebro
-    /// pergunta pela postura inicial. Nenhum deles tem um <c>if</c> de escola.
+    /// por <see cref="IStatBlockProvider"/>, o atacante pergunta pelos golpes, o conjurador pelas
+    /// habilidades, e o cerebro pela postura inicial. Nenhum deles tem um <c>if</c> de escola.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PlayerSchool : MonoBehaviour, IStatBlockProvider
@@ -36,6 +36,12 @@ namespace LoboBranco.Player
 
         /// <summary>O golpe da escola para uma postura, ou nulo sem escola.</summary>
         public AttackDef AttackFor(Stance stance) => school != null ? school.AttackFor(stance) : null;
+
+        /// <summary>Quantas vagas de habilidade a escola usa. Sem escola, nenhuma.</summary>
+        public int AbilityCount => school != null ? school.AbilityCount : 0;
+
+        /// <summary>A habilidade de uma vaga, ou nulo sem escola ou com a vaga vazia.</summary>
+        public AbilityDef AbilityAt(int slot) => school != null ? school.AbilityAt(slot) : null;
 
         void Awake()
         {

@@ -13,7 +13,8 @@
         "TW1R.Inventory",
         "TW1R.Alchemy",
         "TW1R.Progression",
-        "TW1R.Save"
+        "TW1R.Save",
+        "Unity.Netcode.Runtime"
     ],
     "includePlatforms": [ "Editor" ],
     "excludePlatforms": [],

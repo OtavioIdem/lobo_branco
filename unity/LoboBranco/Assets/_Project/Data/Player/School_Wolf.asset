@@ -18,3 +18,5 @@ MonoBehaviour:
   strongAttack: {fileID: 11400000, guid: 1b64da35544b5bf408e425efa52f947b, type: 2}
   fastAttack: {fileID: 11400000, guid: fc378a0de87860040a9903b886b09255, type: 2}
   groupAttack: {fileID: 11400000, guid: d10c16e231809fe4c96e98a320b6c504, type: 2}
+  abilities:
+  - {fileID: 11400000, guid: b85d40b5dba838b4eb6af269cd335efb, type: 2}

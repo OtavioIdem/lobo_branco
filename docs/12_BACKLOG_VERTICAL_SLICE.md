@@ -163,8 +163,26 @@ existem. O Lobo sai idêntico ao kit que já existia; nada muda em jogo nesta ta
 Um teste falha se aparecer uma terceira escola em `Assets/_Project/Data`. O slice é Lobo e
 Grifo, e uma escola nova é só um asset, que é a porta mais fácil para o escopo crescer.
 
+**Sobre a habilidade da 1.32, 2026-09-14.** Uma habilidade é um `AbilityDef`: custo de vigor,
+recarga, tempo de conjurar e recuperação. A escola lista as dela por vaga, e é a vaga que viaja
+pela rede, como a postura viaja no golpe. O efeito ficou de fora, porque os efeitos dos sinais
+são a 1.18: o host dispara um evento no instante do efeito, e é ali que o empurrão vai pendurar.
+
+A autoridade tem uma diferença para o golpe, e ela é deliberada. O vigor do golpe o host cobra
+sempre e nunca recusa. A habilidade ele pode recusar, porque sinal de graça é janela de graça,
+e janela é o recurso mais caro do combate. A recusa quase nunca acontece, e quando acontece o
+dono corta a conjuração. A recarga viaja como o instante em que volta, no relógio do servidor,
+e não como contagem ([ADR 0011](../tech/adr/0011-habilidade-cobrada-no-inicio-recarga-como-instante.md)).
+
+**O Lobo ganhou o primeiro sinal, e ele não faz nada ainda.** É o abridor do doc 03 §8, com os
+30 de vigor e os 4 s de recarga do documento. Isso muda o jogo de propósito: Q passa a gastar
+vigor. É o que permite conferir, no portão da rede, que a recarga do companheiro conta junto
+com a do host. Os tempos de conjurar e recuperar não estão no doc 03, e a nota de lá diz quais
+foram escolhidos. A roda de sinais do doc 02 §4 também não existe, e até ela existir Q usa a
+primeira vaga.
+
 | ~~1.31~~ ✅ | `SchoolDef`: bloco de atributos, três golpes e postura favorecida. A intensidade de sinal é atributo. Nota acima | M | 13 §5.1 |
-| 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |
+| ~~1.32~~ ✅ | Habilidade com custo e recarga, como dado. O host cobra no início e pode recusar; a recarga viaja como instante. Sem efeito até a 1.18. Nota acima | G | 13 §5 |
 | 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Vontade. Zero `if` por escola | G | 13 §5 |
 | 1.34 | Seleção de escola na entrada da sala | P | 13 §8 |
 | 1.35 | Rebalancear o doc 03 para dois jogadores. Os números foram feitos para um | G | 03 §12 |

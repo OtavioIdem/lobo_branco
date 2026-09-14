@@ -158,6 +158,16 @@ Regras que dão relevância aos sinais:
 3. **Axii em diálogo** aparece em cerca de 15% das conversas, gastando vigor, e às vezes é
    a única forma de obter uma pista.
 
+**Nota de implementação, 2026-09-14 (tarefa 1.32).** Custo e recarga existem como dado, no
+`AbilityDef`, e o Aard é o primeiro asset: 30 de vigor e 4 s, como na tabela. A recarga conta a
+partir do início da conjuração, e o vigor é cobrado no mesmo instante. O efeito é da tarefa 1.18,
+e até lá o sinal cobra, recarrega e não faz nada.
+
+Esta seção não dá dois números que o sistema precisa, e eles foram decididos na tarefa: **0,3 s
+de conjuração** até o efeito e **0,4 s de recuperação**, 0,7 s no total, o mesmo da troca de
+espada. A tarefa 1.30 revê os dois. O "escalado por Inteligência" do primeiro parágrafo também
+não tem fórmula, e fica para a 1.18 decidir junto com a intensidade.
+
 ## 9. Pipeline de dano
 
 A ordem importa, e ela é o que faz o pilar P2 funcionar. Implementada como uma struct

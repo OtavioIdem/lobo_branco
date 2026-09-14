@@ -21,6 +21,7 @@ namespace LoboBranco.EditorTools
         const string StatsFolder = "Assets/_Project/Data/Stats";
         const string AttacksFolder = "Assets/_Project/Data/Combat/Attacks";
         const string WeaponsFolder = "Assets/_Project/Data/Combat/Weapons";
+        const string AbilitiesFolder = "Assets/_Project/Data/Combat/Abilities";
         const string PlayerFolder = "Assets/_Project/Data/Player";
         const string MonstersFolder = "Assets/_Project/Data/Monsters";
 
@@ -70,8 +71,9 @@ namespace LoboBranco.EditorTools
             CreateMonsters();
             CreateTelegraphStyle();
             CreateHitFeedback();
+            CreateAbilities();
 
-            // Por ultimo: a escola aponta para golpes e bloco de atributos criados acima.
+            // Por ultimo: a escola aponta para golpes, habilidades e bloco de atributos criados acima.
             CreateSchools();
 
             AssetDatabase.SaveAssets();
@@ -338,6 +340,50 @@ namespace LoboBranco.EditorTools
             EnsureFolder(PlayerFolder);
 
             string path = $"{PlayerFolder}/School_Wolf.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<SchoolDef>(path);
+
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<SchoolDef>();
+                asset.displayName = "Lobo";
+                asset.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Player.asset");
+                asset.favoredStance = Stance.Fast;    // docs/13 secao 5: o Lobo favorece a Rapida
+                asset.strongAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Heavy.asset");
+                asset.fastAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Light.asset");
+                asset.groupAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Group.asset");
+
+                AssetDatabase.CreateAsset(asset, path);
+                Debug.Log($"[CombatData] Criado: {path}");
+            }
+
+            // As habilidades entraram na tarefa 1.32, depois de a escola ja existir. Mesmo
+            // arranjo do barghest: preencher so o que esta vazio.
+            if (asset.abilities != null && asset.abilities.Length > 0) return;
+
+            var knockback = AssetDatabase.LoadAssetAtPath<AbilityDef>($"{AbilitiesFolder}/Sign_Knockback.asset");
+            if (knockback == null) return;
+
+            // docs/13 secao 5: "equilibrado, espada e sinal". O sinal e o abridor do docs/03 secao 8.
+            asset.abilities = new[] { knockback };
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] Habilidades ligadas em {path}.");
+        }
+
+        // ----------------------------------------------------------- habilidades
+
+        /// <summary>
+        /// O abridor do docs/03 secao 8, o primeiro sinal do jogo (tarefa 1.32). Custo e recarga
+        /// sao os do documento. O tempo de conjurar e a recuperacao nao estao la, e foram decididos
+        /// aqui: 0,7 s no total, o mesmo da troca de espada, porque um sinal e uma decisao do mesmo
+        /// peso. O efeito e a tarefa 1.18, e ate la o sinal cobra, recarrega e nao faz nada.
+        ///
+        /// O nome do asset e o do efeito, e o nome do sinal vem do campo exibido (tech/adr/0005).
+        /// </summary>
+        static void CreateAbilities()
+        {
+            EnsureFolder(AbilitiesFolder);
+
+            string path = $"{AbilitiesFolder}/Sign_Knockback.asset";
 
             if (File.Exists(path))
             {
@@ -345,13 +391,12 @@ namespace LoboBranco.EditorTools
                 return;
             }
 
-            var asset = ScriptableObject.CreateInstance<SchoolDef>();
-            asset.displayName = "Lobo";
-            asset.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Player.asset");
-            asset.favoredStance = Stance.Fast;    // docs/13 secao 5: o Lobo favorece a Rapida
-            asset.strongAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Heavy.asset");
-            asset.fastAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Light.asset");
-            asset.groupAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Group.asset");
+            var asset = ScriptableObject.CreateInstance<AbilityDef>();
+            asset.displayName = "Aard";
+            asset.staminaCost = 30f;       // docs/03 secao 8
+            asset.cooldownSeconds = 4f;    // docs/03 secao 8
+            asset.castTime = 0.3f;         // decidido na tarefa 1.32
+            asset.recovery = 0.4f;         // decidido na tarefa 1.32
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");

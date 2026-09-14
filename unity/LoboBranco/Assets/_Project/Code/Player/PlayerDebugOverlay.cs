@@ -22,6 +22,7 @@ namespace LoboBranco.Player
         [SerializeField] PlayerBrain brain;
         [SerializeField] PlayerMeleeAttacker attacker;
         [SerializeField] CharacterVitals vitals;
+        [SerializeField] PlayerAbilityCaster caster;
 
         [Tooltip("F1 alterna o painel em tempo de execucao.")]
         [SerializeField] bool visible = true;
@@ -36,6 +37,7 @@ namespace LoboBranco.Player
             if (brain == null) brain = GetComponent<PlayerBrain>();
             if (attacker == null) attacker = GetComponent<PlayerMeleeAttacker>();
             if (vitals == null) vitals = GetComponent<CharacterVitals>();
+            if (caster == null) caster = GetComponent<PlayerAbilityCaster>();
             if (cameraRig == null) cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
         }
 
@@ -108,6 +110,7 @@ namespace LoboBranco.Player
             GUILayout.Space(4f);
             GUILayout.Label("WASD mover | mouse camera | Shift correr", _style);
             GUILayout.Label("Botao esq. golpe leve | dir. golpe forte", _style);
+            GUILayout.Label("Q sinal (sem efeito ate a tarefa 1.18)", _style);
 
             if (attacker != null && !string.IsNullOrEmpty(attacker.LastHitSummary))
             {
@@ -155,6 +158,8 @@ namespace LoboBranco.Player
                     _style);
             }
 
+            DrawAbility(machine);
+
             InputBuffer buffer = brain.Buffer;
             if (buffer != null)
                 GUILayout.Label($"Buffer            {buffer.Pending,-14} {buffer.Remaining,5:F2}s", _style);
@@ -170,6 +175,37 @@ namespace LoboBranco.Player
                     (attacker.FlowWindowOpen ? "ENCADEIA" : string.Empty),
                     _style);
             }
+        }
+
+        /// <summary>
+        /// A vaga selecionada e a recarga dela (tarefa 1.32). Ate o HUD do docs/02 secao 7 existir,
+        /// e aqui que se confere que a recarga do dono conta junto com a do host. O efeito so
+        /// aparece em quem resolve, e a recusa so no dono.
+        /// </summary>
+        void DrawAbility(PlayerStateMachine machine)
+        {
+            if (caster == null) return;
+
+            int slot = brain.SelectedAbilitySlot;
+            AbilityDef selected = caster.AbilityAt(slot);
+            if (selected == null) return;
+
+            float remaining = caster.CooldownRemaining(slot);
+            GUILayout.Label(
+                $"Sinal             {selected.displayName,-14} " +
+                (remaining > 0f ? $"volta em {remaining:F1}s" : "pronto"),
+                _style);
+
+            if (machine.Current is CastState cast && cast.CurrentAbility != null)
+                GUILayout.Label(
+                    $"Conjurando        {cast.Elapsed,5:F2}s        efeito {(cast.Triggered ? "SAIU" : "...")}",
+                    _style);
+
+            if (caster.CanResolve && caster.LastTriggered != null)
+                GUILayout.Label($"Ultimo efeito     {caster.LastTriggered.displayName}", _style);
+
+            if (caster.LastRefusal != AbilityRefusal.None)
+                GUILayout.Label($"Recusa do host    {caster.LastRefusal}", _style);
         }
     }
 }

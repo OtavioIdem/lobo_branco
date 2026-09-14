@@ -99,7 +99,8 @@ Uma escola é a combinação de três alavancas que **já existem no projeto**:
 
 1. `StatBlockDef` diferente, que é o viés de atributo.
 2. ~~Afinidade de postura, que `StanceAffinityStage` já aplica.~~ **Corrigido na tarefa 1.31**, abaixo.
-3. Intensidade e custo de sinal, que o [doc 03 §8](03_COMBATE.md) já parametriza.
+3. Intensidade e custo de sinal, que o [doc 03 §8](03_COMBATE.md) já parametriza. **Custo e
+   recarga moram no `AbilityDef` desde a tarefa 1.32**, e a escola lista as habilidades dela por vaga.
 
 Uma escola nova é um `SchoolDef` apontando para esses três assets, mais o filtro de vestígio
 do §4.1. Nenhum `if` por escola em código de combate. Se aparecer um, a escola está errada.
@@ -114,8 +115,9 @@ mais simples e sem multiplicador novo:
   muda é o `AttackDef`, e não um bônus de dano, a razão de 5,3 vezes do doc 03 fica intacta.
 - **A intensidade de sinal é o atributo `SignIntensity`**, e por isso mora no `StatBlockDef`
   da escola, e não num campo próprio.
-- **Custo de sinal e filtro de vestígio ficam fora do `SchoolDef` por enquanto**, porque sinais
-  e investigação ainda não existem (tarefa 1.18 e M3).
+- ~~**Custo de sinal e filtro de vestígio ficam fora do `SchoolDef` por enquanto**~~. O custo
+  entrou na tarefa 1.32, como habilidade com recarga que a escola lista por vaga. O filtro de
+  vestígio continua fora, porque investigação ainda não existe (M3).
 
 Cada golpe tem que declarar a postura da vaga em que está. O golpe viaja pela rede como
 postura e o host resolve o asset pela postura; um golpe na vaga errada faria dono e host
@@ -133,6 +135,7 @@ Detalhe e justificativa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-c
 | Vida, Vigor, Adrenalina, Fluxo | **O host** | Replicados para todos. Cliente lê, não escreve |
 | IA, encontro, attack token | **O host** | O coordenador de token do doc 07 §6 já é peça única por natureza |
 | Efeito visual e som de impacto | Todos, localmente | Reagem ao evento do host |
+| Habilidade: custo e recarga | **O host** confere, cobra e pode recusar; o dono pede e prevê | Cobrada no início da conjuração. A recarga viaja como o instante em que volta, no relógio do servidor, e cada máquina calcula quanto falta. Ao contrário do vigor do golpe, aqui o host recusa, porque sinal de graça é janela de graça ([ADR 0011](../tech/adr/0011-habilidade-cobrada-no-inicio-recarga-como-instante.md)) |
 | Telegrafo de ataque de inimigo | **O host** decide o instante; todos desenham | Um carimbo de tempo por golpe, no relógio do servidor. Cada máquina calcula o aviso a partir do mesmo `AttackDef`, e o aviso do cliente com ping termina junto com a janela de dano do host (tarefa 1.23) |
 | Hitstop | **O host** soma ao golpe; o dono segura o dele pelo mesmo tempo | Nunca `Time.timeScale`, que no host congelaria a sessão inteira. A extensão do golpe é igual nas duas pontas, e a janela de Fluxo sobrevive ([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)) |
 | Tremor e soco de câmera | Só o dono, na tela dele | Reagem ao acerto confirmado pelo host e à vida do próprio bruxo caindo |
