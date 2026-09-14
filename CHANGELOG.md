@@ -4,6 +4,33 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-14 — M1 tarefa 1.23: o aviso do golpe chega a todo mundo
+- **O telegrafo era, antes de tudo, um problema de rede.** A linha do tempo do golpe roda
+  so no host, entao no cliente nao existia anticipacao nenhuma: quem hospedava via o tell,
+  e o companheiro apanhava sem aviso.
+- `EnemyTelegraph`: o host manda um unico instante por golpe, no relogio do servidor, e cada
+  maquina calcula o aviso sozinha a partir do mesmo `AttackDef`, que ja esta no disco dela.
+  Mandar a fase por quadro seria mandar pela rede uma conta que o outro lado sabe fazer.
+- **Com ping, o cliente comeca o aviso atrasado, mas termina no tempo certo.** O tempo e
+  medido contra o relogio do servidor, entao o aviso de quem tem latencia fecha junto com a
+  janela de dano do host. Recomecar do zero ao receber daria a todo cliente um aviso que
+  acaba depois de o golpe ja ter acertado, e ensinaria o tempo errado a quem joga com ping.
+- O golpe cortado no meio tambem viaja, para o cliente nao continuar avisando um golpe que o
+  host cancelou. O fim natural nao viaja: cada maquina chega nele pela mesma conta.
+- `TelegraphCurve`: **o aviso enche ate a janela abrir, em vez de so ligar.** Um aviso que
+  liga diz que o golpe vem; um aviso que enche diz quando, e quando e o que a esquiva precisa.
+  Ele tambem nasce ja visivel, porque um aviso que comeca apagado desperdica metade da
+  anticipacao.
+- `TelegraphStyleDef`: ambar e nunca vermelho. Vermelho e o tell de `Unblockable` da tarefa
+  1.24, e um aviso comum vermelho ensinaria ao jogador a resposta errada.
+- Sem Animator, a pose de anticipacao e a capsula que se abaixa com o pe no chao. Encolher
+  pelo centro a faria flutuar, e flutuar antes de atacar parece erro de fisica, nao pose.
+- **Corrigido: um barghest que caia no meio da garrada terminava o golpe e acertava.** Quem
+  dirige o golpe e a arvore, e uma arvore que continua rodando deixava a criatura morta
+  concluir o ataque. Agora o golpe e encerrado no quadro em que ela cai.
+- 218 testes passando, contra 206 antes. Dois deles sao sobre rede: relogio do cliente um
+  pouco atras do carimbo do host nao apaga o aviso, e aviso recebido tarde ja comeca adiantado.
+
 ### 2026-09-12 — M1 tarefa 1.22: quem tem a vez de golpear
 - `AttackTokenPool`: no maximo dois atacantes por alvo ao mesmo tempo. E a regra que
   transforma um amontoado em combate: nao ha esquiva que resolva cinco golpes simultaneos, e

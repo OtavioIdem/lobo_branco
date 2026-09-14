@@ -516,6 +516,16 @@ namespace LoboBranco.EditorTools
             agent.FindProperty("targetMask").intValue = GameLayers.EnemyAttackTargets;
             agent.FindProperty("sightBlockers").intValue = GameLayers.Walkable;
             agent.ApplyModifiedPropertiesWithoutUndo();
+
+            // O telegrafo e um NetworkBehaviour, e por isso so pode entrar depois do
+            // NetworkObject. Ele pisca e abaixa o corpo greybox, e nunca a raiz: a raiz tem
+            // colisor e posicao em rede, e encolhe-la encolheria a hitbox junto.
+            const string TelegraphStylePath = "Assets/_Project/Data/Combat/TelegraphStyle_Default.asset";
+
+            var telegraph = new SerializedObject(enemy.AddComponent<EnemyTelegraph>());
+            telegraph.FindProperty("style").objectReferenceValue = Require<TelegraphStyleDef>(TelegraphStylePath);
+            telegraph.FindProperty("body").objectReferenceValue = enemy.transform.Find("Body_Greybox");
+            telegraph.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>

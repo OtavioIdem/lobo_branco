@@ -116,6 +116,7 @@ Detalhe e justificativa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-c
 | Vida, Vigor, Adrenalina, Fluxo | **O host** | Replicados para todos. Cliente lê, não escreve |
 | IA, encontro, attack token | **O host** | O coordenador de token do doc 07 §6 já é peça única por natureza |
 | Efeito visual e som de impacto | Todos, localmente | Reagem ao evento do host |
+| Telegrafo de ataque de inimigo | **O host** decide o instante; todos desenham | Um carimbo de tempo por golpe, no relógio do servidor. Cada máquina calcula o aviso a partir do mesmo `AttackDef`, e o aviso do cliente com ping termina junto com a janela de dano do host (tarefa 1.23) |
 
 A frase que resolve noventa por cento das dúvidas de implementação: **o cliente pede, o host
 decide, todo mundo assiste.**

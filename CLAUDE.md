@@ -104,14 +104,14 @@ Estas não são preferências de estilo, são o que mantém o projeto navegável
 
 M0 fechado. Do M1 estão escritas as tarefas 1.1 a 1.9, a camada de rede inteira (1.9a a
 1.9i), o Fluxo (1.12), as três posturas (1.14), aço e prata (1.15), o Vigor (1.16), a
-Adrenalina parcial (1.17), o `MonsterDef` (1.20), a IA de inimigo parcial (1.21) e o
-coordenador de encontro (1.22).
+Adrenalina parcial (1.17), o `MonsterDef` (1.20), a IA de inimigo parcial (1.21), o
+coordenador de encontro (1.22) e o telegrafo de ataque replicado (1.23).
 Existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
 de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes por postura
 com hitbox sem alocação, sessão em que o dono simula o próprio bruxo enquanto o host resolve
 vida e dano (por IP direto ou por código de convite), e uma criatura que percebe por cone e
-por som, persegue por NavMesh, golpeia com telegrafo de 0,65 s e espera a vez rondando quando
-o alvo já tem dois atacantes. 206 testes passando, build gerando.
+por som, persegue por NavMesh, golpeia com telegrafo de 0,65 s visível em todas as máquinas e
+espera a vez rondando quando o alvo já tem dois atacantes. 218 testes passando, build gerando.
 
 Duas coisas estão pendentes e **nenhuma delas é código**.
 

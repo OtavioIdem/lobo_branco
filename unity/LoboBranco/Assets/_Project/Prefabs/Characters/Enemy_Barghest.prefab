@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 7760653337110674764}
   - component: {fileID: 5631679369086755462}
   - component: {fileID: 3135784218698979072}
+  - component: {fileID: 8829121345188657873}
   m_Layer: 9
   m_Name: Enemy_Barghest
   m_TagString: Untagged
@@ -341,6 +342,21 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &8829121345188657873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3524103765472324796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5b817be4943ec345adc1192c89740ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.AI::LoboBranco.AI.EnemyTelegraph
+  ShowTopMostFoldoutHeaderGroup: 1
+  style: {fileID: 11400000, guid: ec063156babaa1d4bbdee36ff30abfa7, type: 2}
+  body: {fileID: 2871562434738043197}
 --- !u!1 &5576446439107279541
 GameObject:
   m_ObjectHideFlags: 0

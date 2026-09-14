@@ -68,6 +68,7 @@ namespace LoboBranco.EditorTools
             CreateWeapons();
             CreatePlayerTuning();
             CreateMonsters();
+            CreateTelegraphStyle();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -316,6 +317,30 @@ namespace LoboBranco.EditorTools
             asset.sightRange = 0f;
             asset.hearingRange = 0f;
             asset.moveSpeed = 0f;
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // ------------------------------------------------------------- telegrafo
+
+        /// <summary>
+        /// A aparencia padrao do telegrafo de ataque (tarefa 1.23). Os valores ficam nos
+        /// padroes do proprio <see cref="TelegraphStyleDef"/>, e o motivo de cada um esta
+        /// no tooltip: ambar e nao vermelho porque vermelho e o tell de Unblockable, e um
+        /// aviso comum vermelho ensinaria ao jogador a resposta errada (docs/03 secao 5).
+        /// </summary>
+        static void CreateTelegraphStyle()
+        {
+            string path = $"{CombatFolder}/TelegraphStyle_Default.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<TelegraphStyleDef>();
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");

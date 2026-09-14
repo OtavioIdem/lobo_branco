@@ -1,3 +1,4 @@
+using System;
 using LoboBranco.Combat;
 using LoboBranco.Core;
 using LoboBranco.Stats;
@@ -71,7 +72,10 @@ namespace LoboBranco.AI
         /// <summary>Verdadeiro do inicio da anticipacao ao fim da recuperacao.</summary>
         public bool Swinging => _timeline.Running;
 
-        /// <summary>Fase do golpe corrente. O telegrafo da tarefa 1.23 vai ler isto.</summary>
+        /// <summary>
+        /// Fase do golpe corrente, na contagem de quem resolve. O telegrafo nao le isto: no
+        /// cliente esta contagem nao existe, e o aviso de la sai de <see cref="SwingStarted"/>.
+        /// </summary>
         public AttackPhase Phase => _timeline.CurrentPhase;
 
         /// <summary>Falso durante a pausa entre golpes, durante um golpe, e depois de cair.</summary>
@@ -81,6 +85,15 @@ namespace LoboBranco.AI
         public bool CanResolve => _vitals == null || _vitals.CanResolve;
 
         bool IsDown => _vitals != null && _vitals.IsDown;
+
+        /// <summary>Um golpe comecou. Dispara so em quem resolve, e e o que o telegrafo manda pela rede.</summary>
+        public event Action SwingStarted;
+
+        /// <summary>
+        /// Um golpe foi cortado antes do fim. O fim natural nao dispara nada: cada maquina
+        /// chega nele sozinha pela mesma linha do tempo.
+        /// </summary>
+        public event Action SwingInterrupted;
 
         // ------------------------------------------------------------------ ciclo
 
@@ -108,6 +121,12 @@ namespace LoboBranco.AI
         {
             if (!CanResolve) return;
 
+            // Criatura que cai no meio do golpe para de golpear na hora. Sem isto, quem
+            // dirige o golpe e a arvore, e uma arvore que continua rodando deixaria um
+            // barghest morto terminar a garrada e acertar o bruxo que acabou de mata-lo.
+            if (Swinging && IsDown)
+                EndSwing();
+
             if (_cooldownRemaining > 0f)
                 _cooldownRemaining -= Time.deltaTime;
         }
@@ -123,6 +142,8 @@ namespace LoboBranco.AI
             if (!CanResolve || !Ready) return false;
 
             _timeline.Begin(Attack, this);
+            SwingStarted?.Invoke();
+
             return true;
         }
 
@@ -140,16 +161,23 @@ namespace LoboBranco.AI
         }
 
         /// <summary>
-        /// Encerra o golpe. Chamado pelo fim natural e por quem cortar o golpe no meio,
-        /// que hoje e a arvore desistindo do no de ataque.
+        /// Encerra o golpe. Chamado pelo fim natural, por quem cortar o golpe no meio, que e
+        /// a arvore desistindo do no de ataque, e pela propria criatura ao cair.
         /// </summary>
         public void EndSwing()
         {
+            // Perguntar antes de encerrar: depois do End a linha do tempo ja nao sabe se
+            // chegou ao fim sozinha ou foi cortada.
+            bool interrupted = _timeline.Running;
+
             _timeline.End();
             _windowOpen = false;
 
             if (monster != null)
                 _cooldownRemaining = monster.attackCooldown;
+
+            if (interrupted)
+                SwingInterrupted?.Invoke();
         }
 
         // ----------------------------------------------------------- IMeleeAttacker

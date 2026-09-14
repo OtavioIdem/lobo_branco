@@ -87,7 +87,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | ~~1.20~~ ✅ | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
 | 1.21 ⚠️ | Behavior tree base do inimigo. **Parcial**: sentidos, aquisição de alvo, golpe, nós customizados, prefab e NavMesh prontos; falta desenhar o grafo no editor gráfico. Nota abaixo | G | 07 §6 |
 | ~~1.22~~ ✅ | Coordenador de encontro com attack token. **Máximo 2 por alvo**, e não por encontro: nota abaixo | M | 07 §6 |
-| 1.23 | Telegrafo de ataque: animação de anticipação de 0,4 a 0,9 s | M | 03 §10 |
+| ~~1.23~~ ✅ | Telegrafo de ataque de 0,4 a 0,9 s. Em greybox, cor e pose; o aviso é replicado por instante de início. Nota abaixo | M | 03 §10 |
 | 1.24 | Ataques `Unblockable` com tell vermelho | P | 03 §5 |
 | 1.25 | Hitstop, screen shake por Cinemachine Impulse, camera punch | M | 03 §11 |
 | 1.26 | Partículas de impacto por material do alvo | M | 03 §11 |
@@ -126,6 +126,20 @@ O token só melhora o combate com o `CircleTargetAction` do lado dele. Sem ter p
 esperar, a terceira criatura seria recusada, cairia no galho de perseguir e ficaria encostada
 no bruxo sem bater, e inimigo parado a meio metro parece travado. Rondando, a espera vira
 ameaça.
+
+**Sobre o telegrafo da 1.23 ser de rede antes de ser de arte, 2026-09-14.** A linha do tempo
+do golpe roda só no host, então no cliente não existe anticipação nenhuma para desenhar: sem
+um aviso replicado, quem hospeda vê o tell e o companheiro apanha sem aviso. O host manda um
+único instante por golpe, no relógio do servidor, e cada máquina calcula o aviso a partir do
+mesmo `AttackDef`. Com ping, o cliente começa o aviso atrasado, mas termina junto com a
+janela de dano do host. Recomeçar do zero ao receber daria a todo cliente um aviso que acaba
+depois de o golpe já ter acertado.
+
+Não há `Animator` ainda, então a "animação de anticipação" da tarefa é, em greybox, a cápsula
+que muda de cor e se abaixa. O aviso **enche** até a janela abrir, em vez de só ligar: um
+aviso que liga diz que o golpe vem, e um aviso que enche diz quando. A cor é âmbar e nunca
+vermelha, porque vermelho é o tell de `Unblockable` da 1.24. Quando as animações entrarem no
+M4, a pose substitui o encolher, e o instante que viaja pela rede continua o mesmo.
 
 | 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
 | 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |
