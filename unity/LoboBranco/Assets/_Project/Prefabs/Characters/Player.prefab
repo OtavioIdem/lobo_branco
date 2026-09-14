@@ -201,6 +201,7 @@ GameObject:
   - component: {fileID: 6588835061401535998}
   - component: {fileID: 6890606113203842839}
   - component: {fileID: 6791933854443426249}
+  - component: {fileID: 870007490810949946}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -326,9 +327,6 @@ MonoBehaviour:
   steelSword: {fileID: 11400000, guid: e629858392dedce4f980a1d152afdb23, type: 2}
   silverSword: {fileID: 11400000, guid: 8ffd9dca9ff77204590ba39ed54c585d, type: 2}
   startingMaterial: 0
-  strongAttack: {fileID: 11400000, guid: 1b64da35544b5bf408e425efa52f947b, type: 2}
-  fastAttack: {fileID: 11400000, guid: fc378a0de87860040a9903b886b09255, type: 2}
-  groupAttack: {fileID: 11400000, guid: d10c16e231809fe4c96e98a320b6c504, type: 2}
   targetMask:
     serializedVersion: 2
     m_Bits: 512
@@ -511,3 +509,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerHitFeedback
   feedback: {fileID: 11400000, guid: cef021565843a154c824877ecfa354c9, type: 2}
+--- !u!114 &870007490810949946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415091062731458965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd125ba760cbd134780de1c1cfb6e507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerSchool
+  school: {fileID: 11400000, guid: cf74cdeaa9341664eb585d235a75ea97, type: 2}

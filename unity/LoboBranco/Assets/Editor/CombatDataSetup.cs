@@ -71,6 +71,9 @@ namespace LoboBranco.EditorTools
             CreateTelegraphStyle();
             CreateHitFeedback();
 
+            // Por ultimo: a escola aponta para golpes e bloco de atributos criados acima.
+            CreateSchools();
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[CombatData] Assets de combate prontos.");
@@ -318,6 +321,37 @@ namespace LoboBranco.EditorTools
             asset.sightRange = 0f;
             asset.hearingRange = 0f;
             asset.moveSpeed = 0f;
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // ---------------------------------------------------------------- escolas
+
+        /// <summary>
+        /// A Escola do Lobo, que o docs/13 secao 5 descreve como "o kit que ja existe". Por isso
+        /// ela aponta para os mesmos assets que o jogador ja usava, e nenhum numero muda: criar a
+        /// escola nao pode mudar o jogo. Mudar o jogo com uma escola nova e a tarefa 1.33.
+        /// </summary>
+        static void CreateSchools()
+        {
+            EnsureFolder(PlayerFolder);
+
+            string path = $"{PlayerFolder}/School_Wolf.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<SchoolDef>();
+            asset.displayName = "Lobo";
+            asset.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Player.asset");
+            asset.favoredStance = Stance.Fast;    // docs/13 secao 5: o Lobo favorece a Rapida
+            asset.strongAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Heavy.asset");
+            asset.fastAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Light.asset");
+            asset.groupAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Group.asset");
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");

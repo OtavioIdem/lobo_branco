@@ -297,6 +297,24 @@ namespace LoboBranco.EditorTools
             WireProfile(player.GetComponent<DamageReceiver>(), WitcherProfilePath);
             WireAttacker(player.GetComponent<PlayerMeleeAttacker>());
             WireHitFeedback(player);
+            WireSchool(player);
+        }
+
+        /// <summary>
+        /// A escola do bruxo (tarefa 1.31). Dela saem os atributos, os tres golpes e a postura
+        /// inicial, e por isso nem o atacante nem a folha de atributos tem golpe ou bloco de
+        /// atributos proprio ligado aqui: eles perguntam a escola em tempo de execucao.
+        ///
+        /// Todos os jogadores nascem Lobo por enquanto. Escolher a escola na sala e a tarefa
+        /// 1.34, e ela transforma isto em um indice replicado decidido antes do spawn.
+        /// </summary>
+        static void WireSchool(GameObject player)
+        {
+            const string WolfSchoolPath = "Assets/_Project/Data/Player/School_Wolf.asset";
+
+            var school = new SerializedObject(player.AddComponent<PlayerSchool>());
+            school.FindProperty("school").objectReferenceValue = Require<SchoolDef>(WolfSchoolPath);
+            school.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>
@@ -352,11 +370,9 @@ namespace LoboBranco.EditorTools
             so.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
             so.FindProperty("steelSword").objectReferenceValue = Require<MeleeWeaponDef>(SteelSwordPath);
             so.FindProperty("silverSword").objectReferenceValue = Require<MeleeWeaponDef>(SilverSwordPath);
-            // Um golpe por postura, e nao um por botao: e a postura que decide o golpe
-            // (docs/03 secao 4). O asset de cada um ja declara a propria postura.
-            so.FindProperty("fastAttack").objectReferenceValue = Require<AttackDef>(LightAttackPath);
-            so.FindProperty("strongAttack").objectReferenceValue = Require<AttackDef>(HeavyAttackPath);
-            so.FindProperty("groupAttack").objectReferenceValue = Require<AttackDef>(GroupAttackPath);
+
+            // Os golpes nao sao ligados aqui desde a tarefa 1.31: eles sao da escola, e o
+            // atacante pergunta a ela. Ver WireSchool.
 
             // Zero significa "use GameLayers.PlayerAttackTargets", mas gravar a mascara
             // explicita aqui torna visivel no Inspector no que o golpe acerta.

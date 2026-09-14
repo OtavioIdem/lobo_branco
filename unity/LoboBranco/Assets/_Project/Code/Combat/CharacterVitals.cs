@@ -217,10 +217,12 @@ namespace LoboBranco.Combat
 
         void Awake()
         {
-            if (statBlock == null)
+            StatBlockDef block = ResolveStatBlock();
+
+            if (block == null)
                 Debug.LogWarning($"{name}: {nameof(CharacterVitals)} sem {nameof(StatBlockDef)}. Vida nasce zerada.", this);
 
-            _stats = statBlock != null ? statBlock.CreateSheet() : new StatSheet();
+            _stats = block != null ? block.CreateSheet() : new StatSheet();
             _soloVitality = MaxVitality;
 
             _stamina = new StaminaPool(
@@ -233,6 +235,20 @@ namespace LoboBranco.Combat
                 tuning != null ? tuning.adrenalineFlowLinksPerCharge : 2);
 
             RefreshStaminaFromStats();
+        }
+
+        /// <summary>
+        /// Quem esta ao lado decide primeiro. No bruxo, e a escola (docs/13 secao 5.1); na
+        /// criatura nao ha ninguem, e vale o campo deste componente. A pergunta e por
+        /// <see cref="IStatBlockProvider"/> porque a escola mora num modulo acima deste, e o
+        /// grafo de asmdef so aponta para baixo.
+        /// </summary>
+        StatBlockDef ResolveStatBlock()
+        {
+            var provider = GetComponent<IStatBlockProvider>();
+            StatBlockDef provided = provider != null ? provider.StatBlock : null;
+
+            return provided != null ? provided : statBlock;
         }
 
         /// <summary>

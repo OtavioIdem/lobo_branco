@@ -151,7 +151,19 @@ hitstop por golpe, e não por alvo. A regra vale também para a câmera lenta da
 decidida antes de existir: só apresentação, nunca simulação
 ([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)).
 
-| 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
+**Sobre o `SchoolDef` da 1.31, 2026-09-14.** O `docs/13` §5.1 dizia que a afinidade de postura
+de uma escola já era aplicada pelo `StanceAffinityStage`, e isso estava errado: aquele estágio
+compara a postura do golpe com o arquétipo do alvo, e a escola de quem bate não entra na conta.
+A escola passou a ser dona dos três golpes, e a postura favorecida é a postura inicial e a vaga
+do golpe mais bem feito. É dado de golpe, não multiplicador novo, então a razão de 5,3 vezes
+fica intacta. A intensidade de sinal já era atributo, e mora no bloco de atributos da escola.
+Custo de sinal e filtro de vestígio ficaram de fora, porque sinais e investigação ainda não
+existem. O Lobo sai idêntico ao kit que já existia; nada muda em jogo nesta tarefa.
+
+Um teste falha se aparecer uma terceira escola em `Assets/_Project/Data`. O slice é Lobo e
+Grifo, e uma escola nova é só um asset, que é a porta mais fácil para o escopo crescer.
+
+| ~~1.31~~ ✅ | `SchoolDef`: bloco de atributos, três golpes e postura favorecida. A intensidade de sinal é atributo. Nota acima | M | 13 §5.1 |
 | 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |
 | 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Vontade. Zero `if` por escola | G | 13 §5 |
 | 1.34 | Seleção de escola na entrada da sala | P | 13 §8 |

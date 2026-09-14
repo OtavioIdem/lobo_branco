@@ -150,7 +150,14 @@ namespace LoboBranco.Player
                 Window = tuning != null ? tuning.inputBufferSeconds : 0.2f,
             };
 
-            _stance = new StanceSelector(tuning != null ? tuning.stanceSwitchSeconds : 0.25f);
+            // O bruxo entra na luta na postura favorecida da escola, que e a vaga em que ela poe
+            // o golpe mais bem feito (docs/13 secao 5.1). Sem escola, a Rapida de sempre.
+            var school = GetComponent<PlayerSchool>();
+
+            _stance = new StanceSelector(
+                tuning != null ? tuning.stanceSwitchSeconds : 0.25f,
+                // Qualificado de proposito: dentro desta classe, Stance e a propriedade do seletor.
+                school != null ? school.FavoredStance : LoboBranco.Combat.Stance.Fast);
 
             _context = new PlayerStateContext
             {

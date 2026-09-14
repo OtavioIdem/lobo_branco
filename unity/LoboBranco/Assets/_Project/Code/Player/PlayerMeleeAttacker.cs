@@ -50,15 +50,13 @@ namespace LoboBranco.Player
         [Tooltip("Com qual espada o bruxo entra na cena.")]
         [SerializeField] WeaponMaterial startingMaterial = WeaponMaterial.Steel;
 
-        [Header("Golpes por postura (docs/03 secao 4)")]
-        [Tooltip("Forte: 1,45x, lento, um alvo.")]
-        [SerializeField] AttackDef strongAttack;
+        // Os golpes por postura moravam aqui ate a tarefa 1.31. Agora sao da escola, e este
+        // componente pergunta a ela: um bruxo do Grifo e um do Lobo empunham a mesma espada e
+        // desferem golpes diferentes (docs/13 secao 5.1). Achado na primeira vez que precisa,
+        // porque o host resolve o golpe do companheiro e a pergunta chega pela rede.
+        PlayerSchool _school;
 
-        [Tooltip("Rapida: 0,75x, cadencia alta, um alvo.")]
-        [SerializeField] AttackDef fastAttack;
-
-        [Tooltip("Grupo: 0,90x, ate quatro alvos em arco de 180 graus.")]
-        [SerializeField] AttackDef groupAttack;
+        PlayerSchool School => _school != null ? _school : (_school = GetComponent<PlayerSchool>());
 
         [Header("Alvos")]
         [Tooltip("Deixe em Nothing para usar a mascara padrao de GameLayers.PlayerAttackTargets.")]
@@ -144,12 +142,7 @@ namespace LoboBranco.Player
         /// propria postura, entao o estagio 2 e o 3 do pipeline saem do asset e nenhum
         /// <c>if</c> de postura precisa existir em codigo de combate.
         /// </summary>
-        public AttackDef AttackFor(Stance stance) => stance switch
-        {
-            Stance.Strong => strongAttack,
-            Stance.Group => groupAttack,
-            _ => fastAttack,
-        };
+        public AttackDef AttackFor(Stance stance) => School != null ? School.AttackFor(stance) : null;
 
         /// <summary>Verdadeiro enquanto a janela de dano esta aberta. O painel de debug mostra isto.</summary>
         public bool HitboxOpen => _windowOpen;
@@ -364,8 +357,10 @@ namespace LoboBranco.Player
         /// o asset do proprio lado: os dois tem o mesmo prefab, entao a mesma postura da
         /// no mesmo golpe, e nao existe como as duas maquinas discordarem de qual foi.
         ///
-        /// Quando as escolas entrarem (tarefa 1.31) a tabela vem do `SchoolDef` e este
-        /// metodo continua sendo uma conversao de postura para asset, sem virar `if`.
+        /// Desde a tarefa 1.31 a tabela vem do <see cref="SchoolDef"/>, e este metodo continua
+        /// sendo uma conversao de postura para asset, sem nenhum <c>if</c> de escola. E por
+        /// isso que cada golpe da escola tem que declarar a postura da vaga em que esta: o
+        /// dono manda a postura do golpe, e o host busca o asset pela vaga.
         /// </summary>
         byte IndexOf(AttackDef attack) => attack != null ? (byte)attack.stance : NoAttack;
 
@@ -547,7 +542,9 @@ namespace LoboBranco.Player
         /// <summary>Desenha o alcance do golpe leve no editor. Sem isso, afinar 'reach' e adivinhacao.</summary>
         void OnDrawGizmosSelected()
         {
-            AttackDef preview = fastAttack != null ? fastAttack : strongAttack;
+            // Os golpes sao da escola desde a tarefa 1.31. Sem escola no prefab, nao ha o que desenhar.
+            AttackDef preview = AttackFor(Stance.Fast);
+            if (preview == null) preview = AttackFor(Stance.Strong);
             if (preview == null) return;
 
             Vector3 center = transform.position + Vector3.up * preview.heightOffset;

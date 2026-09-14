@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e094808d2e6f66e47b21d99081a6403b, type: 3}
+  m_Name: School_Wolf
+  m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.SchoolDef
+  displayName: Lobo
+  statBlock: {fileID: 11400000, guid: ef2157e2dfb2ff14b81a8b4016ae0d11, type: 2}
+  favoredStance: 1
+  strongAttack: {fileID: 11400000, guid: 1b64da35544b5bf408e425efa52f947b, type: 2}
+  fastAttack: {fileID: 11400000, guid: fc378a0de87860040a9903b886b09255, type: 2}
+  groupAttack: {fileID: 11400000, guid: d10c16e231809fe4c96e98a320b6c504, type: 2}

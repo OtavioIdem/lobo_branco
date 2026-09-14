@@ -98,11 +98,28 @@ sistema é a infraestrutura que as outras três reaproveitam depois.
 Uma escola é a combinação de três alavancas que **já existem no projeto**:
 
 1. `StatBlockDef` diferente, que é o viés de atributo.
-2. Afinidade de postura, que `StanceAffinityStage` já aplica.
+2. ~~Afinidade de postura, que `StanceAffinityStage` já aplica.~~ **Corrigido na tarefa 1.31**, abaixo.
 3. Intensidade e custo de sinal, que o [doc 03 §8](03_COMBATE.md) já parametriza.
 
 Uma escola nova é um `SchoolDef` apontando para esses três assets, mais o filtro de vestígio
 do §4.1. Nenhum `if` por escola em código de combate. Se aparecer um, a escola está errada.
+
+**Correção de 2026-09-14, escrita ao implementar a tarefa 1.31.** O item 2 estava errado. O
+`StanceAffinityStage` compara a postura do golpe com o arquétipo do **alvo**, e a escola de
+quem bate não entra nessa conta. A "postura favorecida" da tabela do §5 virou outra coisa,
+mais simples e sem multiplicador novo:
+
+- **A escola é dona dos três golpes, um por postura.** A postura favorecida é a postura com
+  que o bruxo entra na luta, e a vaga em que a escola põe o golpe mais bem feito. Como o que
+  muda é o `AttackDef`, e não um bônus de dano, a razão de 5,3 vezes do doc 03 fica intacta.
+- **A intensidade de sinal é o atributo `SignIntensity`**, e por isso mora no `StatBlockDef`
+  da escola, e não num campo próprio.
+- **Custo de sinal e filtro de vestígio ficam fora do `SchoolDef` por enquanto**, porque sinais
+  e investigação ainda não existem (tarefa 1.18 e M3).
+
+Cada golpe tem que declarar a postura da vaga em que está. O golpe viaja pela rede como
+postura e o host resolve o asset pela postura; um golpe na vaga errada faria dono e host
+desferirem golpes diferentes. Há teste para isso sobre os assets reais.
 
 ## 6. Modelo de autoridade, em resumo
 

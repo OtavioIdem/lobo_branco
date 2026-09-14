@@ -4,6 +4,31 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-14 — M1 tarefa 1.31: a escola vira dado
+- `SchoolDef`: uma escola de bruxo em asset. Bloco de atributos, os tres golpes por postura e
+  a postura favorecida. E a regra 7 do CLAUDE.md feita tipo: nenhum `if` de escola em codigo.
+- **O docs/13 secao 5.1 estava errado sobre a afinidade de postura, e foi corrigido.** Ele
+  dizia que o `StanceAffinityStage` ja aplicava a afinidade da escola. Nao aplica: aquele
+  estagio compara a postura do golpe com o arquetipo do alvo, e a escola de quem bate nao
+  entra na conta. A postura favorecida virou a postura inicial e a vaga do golpe mais bem
+  feito. E dado de golpe e nao multiplicador novo, entao a razao de 5,3 vezes fica intacta.
+- A intensidade de sinal ja era o atributo `SignIntensity`, e mora no bloco de atributos da
+  escola. Custo de sinal e filtro de vestigio ficaram de fora: sinais e investigacao ainda
+  nao existem, e campo para sistema inexistente e promessa.
+- **Cada golpe tem que declarar a postura da vaga em que esta.** O golpe viaja pela rede como
+  postura e o host resolve o asset pela vaga; um golpe Forte na vaga Rapida faria dono e host
+  desferirem golpes diferentes, sem erro nenhum. O asset avisa no Inspector, e um teste
+  percorre as escolas reais do projeto.
+- `PlayerSchool`: o unico lugar do personagem que sabe a escola. O atacante pergunta os
+  golpes, o cerebro pergunta a postura inicial, e a folha de atributos pergunta por uma
+  interface do modulo de combate, porque o grafo de asmdef nao deixa o combate apontar para o
+  jogador.
+- `School_Wolf.asset` aponta para os mesmos assets que o jogador ja usava. **Nada muda em jogo**:
+  criar a escola nao pode mudar o jogo, e a escola que muda e o Grifo, da tarefa 1.33.
+- **Um teste falha se aparecer uma terceira escola.** O slice e Lobo e Grifo, e uma escola nova
+  e so um asset, a porta mais facil para o escopo crescer (risco X1 do docs/10).
+- 248 testes passando, contra 238 antes.
+
 ### 2026-09-14 — M1 tarefa 1.25: o golpe que conecta se sente, sem parar o tempo de ninguem
 - **O hitstop nao mexe em `Time.timeScale`, e isso e regra do projeto agora.** A escala de
   tempo e global na maquina: no host, 0,08 s de congelamento de um golpe forte travaria a IA,
