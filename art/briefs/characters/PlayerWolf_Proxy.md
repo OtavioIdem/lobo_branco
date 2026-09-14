@@ -66,3 +66,26 @@
 - `art/CREDITS.md`: não aplicável nesta etapa; a imagem oficial é referência externa e não é incorporada. Concept de trabalho e geometria são gerados para o projeto.
 - Pendências: rig, retopologia final, UV, texturas, cabelo final, armas, sockets, LOD e prefab jogável.
 - Resultado: proxy aprovado para teste de escala e importação em 2026-09-12; ver o relatório ao lado do `.blend`.
+
+## Revisão de modelagem v02 — 2026-09-12
+
+- Revisão solicitada pelo usuário para rosto/nuca, barba curta e anatomia dos membros.
+- Fonte revisada: `art/source/blender/characters/player-wolf/SM_PlayerWolf_Proxy_v02.blend`.
+- FBX de revisão: ao lado do `.blend`; ainda não substitui o FBX instalado na Unity.
+- 14.698 triângulos, cinco materiais, altura total de 1,85 m incluindo as espadas.
+- Cores de vértice diferenciam barba, olhos e roupa sem imagens de textura. A exibição
+  dessas cores na Unity exige um shader compatível; integração não executada.
+- Proxy estilizado, com componentes separados por grupos de vértices. Arte final,
+  retopologia para deformação, rig, UV e texturas continuam pendentes.
+- Fonte v01 preservada; detalhes em `SM_PlayerWolf_Proxy_v02.validation.md` ao lado da v02.
+
+## Estudo de acabamento v03 — 2026-09-14
+
+- Continuação solicitada pelo usuário para mais acabamento e qualidade no Blender.
+- Fonte: `art/source/blender/characters/player-wolf/SM_PlayerWolf_Refined_v03.blend`.
+- V03 de trabalho com 460.258 triângulos e dez materiais procedurais; não segue o
+  orçamento de 15 mil da v02, que permanece intacta como proxy leve.
+- Rosto, pálpebras, cabelo, barba, superfícies da roupa, cota e materiais revistos.
+- FBX geométrico reimportado e validado. Procedurais não foram convertidos em mapas.
+- Não substitui o jogador da Unity; otimização, UV, bake, rig e integração pendentes.
+- Evidências: `SM_PlayerWolf_Refined_v03.validation.md` e `validation_v03_roundtrip.json`.
