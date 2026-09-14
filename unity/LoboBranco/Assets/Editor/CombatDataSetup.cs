@@ -69,6 +69,7 @@ namespace LoboBranco.EditorTools
             CreatePlayerTuning();
             CreateMonsters();
             CreateTelegraphStyle();
+            CreateHitFeedback();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -317,6 +318,29 @@ namespace LoboBranco.EditorTools
             asset.sightRange = 0f;
             asset.hearingRange = 0f;
             asset.moveSpeed = 0f;
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // -------------------------------------------------------------- sensacao
+
+        /// <summary>
+        /// Os numeros de sensacao do docs/03 secao 11 (tarefa 1.25). Os valores ficam nos
+        /// padroes do proprio <see cref="HitFeedbackDef"/>, que sao os do documento: 0,08 s
+        /// de hitstop no golpe forte, 0,04 s no leve, e 2 graus de soco de camera.
+        /// </summary>
+        static void CreateHitFeedback()
+        {
+            string path = $"{CombatFolder}/HitFeedback_Default.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<HitFeedbackDef>();
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");

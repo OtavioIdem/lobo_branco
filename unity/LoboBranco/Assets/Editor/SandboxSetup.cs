@@ -296,6 +296,35 @@ namespace LoboBranco.EditorTools
             WireVitals(player.GetComponent<CharacterVitals>(), PlayerStatsPath);
             WireProfile(player.GetComponent<DamageReceiver>(), WitcherProfilePath);
             WireAttacker(player.GetComponent<PlayerMeleeAttacker>());
+            WireHitFeedback(player);
+        }
+
+        /// <summary>
+        /// A sensacao do golpe conectado (tarefa 1.25). O mesmo asset vai para dois lugares:
+        /// o atacante le o hitstop dele no host, e o componente de sensacao le o tremor e o
+        /// soco na tela do dono (tech/adr/0010).
+        /// </summary>
+        static void WireHitFeedback(GameObject player)
+        {
+            const string HitFeedbackPath = "Assets/_Project/Data/Combat/HitFeedback_Default.asset";
+
+            var feedbackDef = Require<HitFeedbackDef>(HitFeedbackPath);
+
+            // Uniforme e nao dissipando: o impulso so existe na maquina de quem bateu, entao
+            // a distancia ate a camera nao significa nada, e dissipar faria a forca do tremor
+            // depender de onde a camera esta. A duracao nao e gravada aqui: ela e lida do
+            // asset em tempo de execucao, para afinar sem remontar o jogador.
+            var impulse = player.AddComponent<CinemachineImpulseSource>();
+            impulse.ImpulseDefinition.ImpulseType = CinemachineImpulseDefinition.ImpulseTypes.Uniform;
+            impulse.ImpulseDefinition.ImpulseShape = CinemachineImpulseDefinition.ImpulseShapes.Bump;
+
+            var hitFeedback = new SerializedObject(player.AddComponent<PlayerHitFeedback>());
+            hitFeedback.FindProperty("feedback").objectReferenceValue = feedbackDef;
+            hitFeedback.ApplyModifiedPropertiesWithoutUndo();
+
+            var attacker = new SerializedObject(player.GetComponent<PlayerMeleeAttacker>());
+            attacker.FindProperty("feedback").objectReferenceValue = feedbackDef;
+            attacker.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>
@@ -669,6 +698,13 @@ namespace LoboBranco.EditorTools
             avoidance.Enabled = true;
             avoidance.CameraRadius = 0.25f;
             deoccluder.AvoidObstacles = avoidance;
+
+            // Sem ouvinte, o tremor do Impulse e gerado e nunca chega a tela (docs/07 secao
+            // 7). Em espaco de camera para o tremor ser sempre na tela, e nao no mundo: um
+            // tremor no eixo do mundo some quando a camera olha na direcao dele.
+            var listener = go.AddComponent<CinemachineImpulseListener>();
+            listener.Gain = 1f;
+            listener.UseCameraSpace = true;
 
             go.transform.position = pivot.position - pivot.forward * CameraDistance;
         }

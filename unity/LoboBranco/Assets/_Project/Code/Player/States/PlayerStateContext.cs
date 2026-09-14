@@ -89,5 +89,15 @@ namespace LoboBranco.Player
         /// ha troca em andamento, o que e diferente de "trocar para a que ja esta na mao".
         /// </summary>
         public WeaponMaterial? PendingWeapon;
+
+        // --------------------------------------------------------------- hitstop
+
+        /// <summary>
+        /// Segundos que o golpe corrente deve ficar parado, pedidos quando o host confirma
+        /// que ele conectou (tech/adr/0010). Consumido pelo estado de ataque; fora dele,
+        /// quem escreve e o <see cref="PlayerBrain"/> zera, porque um acerto confirmado
+        /// depois de a esquiva cortar o golpe nao tem o que congelar.
+        /// </summary>
+        public float PendingHitstop;
     }
 }

@@ -35,6 +35,7 @@ namespace LoboBranco.Combat
         AttackDef _attack;
         IMeleeAttacker _attacker;
         float _elapsed;
+        float _holdRemaining;
         bool _opened;
         bool _closed;
 
@@ -43,8 +44,11 @@ namespace LoboBranco.Combat
         /// <summary>Golpe em execucao, ou nulo entre golpes.</summary>
         public AttackDef Attack => _attack;
 
-        /// <summary>Segundos desde o inicio do golpe.</summary>
+        /// <summary>Segundos desde o inicio do golpe, sem contar o tempo segurado.</summary>
         public float Elapsed => _elapsed;
+
+        /// <summary>Segundos que o golpe ainda vai ficar parado pelo hitstop (tech/adr/0010).</summary>
+        public float HoldRemaining => _holdRemaining;
 
         /// <summary>Verdadeiro enquanto o golpe ainda nao chegou ao fim da recuperacao.</summary>
         public bool Running => _attack != null && _elapsed < _attack.TotalDuration;
@@ -80,6 +84,7 @@ namespace LoboBranco.Combat
             _attack = attack;
             _attacker = attacker;
             _elapsed = 0f;
+            _holdRemaining = 0f;
             _opened = false;
             _closed = false;
 
@@ -88,12 +93,41 @@ namespace LoboBranco.Combat
         }
 
         /// <summary>
+        /// Segura o golpe parado por alguns segundos: o hitstop (tech/adr/0010). Nao usa
+        /// <c>Time.timeScale</c>, que em coop congelaria a sessao inteira no host.
+        ///
+        /// Pedir de novo nao soma, e o maior pedido vence. Um golpe de Grupo que acerta
+        /// quatro alvos congela uma vez, e nao quatro.
+        /// </summary>
+        public void Hold(float seconds)
+        {
+            if (_attack == null || seconds <= 0f) return;
+
+            if (seconds > _holdRemaining) _holdRemaining = seconds;
+        }
+
+        /// <summary>
         /// Envelhece o golpe. Devolve falso quando ele terminou, e terminar inclui o caso
         /// de nunca ter comecado.
+        ///
+        /// O tempo segurado e gasto antes, e a sobra do passo avanca o golpe no mesmo quadro.
+        /// Sem a sobra, cada hitstop arredondaria para um quadro inteiro a mais, e a duracao
+        /// do golpe passaria a depender da taxa de quadros, que e diferente no host e no dono.
         /// </summary>
         public bool Tick(float deltaTime)
         {
             if (_attack == null) return false;
+
+            if (_holdRemaining > 0f)
+            {
+                float held = deltaTime < _holdRemaining ? deltaTime : _holdRemaining;
+                _holdRemaining -= held;
+                deltaTime -= held;
+
+                // Parado, o golpe tambem nao consulta a hitbox: um alvo que entrasse no arco
+                // agora seria acertado por uma lamina que, na tela, esta imovel.
+                if (deltaTime <= 0f) return _elapsed < _attack.TotalDuration;
+            }
 
             _elapsed += deltaTime;
 

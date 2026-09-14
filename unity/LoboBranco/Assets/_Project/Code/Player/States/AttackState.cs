@@ -59,6 +59,15 @@ namespace LoboBranco.Player
 
         public override void OnTick(PlayerStateContext context, float deltaTime)
         {
+            // O hitstop pedido pelo host entra antes de o golpe andar, e nao depois: assim o
+            // quadro em que ele chega ja e um quadro parado, e a extensao do golpe no dono
+            // bate com a que o host somou do lado dele (tech/adr/0010).
+            if (context.PendingHitstop > 0f)
+            {
+                _timeline.Hold(context.PendingHitstop);
+                context.PendingHitstop = 0f;
+            }
+
             // Sem asset de ataque nao ha o que executar, e a linha do tempo devolve falso
             // no primeiro passo. Sair aqui e nao no OnEnter e deliberado: trocar de estado
             // de dentro do OnEnter e reentrar na maquina no meio de uma transicao.
@@ -69,6 +78,10 @@ namespace LoboBranco.Player
         public override void OnExit(PlayerStateContext context)
         {
             _timeline.End();
+
+            // Um hitstop que sobrou e de um golpe que acabou. Deixado no contexto, ele
+            // congelaria o golpe seguinte, que nao acertou nada.
+            context.PendingHitstop = 0f;
         }
 
         // ---------------------------------------------------------------- interno

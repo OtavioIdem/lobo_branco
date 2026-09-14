@@ -117,6 +117,8 @@ Detalhe e justificativa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-c
 | IA, encontro, attack token | **O host** | O coordenador de token do doc 07 §6 já é peça única por natureza |
 | Efeito visual e som de impacto | Todos, localmente | Reagem ao evento do host |
 | Telegrafo de ataque de inimigo | **O host** decide o instante; todos desenham | Um carimbo de tempo por golpe, no relógio do servidor. Cada máquina calcula o aviso a partir do mesmo `AttackDef`, e o aviso do cliente com ping termina junto com a janela de dano do host (tarefa 1.23) |
+| Hitstop | **O host** soma ao golpe; o dono segura o dele pelo mesmo tempo | Nunca `Time.timeScale`, que no host congelaria a sessão inteira. A extensão do golpe é igual nas duas pontas, e a janela de Fluxo sobrevive ([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)) |
+| Tremor e soco de câmera | Só o dono, na tela dele | Reagem ao acerto confirmado pelo host e à vida do próprio bruxo caindo |
 
 A frase que resolve noventa por cento das dúvidas de implementação: **o cliente pede, o host
 decide, todo mundo assiste.**

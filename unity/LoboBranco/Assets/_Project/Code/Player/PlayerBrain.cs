@@ -199,10 +199,30 @@ namespace LoboBranco.Player
             _input.StanceCycled += OnStanceCycled;
             _input.SwitchSteelPressed += OnSwitchSteel;
             _input.SwitchSilverPressed += OnSwitchSilver;
+
+            if (_attacker != null) _attacker.HitConfirmed += OnHitConfirmed;
+        }
+
+        /// <summary>
+        /// O host confirmou que o golpe conectou (tech/adr/0010). O pedido vai para o
+        /// contexto, e nao direto para a linha do tempo, pela regra da FSM: quem mexe no
+        /// golpe e o estado de ataque.
+        ///
+        /// So guarda se ainda ha golpe. Uma confirmacao que chega depois de a esquiva cortar
+        /// o golpe nao tem o que congelar, e guardada ela congelaria o golpe seguinte.
+        /// </summary>
+        void OnHitConfirmed(float damage, float hitstopSeconds)
+        {
+            if (_machine == null || _machine.CurrentId != PlayerStateId.Attack) return;
+
+            if (hitstopSeconds > _context.PendingHitstop)
+                _context.PendingHitstop = hitstopSeconds;
         }
 
         void OnDisable()
         {
+            if (_attacker != null) _attacker.HitConfirmed -= OnHitConfirmed;
+
             _input.AttackLightPressed -= OnAttackLight;
             _input.AttackHeavyPressed -= OnAttackHeavy;
             _input.DodgePressed -= OnDodge;

@@ -89,7 +89,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | ~~1.22~~ ✅ | Coordenador de encontro com attack token. **Máximo 2 por alvo**, e não por encontro: nota abaixo | M | 07 §6 |
 | ~~1.23~~ ✅ | Telegrafo de ataque de 0,4 a 0,9 s. Em greybox, cor e pose; o aviso é replicado por instante de início. Nota abaixo | M | 03 §10 |
 | 1.24 | Ataques `Unblockable` com tell vermelho | P | 03 §5 |
-| 1.25 | Hitstop, screen shake por Cinemachine Impulse, camera punch | M | 03 §11 |
+| ~~1.25~~ ✅ | Hitstop, screen shake por Cinemachine Impulse, camera punch. **Sem `timeScale`**: nota abaixo | M | 03 §11 |
 | 1.26 | Partículas de impacto por material do alvo | M | 03 §11 |
 | 1.27 | Knockback proporcional ao peso do alvo | P | 03 §11 |
 | 1.28 | Slow-motion no último inimigo morto | P | 03 §11 |
@@ -140,6 +140,16 @@ que muda de cor e se abaixa. O aviso **enche** até a janela abrir, em vez de s�
 aviso que liga diz que o golpe vem, e um aviso que enche diz quando. A cor é âmbar e nunca
 vermelha, porque vermelho é o tell de `Unblockable` da 1.24. Quando as animações entrarem no
 M4, a pose substitui o encolher, e o instante que viaja pela rede continua o mesmo.
+
+**Sobre o hitstop da 1.25 não congelar o tempo, 2026-09-14.** O jeito comum de fazer hitstop é
+mexer em `Time.timeScale`, e em coop isso é proibido: a escala é global na máquina, e no host
+ela congelaria a simulação de todos os jogadores. Congelar só o dono também quebra, porque o
+host mede a janela de Fluxo de 0,22 s pelo próprio relógio, e um dono parado 0,08 s perderia um
+terço dela. O hitstop estende o golpe de quem bateu pela mesma duração nas duas pontas: o host
+soma à contagem dele, e o dono segura a própria linha do tempo quando a confirmação chega. É um
+hitstop por golpe, e não por alvo. A regra vale também para a câmera lenta da 1.28, que fica
+decidida antes de existir: só apresentação, nunca simulação
+([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)).
 
 | 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
 | 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |

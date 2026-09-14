@@ -36,6 +36,19 @@ namespace LoboBranco.CameraSystem
         float _yaw;
         float _pitch = 12f;
 
+        // Somado so na hora de escrever a rotacao, e nunca no pitch do jogador: e o que
+        // impede dez golpes seguidos de deixarem a camera vinte graus mais baixa.
+        readonly CameraPunch _punch = new CameraPunch();
+
+        /// <summary>Deslocamento do soco de camera agora, em graus. O painel de debug mostra isto.</summary>
+        public float PunchOffset => _punch.Offset;
+
+        /// <summary>
+        /// Da o soco de camera do docs/03 secao 11. Quem chama e o dono do personagem, na
+        /// tela dele: camera e local por natureza, e o companheiro nao sente o seu golpe.
+        /// </summary>
+        public void Punch(float degrees, float recoverySeconds) => _punch.Kick(degrees, recoverySeconds);
+
         /// <summary>Rotacao horizontal atual, em graus. O movimento do jogador usa isto.</summary>
         public float Yaw => _yaw;
 

@@ -4,6 +4,33 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 ## [Nao lancado]
 
+### 2026-09-14 — M1 tarefa 1.25: o golpe que conecta se sente, sem parar o tempo de ninguem
+- **O hitstop nao mexe em `Time.timeScale`, e isso e regra do projeto agora.** A escala de
+  tempo e global na maquina: no host, 0,08 s de congelamento de um golpe forte travaria a IA,
+  a vida e o Fluxo dos outros tres jogadores. Registrado em `tech/adr/0010`.
+- **O hitstop estende o golpe de quem bateu pelo mesmo tempo nas duas pontas da rede.** O host
+  soma os segundos a contagem do golpe e confirma o acerto para o dono, que segura a propria
+  linha do tempo pelo mesmo numero. A confirmacao chega com meia ida e volta de atraso, e isso
+  nao importa: a extensao total e igual dos dois lados. Congelar so o dono faria o golpe
+  terminar depois do que o host acha, e comeria um terco da janela de Fluxo de 0,22 s.
+- `AttackTimeline.Hold`: o tempo segurado e gasto antes, e a sobra do passo avanca o golpe no
+  mesmo quadro. Sem a sobra, cada hitstop arredondaria para um quadro inteiro, e a duracao do
+  golpe dependeria da taxa de quadros, que e diferente no host e no dono.
+- **Um hitstop por golpe, e nao por alvo.** A postura Grupo acerta ate quatro, e somar quatro
+  congelamentos faria dela o golpe mais lento do jogo.
+- Uma confirmacao que chega depois de a esquiva cortar o golpe e descartada. Guardada, ela
+  congelaria o golpe seguinte, que nao acertou nada.
+- `HitFeedbackDef`: 0,08 s no Forte e 0,04 s no Rapido, os numeros do docs/03 secao 11. Grupo
+  fica em 0,05 s, porque o documento nao da numero e congelar muito com varios alvos parece
+  travamento. Tremor proporcional ao dano, com teto, e soco de 2 graus.
+- `PlayerHitFeedback`: tremor e soco so na tela de quem bateu. Apanhar tambem treme, e nao
+  empurra, porque o soco e a assinatura de quem acerta. Sem a pergunta "este personagem e o
+  desta tela", o golpe de um companheiro sacudiria a camera de todo mundo.
+- `CameraPunch`: o soco e somado so na hora de escrever a rotacao, e nunca no pitch do
+  jogador. Dez golpes seguidos nao deixam a camera vinte graus mais baixa.
+- 238 testes passando, contra 218 antes. Um deles garante que o golpe dura exatamente o tempo
+  dele mais o tempo segurado, nem um passo a mais: e a conta que faz host e dono concordarem.
+
 ### 2026-09-14 — M1 tarefa 1.23: o aviso do golpe chega a todo mundo
 - **O telegrafo era, antes de tudo, um problema de rede.** A linha do tempo do golpe roda
   so no host, entao no cliente nao existia anticipacao nenhuma: quem hospedava via o tell,

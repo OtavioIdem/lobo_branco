@@ -77,6 +77,10 @@ namespace LoboBranco.Player
         [Tooltip("Simula um oleo aplicado na lamina, para ver o 1,5x antes da alquimia existir.")]
         [SerializeField] OilClass appliedOil = OilClass.None;
 
+        [Header("Sensacao (docs/03 secao 11)")]
+        [Tooltip("De onde sai o hitstop por postura. Sem asset, o golpe conecta sem congelar.")]
+        [SerializeField] HitFeedbackDef feedback;
+
         const int MaxTargetsPerSwing = 8;
 
         /// <summary>Indice que nao corresponde a golpe nenhum. Vai no lugar de null pela rede.</summary>
@@ -108,6 +112,17 @@ namespace LoboBranco.Player
         AttackDef _resolvingAttack;
         bool _resolvingWindowOpen;
         bool _queriedSinceOpen;
+
+        // Um hitstop por golpe, e nao por alvo (tech/adr/0010). Zerado no inicio de cada
+        // golpe, do lado de quem resolve.
+        bool _hitstopGranted;
+
+        /// <summary>
+        /// O golpe conectou: dano do primeiro alvo e segundos de hitstop que o host somou.
+        /// Dispara so no dono, uma vez por golpe. E o que congela o golpe na maquina de estados
+        /// e o que dispara tremor e soco de camera na tela de quem bateu.
+        /// </summary>
+        public event System.Action<float, float> HitConfirmed;
 
         // Quanto falta do golpe corrente, na contagem de quem resolve. Chegar a zero e o
         // que abre a janela de Fluxo, entao ela abre no fim do golpe inteiro e nao no fim
@@ -364,6 +379,7 @@ namespace LoboBranco.Player
             _resolvingAttack = attack;
             _resolvingWindowOpen = false;
             _queriedSinceOpen = false;
+            _hitstopGranted = false;
             _hitbox?.BeginSwing();
 
             int links = _flow.Begin();
@@ -468,6 +484,8 @@ namespace LoboBranco.Player
 
             DamageResult result = _pipeline.Deal(request);
 
+            GrantHitstop(result.Amount);
+
             // Morte causada rende uma carga (docs/03 secao 7). A pergunta e feita depois do
             // golpe: antes dele o alvo estava de pe, senao nao teria sido acertado.
             if (target.IsDown && _vitals != null)
@@ -476,6 +494,37 @@ namespace LoboBranco.Player
             if (_pipeline.LoggingEnabled)
                 RecordSummary(target, result);
         }
+
+        /// <summary>
+        /// Soma o hitstop na contagem de quem resolve e confirma o acerto para o dono
+        /// (tech/adr/0010). Uma vez por golpe, e nao por alvo: a postura Grupo acerta ate
+        /// quatro, e somar quatro congelamentos faria dela o golpe mais lento do jogo.
+        ///
+        /// O dono recebe o numero pronto, e nao a postura. Quem somou os segundos a janela
+        /// de Fluxo foi este lado, e e esse mesmo numero que o dono tem que segurar.
+        /// </summary>
+        void GrantHitstop(float damage)
+        {
+            if (_hitstopGranted || _resolvingAttack == null) return;
+
+            _hitstopGranted = true;
+
+            float hitstop = feedback != null ? feedback.HitstopFor(_resolvingAttack.stance) : 0f;
+
+            // A metade do host da conta. A contagem que abre a janela de Fluxo anda o
+            // mesmo tempo que o dono segura, e as duas pontas terminam o golpe juntas.
+            _resolvingRemaining += hitstop;
+
+            if (!IsSpawned || IsOwner) ConfirmHit(damage, hitstop);
+            else HitConfirmedRpc(damage, hitstop);
+        }
+
+        // Server como permissao faz o NGO recusar confirmacao vinda de cliente. Sem isso,
+        // um participante poderia congelar o golpe de outro quando quisesse.
+        [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+        void HitConfirmedRpc(float damage, float hitstopSeconds) => ConfirmHit(damage, hitstopSeconds);
+
+        void ConfirmHit(float damage, float hitstopSeconds) => HitConfirmed?.Invoke(damage, hitstopSeconds);
 
         /// <summary>
         /// Monta o texto do ultimo golpe. So roda com o log ligado, porque concatenar
