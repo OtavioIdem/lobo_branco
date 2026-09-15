@@ -21,7 +21,9 @@ namespace LoboBranco.EditorTools
         const string StatsFolder = "Assets/_Project/Data/Stats";
         const string AttacksFolder = "Assets/_Project/Data/Combat/Attacks";
         const string WeaponsFolder = "Assets/_Project/Data/Combat/Weapons";
+        const string AbilitiesFolder = "Assets/_Project/Data/Combat/Abilities";
         const string PlayerFolder = "Assets/_Project/Data/Player";
+        const string MonstersFolder = "Assets/_Project/Data/Monsters";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -61,11 +63,23 @@ namespace LoboBranco.EditorTools
                 Entry(StatType.MaxVitality, 55f),
                 Entry(StatType.AttackDamage, 16f),
                 Entry(StatType.Armor, 2f),
+                Entry(StatType.MoveSpeed, 1f),         // neutro; a lentidao multiplica isto
             });
+
+            // O MoveSpeed entrou na tarefa 1.18a, depois de o bloco ja existir. Sem ele, a
+            // lentidao multiplica zero e nao pega (ver MonsterAssetsTests).
+            EnsureStatEntry($"{StatsFolder}/StatBlock_Barghest.asset", StatType.MoveSpeed, 1f);
 
             CreateAttacks();
             CreateWeapons();
             CreatePlayerTuning();
+            CreateMonsters();
+            CreateTelegraphStyle();
+            CreateHitFeedback();
+            CreateAbilities();
+
+            // Por ultimo: a escola aponta para golpes, habilidades e bloco de atributos criados acima.
+            CreateSchools();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -129,6 +143,26 @@ namespace LoboBranco.EditorTools
                 a.radius = 0.9f;
                 a.heightOffset = 1.1f;
             });
+
+            // A garra do barghest (tarefa 1.21). A anticipacao aqui nao e detalhe de
+            // afinacao, e o telegrafo do docs/03 secao 10: 0,65 s antes da janela abrir,
+            // dentro da faixa de 0,4 a 0,9 s que o documento pede. E esse tempo que a
+            // esquiva da tarefa 1.10 vai ter para acontecer, e quem encurtar este numero
+            // esta tornando o combate injusto, nao dificil.
+            CreateAttack($"{AttacksFolder}/Attack_Barghest_Claw.asset", a =>
+            {
+                a.stance = Stance.Fast;         // besta agil ataca rapido
+                a.strikeTime = 1.0f;
+                a.recovery = 0.45f;
+                a.hitboxOpenAt = 0.65f;         // anticipacao de 0,65 s: o tell
+                a.hitboxCloseAt = 0.85f;        // janela de 0,20 s
+                a.staminaCost = 0f;             // monstro nao gasta vigor (docs/03 secao 7)
+                a.maxTargets = 1;
+                a.arcDegrees = 90f;
+                a.reach = 2.0f;
+                a.radius = 0.5f;
+                a.heightOffset = 1.0f;
+            });
         }
 
         static void CreateWeapons()
@@ -138,6 +172,13 @@ namespace LoboBranco.EditorTools
             // docs/03 secao 12: jogador nivel 1 bate 12 de base.
             CreateWeapon($"{WeaponsFolder}/Weapon_SteelSword.asset", WeaponMaterial.Steel, 12f);
             CreateWeapon($"{WeaponsFolder}/Weapon_SilverSword.asset", WeaponMaterial.Silver, 12f);
+
+            // A garra do barghest bate zero de dano cru, e isso esta certo: os 16 da
+            // tabela do docs/03 secao 12 ja moram no AttackDamage do StatBlock_Barghest, e
+            // o estagio 1 do pipeline soma os dois. Repetir os 16 aqui dobraria o dano da
+            // criatura e o sintoma apareceria so no playtest. O que este asset carrega e
+            // o tipo de dano e o material do estagio 4.
+            CreateWeapon($"{WeaponsFolder}/Weapon_BarghestClaws.asset", WeaponMaterial.Steel, 0f);
         }
 
         static void CreatePlayerTuning()
@@ -189,6 +230,230 @@ namespace LoboBranco.EditorTools
             Debug.Log($"[CombatData] Criado: {path}");
         }
 
+        // -------------------------------------------------------------- especies
+
+        /// <summary>
+        /// A especie do alvo de sandbox. Os numeros dela nao ficam aqui: o asset aponta
+        /// para o <c>StatBlock_Barghest</c>, que ja tem os 55 de vitalidade do docs/03
+        /// secao 12. Quem duplica numero acaba com dois barghests diferentes.
+        ///
+        /// As resistencias saem vazias, e isso e deliberado: quais criaturas resistem a
+        /// que e decisao de balanceamento, e balanceamento e a tarefa 1.30, com o jogo
+        /// rodando. O que esta pronto aqui e o lugar onde esses numeros vao morar.
+        /// </summary>
+        static void CreateMonsters()
+        {
+            EnsureFolder(MonstersFolder);
+
+            string barghestPath = $"{MonstersFolder}/Monster_Barghest.asset";
+            var barghest = AssetDatabase.LoadAssetAtPath<MonsterDef>(barghestPath);
+
+            if (barghest == null)
+            {
+                barghest = ScriptableObject.CreateInstance<MonsterDef>();
+                barghest.displayName = "Barghest";
+                barghest.creatureClass = CreatureClass.Beast;
+                barghest.archetype = StanceArchetype.Agile;   // docs/03 secao 4: postura Rapida
+                barghest.vulnerableToOil = OilClass.Beast;    // docs/05 secao 5: Oleo de Besta
+                barghest.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Barghest.asset");
+
+                AssetDatabase.CreateAsset(barghest, barghestPath);
+                Debug.Log($"[CombatData] Criado: {barghestPath}");
+            }
+
+            // Golpe e arma natural entraram na tarefa 1.21, depois de o asset ja existir.
+            // Preencher so o que esta vazio e o que permite rodar este setup de novo sem
+            // desfazer balanceamento ja afinado a mao.
+            LinkIfMissing(barghest, barghestPath);
+
+            CreateWitcherProfile();
+        }
+
+        static void LinkIfMissing(MonsterDef monster, string path)
+        {
+            bool changed = false;
+
+            if (monster.meleeAttack == null)
+            {
+                monster.meleeAttack = AssetDatabase.LoadAssetAtPath<AttackDef>(
+                    $"{AttacksFolder}/Attack_Barghest_Claw.asset");
+                changed = monster.meleeAttack != null;
+            }
+
+            if (monster.naturalWeapon == null)
+            {
+                monster.naturalWeapon = AssetDatabase.LoadAssetAtPath<MeleeWeaponDef>(
+                    $"{WeaponsFolder}/Weapon_BarghestClaws.asset");
+                changed |= monster.naturalWeapon != null;
+            }
+
+            if (!changed) return;
+
+            EditorUtility.SetDirty(monster);
+            Debug.Log($"[CombatData] Golpe e arma natural ligados em {path}.");
+        }
+
+        /// <summary>
+        /// O perfil de combate do bruxo. Ele existe porque, a partir da tarefa 1.21,
+        /// alguem bate no jogador, e o pipeline de dano faz ao alvo as mesmas quatro
+        /// perguntas de sempre: classe, arquetipo, oleo que casa e resistencia.
+        ///
+        /// Humanoide nao e detalhe de fantasia, e o numero mais pesado que incide sobre o
+        /// bruxo: com ele, o aco de um bandido vale 1,0x; sem ele, o alvo vira besta e o
+        /// mesmo aco cai para 0,35x, o que deixaria o jogador quase invulneravel a metade
+        /// dos inimigos do capitulo (docs/03 secao 3).
+        ///
+        /// Arquetipo Agil porque o bruxo esquiva e nao encaixa golpe: e o que decide se o
+        /// golpe que vem casa ou nao casa com ele, no estagio 3.
+        /// </summary>
+        static void CreateWitcherProfile()
+        {
+            string path = $"{MonstersFolder}/Combatant_Witcher.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<MonsterDef>();
+            asset.displayName = "Bruxo";
+            asset.creatureClass = CreatureClass.Humanoid;
+            asset.archetype = StanceArchetype.Agile;
+            asset.vulnerableToOil = OilClass.None;        // oleo e arma de bruxo, nao contra ele
+            asset.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Player.asset");
+
+            // Os sentidos e o golpe ficam zerados de proposito: quem decide o que o bruxo
+            // percebe e faz e o jogador, e nao uma arvore de comportamento.
+            asset.sightRange = 0f;
+            asset.hearingRange = 0f;
+            asset.moveSpeed = 0f;
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // ---------------------------------------------------------------- escolas
+
+        /// <summary>
+        /// A Escola do Lobo, que o docs/13 secao 5 descreve como "o kit que ja existe". Por isso
+        /// ela aponta para os mesmos assets que o jogador ja usava, e nenhum numero muda: criar a
+        /// escola nao pode mudar o jogo. Mudar o jogo com uma escola nova e a tarefa 1.33.
+        /// </summary>
+        static void CreateSchools()
+        {
+            EnsureFolder(PlayerFolder);
+
+            string path = $"{PlayerFolder}/School_Wolf.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<SchoolDef>(path);
+
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<SchoolDef>();
+                asset.displayName = "Lobo";
+                asset.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Player.asset");
+                asset.favoredStance = Stance.Fast;    // docs/13 secao 5: o Lobo favorece a Rapida
+                asset.strongAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Heavy.asset");
+                asset.fastAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Light.asset");
+                asset.groupAttack = AssetDatabase.LoadAssetAtPath<AttackDef>($"{AttacksFolder}/Attack_Group.asset");
+
+                AssetDatabase.CreateAsset(asset, path);
+                Debug.Log($"[CombatData] Criado: {path}");
+            }
+
+            // As habilidades entraram na tarefa 1.32, depois de a escola ja existir. Mesmo
+            // arranjo do barghest: preencher so o que esta vazio.
+            if (asset.abilities != null && asset.abilities.Length > 0) return;
+
+            var knockback = AssetDatabase.LoadAssetAtPath<AbilityDef>($"{AbilitiesFolder}/Sign_Knockback.asset");
+            if (knockback == null) return;
+
+            // docs/13 secao 5: "equilibrado, espada e sinal". O sinal e o abridor do docs/03 secao 8.
+            asset.abilities = new[] { knockback };
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] Habilidades ligadas em {path}.");
+        }
+
+        // ----------------------------------------------------------- habilidades
+
+        /// <summary>
+        /// O abridor do docs/03 secao 8, o primeiro sinal do jogo (tarefa 1.32). Custo e recarga
+        /// sao os do documento. O tempo de conjurar e a recuperacao nao estao la, e foram decididos
+        /// aqui: 0,7 s no total, o mesmo da troca de espada, porque um sinal e uma decisao do mesmo
+        /// peso. O efeito e a tarefa 1.18, e ate la o sinal cobra, recarrega e nao faz nada.
+        ///
+        /// O nome do asset e o do efeito, e o nome do sinal vem do campo exibido (tech/adr/0005).
+        /// </summary>
+        static void CreateAbilities()
+        {
+            EnsureFolder(AbilitiesFolder);
+
+            string path = $"{AbilitiesFolder}/Sign_Knockback.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<AbilityDef>();
+            asset.displayName = "Aard";
+            asset.staminaCost = 30f;       // docs/03 secao 8
+            asset.cooldownSeconds = 4f;    // docs/03 secao 8
+            asset.castTime = 0.3f;         // decidido na tarefa 1.32
+            asset.recovery = 0.4f;         // decidido na tarefa 1.32
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // -------------------------------------------------------------- sensacao
+
+        /// <summary>
+        /// Os numeros de sensacao do docs/03 secao 11 (tarefa 1.25). Os valores ficam nos
+        /// padroes do proprio <see cref="HitFeedbackDef"/>, que sao os do documento: 0,08 s
+        /// de hitstop no golpe forte, 0,04 s no leve, e 2 graus de soco de camera.
+        /// </summary>
+        static void CreateHitFeedback()
+        {
+            string path = $"{CombatFolder}/HitFeedback_Default.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<HitFeedbackDef>();
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        // ------------------------------------------------------------- telegrafo
+
+        /// <summary>
+        /// A aparencia padrao do telegrafo de ataque (tarefa 1.23). Os valores ficam nos
+        /// padroes do proprio <see cref="TelegraphStyleDef"/>, e o motivo de cada um esta
+        /// no tooltip: ambar e nao vermelho porque vermelho e o tell de Unblockable, e um
+        /// aviso comum vermelho ensinaria ao jogador a resposta errada (docs/03 secao 5).
+        /// </summary>
+        static void CreateTelegraphStyle()
+        {
+            string path = $"{CombatFolder}/TelegraphStyle_Default.asset";
+
+            if (File.Exists(path))
+            {
+                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
+                return;
+            }
+
+            var asset = ScriptableObject.CreateInstance<TelegraphStyleDef>();
+
+            AssetDatabase.CreateAsset(asset, path);
+            Debug.Log($"[CombatData] Criado: {path}");
+        }
+
         // ------------------------------------------------------------------ util
 
         static StatBlockDef.Entry Entry(StatType stat, float value)
@@ -221,6 +486,34 @@ namespace LoboBranco.EditorTools
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        /// <summary>
+        /// Acrescenta um atributo que falta num bloco que ja existe, sem tocar nos que estao la.
+        /// Mesmo principio do resto deste setup: rodar de novo nunca desfaz balanceamento afinado a
+        /// mao, e so preenche o que um sistema novo passou a precisar.
+        /// </summary>
+        static void EnsureStatEntry(string path, StatType stat, float value)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<StatBlockDef>(path);
+            if (asset == null) return;
+
+            var so = new SerializedObject(asset);
+            SerializedProperty array = so.FindProperty("entries");
+            int index = EnumIndexOf(stat);
+
+            for (int i = 0; i < array.arraySize; i++)
+                if (array.GetArrayElementAtIndex(i).FindPropertyRelative("stat").enumValueIndex == index)
+                    return;
+
+            array.arraySize++;
+            SerializedProperty element = array.GetArrayElementAtIndex(array.arraySize - 1);
+            element.FindPropertyRelative("stat").enumValueIndex = index;
+            element.FindPropertyRelative("value").floatValue = value;
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] {stat} acrescentado em {path}.");
         }
 
         /// <summary>

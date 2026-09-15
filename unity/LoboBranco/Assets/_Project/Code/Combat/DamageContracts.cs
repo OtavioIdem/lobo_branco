@@ -27,6 +27,12 @@ namespace LoboBranco.Combat
         /// <summary>Multiplicador por tipo de dano. 1.0 e neutro, abaixo resiste, acima e fraqueza.</summary>
         float GetResistance(DamageType type);
 
+        /// <summary>
+        /// Ja caiu. Quem desfere o golpe precisa saber, porque morte causada da adrenalina
+        /// (docs/03 secao 7) e porque golpe em quem ja esta no chao nao deveria contar.
+        /// </summary>
+        bool IsDown { get; }
+
         void ApplyDamage(in DamageResult result);
     }
 

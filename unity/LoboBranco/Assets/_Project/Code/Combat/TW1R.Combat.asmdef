@@ -1,7 +1,7 @@
 {
     "name": "TW1R.Combat",
     "rootNamespace": "LoboBranco.Combat",
-    "references": ["TW1R.Core","TW1R.Stats"],
+    "references": ["TW1R.Core","TW1R.Stats","Unity.Netcode.Runtime"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

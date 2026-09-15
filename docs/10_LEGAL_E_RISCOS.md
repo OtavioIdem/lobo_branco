@@ -49,7 +49,13 @@ Derivadas do acima, e são vinculantes para o repositório:
 | R4 | Zero monetização: sem venda, doação, Patreon, anúncio, cripto | Cláusula comercial |
 | R5 | Se for distribuído, deixar explícito que é projeto de fã não oficial | Evitar confusão |
 | R6 | Não usar os logos da CDPR, da série, nem a arte oficial | Marca |
-| R7 | Não copiar a arte conceitual oficial em concepts próprios | Derivação de arte |
+| R7 | Não importar modelos, texturas ou outros assets oficiais/REDkit; personagens fan-made devem ser produzidos do zero | Evitar redistribuição de assets proprietários |
+
+**Interpretação operacional de R7:** referências visuais oficiais podem orientar um modelo
+fan-made deste projeto não comercial, mas os arquivos de referência não entram como assets
+versionados e nenhuma geometria, textura, rig, animação ou material da CDPR é reutilizado.
+Malha, UV, bake, materiais, texturas e animações são produzidos do zero no Blender e nas
+ferramentas do projeto. Nomes da IP continuam fora do código, conforme a seção 4.
 
 ## 4. A decisão estratégica que vale a pena tomar agora
 

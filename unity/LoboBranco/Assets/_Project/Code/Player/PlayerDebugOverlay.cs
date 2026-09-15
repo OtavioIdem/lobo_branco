@@ -1,4 +1,5 @@
 using LoboBranco.CameraSystem;
+using LoboBranco.Combat;
 using UnityEngine.InputSystem;
 using UnityEngine;
 
@@ -20,6 +21,8 @@ namespace LoboBranco.Player
         [SerializeField] PlayerInputReader input;
         [SerializeField] PlayerBrain brain;
         [SerializeField] PlayerMeleeAttacker attacker;
+        [SerializeField] CharacterVitals vitals;
+        [SerializeField] PlayerAbilityCaster caster;
 
         [Tooltip("F1 alterna o painel em tempo de execucao.")]
         [SerializeField] bool visible = true;
@@ -33,6 +36,8 @@ namespace LoboBranco.Player
             if (input == null) input = GetComponent<PlayerInputReader>();
             if (brain == null) brain = GetComponent<PlayerBrain>();
             if (attacker == null) attacker = GetComponent<PlayerMeleeAttacker>();
+            if (vitals == null) vitals = GetComponent<CharacterVitals>();
+            if (caster == null) caster = GetComponent<PlayerAbilityCaster>();
             if (cameraRig == null) cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
         }
 
@@ -61,6 +66,26 @@ namespace LoboBranco.Player
 
             GUILayout.Label($"FPS               {_fps,6:F0}", _style);
 
+            // Quem escreve esta vida e o host (ADR 0008). Mostrar de onde ela vem junto
+            // com o numero e o que separa "levei dano" de "o host acha que levei".
+            if (vitals != null)
+            {
+                GUILayout.Label(
+                    $"Vida              {vitals.CurrentVitality,6:F0} / {vitals.MaxVitality:F0}   " +
+                    (vitals.CanResolve ? "[eu resolvo]" : "[o host manda]"),
+                    _style);
+
+                // Vigor sem o estado da regeneracao e um numero que sobe e desce sem
+                // explicacao. O silencio de 1,5 s do docs/03 secao 7 e o que se sente.
+                GUILayout.Label(
+                    $"Vigor             {vitals.CurrentStamina,6:F0} / {vitals.MaxStamina:F0}   " +
+                    (vitals.StaminaRegenBlocked ? "parado" : vitals.InCombat ? "em combate" : "descansando"),
+                    _style);
+
+                GUILayout.Label(
+                    $"Adrenalina        {vitals.CurrentAdrenaline,6} / {vitals.MaxAdrenaline}", _style);
+            }
+
             DrawStateMachine();
 
             if (locomotion != null)
@@ -85,6 +110,7 @@ namespace LoboBranco.Player
             GUILayout.Space(4f);
             GUILayout.Label("WASD mover | mouse camera | Shift correr", _style);
             GUILayout.Label("Botao esq. golpe leve | dir. golpe forte", _style);
+            GUILayout.Label("Q sinal (sem efeito ate a tarefa 1.18)", _style);
 
             if (attacker != null && !string.IsNullOrEmpty(attacker.LastHitSummary))
             {
@@ -108,6 +134,21 @@ namespace LoboBranco.Player
 
             GUILayout.Label($"Estado            {machine.CurrentId,-14} {machine.TimeInState,5:F2}s", _style);
 
+            // A espada e a decisao de maior impacto do combate, 0,35x quando errada
+            // (docs/03 secao 3), e em greybox nao ha lamina para olhar.
+            if (attacker != null)
+                GUILayout.Label(
+                    $"Espada            {attacker.EquippedMaterial,-14} " +
+                    (machine.CurrentId == PlayerStateId.SwapWeapon ? "trocando..." : "1 aco | 2 prata"),
+                    _style);
+
+            StanceSelector stance = brain.Stance;
+            if (stance != null)
+                GUILayout.Label(
+                    $"Postura           {stance.Current,-14} " +
+                    (stance.IsSwitching ? $"-> {stance.Pending} em {stance.Remaining:F2}s" : "roda do mouse troca"),
+                    _style);
+
             if (machine.Current is AttackState attackState && attackState.CurrentAttack != null)
             {
                 GUILayout.Label(
@@ -117,12 +158,54 @@ namespace LoboBranco.Player
                     _style);
             }
 
+            DrawAbility(machine);
+
             InputBuffer buffer = brain.Buffer;
             if (buffer != null)
                 GUILayout.Label($"Buffer            {buffer.Pending,-14} {buffer.Remaining,5:F2}s", _style);
 
             if (attacker != null)
+            {
                 GUILayout.Label($"Alvos no golpe    {attacker.HitsThisSwing,6}", _style);
+
+                // Ate o brilho na lamina da tarefa 1.13 existir, esta linha e a unica
+                // forma de ver a corrente de Fluxo e conferir a janela de 0,22 s.
+                GUILayout.Label(
+                    $"Fluxo             {attacker.FlowLinks,6} elos   " +
+                    (attacker.FlowWindowOpen ? "ENCADEIA" : string.Empty),
+                    _style);
+            }
+        }
+
+        /// <summary>
+        /// A vaga selecionada e a recarga dela (tarefa 1.32). Ate o HUD do docs/02 secao 7 existir,
+        /// e aqui que se confere que a recarga do dono conta junto com a do host. O efeito so
+        /// aparece em quem resolve, e a recusa so no dono.
+        /// </summary>
+        void DrawAbility(PlayerStateMachine machine)
+        {
+            if (caster == null) return;
+
+            int slot = brain.SelectedAbilitySlot;
+            AbilityDef selected = caster.AbilityAt(slot);
+            if (selected == null) return;
+
+            float remaining = caster.CooldownRemaining(slot);
+            GUILayout.Label(
+                $"Sinal             {selected.displayName,-14} " +
+                (remaining > 0f ? $"volta em {remaining:F1}s" : "pronto"),
+                _style);
+
+            if (machine.Current is CastState cast && cast.CurrentAbility != null)
+                GUILayout.Label(
+                    $"Conjurando        {cast.Elapsed,5:F2}s        efeito {(cast.Triggered ? "SAIU" : "...")}",
+                    _style);
+
+            if (caster.CanResolve && caster.LastTriggered != null)
+                GUILayout.Label($"Ultimo efeito     {caster.LastTriggered.displayName}", _style);
+
+            if (caster.LastRefusal != AbilityRefusal.None)
+                GUILayout.Label($"Recusa do host    {caster.LastRefusal}", _style);
         }
     }
 }

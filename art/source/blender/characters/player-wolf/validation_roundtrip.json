@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "blender_version": "5.2.1 LTS",
+  "source": {
+    "meshes": 1,
+    "height_m": 1.850000023841858,
+    "floor_z": 0.0,
+    "triangles": 14698,
+    "materials": [
+      "M_ProxyCloth",
+      "M_ProxyHair",
+      "M_ProxyLeather",
+      "M_ProxyMetal",
+      "M_ProxySkin"
+    ],
+    "vertex_color_layers": [
+      1
+    ],
+    "degenerate_triangles": 0,
+    "smooth_faces": 7831
+  },
+  "fbx_roundtrip": {
+    "meshes": 1,
+    "height_m": 1.8500000319123888,
+    "floor_z": -8.070530910231355e-09,
+    "triangles": 14698,
+    "materials": [
+      "M_ProxyCloth",
+      "M_ProxyHair",
+      "M_ProxyLeather",
+      "M_ProxyMetal",
+      "M_ProxySkin"
+    ],
+    "vertex_color_layers": [
+      1
+    ],
+    "degenerate_triangles": 0,
+    "smooth_faces": 7831
+  },
+  "unity_validation": "Nao executada; revisao de modelagem no Blender."
+}

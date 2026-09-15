@@ -59,6 +59,19 @@ concede 1,3x adicional; errar concede 0,8x.
 Isso é o motor de decisão mais importante do combate segundo a segundo, e é herança
 direta e intencional do original.
 
+**Nota de implementação, 2026-09-11 (tarefa 1.14).** A tabela acima tem uma linha por
+postura, e não uma por botão: é a postura que decide qual golpe sai. Por isso os dois
+botões de ataque do [doc 02 §4](02_GDD.md) atacam na postura corrente, em vez de o esquerdo
+dar um golpe Rápido e o direito um Forte. Se o botão direito desse um golpe Forte com a
+postura Rápida valendo, escolher postura não seria decisão nenhuma e a camada 2 do §2
+deixaria de existir na prática.
+
+Fica em aberto o que vai distinguir os dois botões **dentro** de uma mesma postura. As
+opções óbvias são um segundo golpe por postura, mais lento e mais caro, ou o botão direito
+virar outra coisa por completo. A decisão não é urgente e não deve ser tomada no escuro:
+ela pede o playtest do portão M1, com as animações do M4 ainda por cima. Até lá os dois
+botões são o mesmo golpe, o que não tira nada de quem joga.
+
 ## 5. Ações defensivas
 
 ### Esquiva (toque)
@@ -113,6 +126,17 @@ Um indicador discreto (um brilho na lâmina, não um ícone de HUD) marca a jane
 - **Sinal reforçado** (1 carga): dobra a intensidade do sinal
 - **Segundo suspiro** (2 cargas): recupera 40% do vigor instantaneamente
 
+**Nota de implementação, 2026-09-12 (tarefa 1.17).** O recurso existe e os ganhos funcionam:
+corrente de Fluxo alta e morte causada rendem carga, e o riposte vai render quando existir
+(tarefa 1.11). Dos três gastos, só o **segundo suspiro** foi implementado, porque é o único
+que não depende de sistema ausente: a finalização precisa de um estado de execução e o sinal
+reforçado precisa dos sinais (tarefa 1.18). Os dois entram junto com o que eles gastam.
+
+Falta também decidir **por onde o jogador gasta**. A tabela de controles do
+[doc 02 §4](02_GDD.md) não tem tecla para nenhum dos três, e inventar uma agora seria
+decidir no escuro uma coisa que o playtest do portão M1 responde melhor. Até lá o segundo
+suspiro é uma chamada que ninguém dispara, e o painel de debug mostra as cargas.
+
 ## 8. Sinais reequilibrados (resolve D6)
 
 Custo em vigor, escalado por Inteligência. Os sinais deixam de ser dano e passam a ser
@@ -133,6 +157,16 @@ Regras que dão relevância aos sinais:
    por Yrden. Isso torna um sinal obrigatório, não opcional.
 3. **Axii em diálogo** aparece em cerca de 15% das conversas, gastando vigor, e às vezes é
    a única forma de obter uma pista.
+
+**Nota de implementação, 2026-09-14 (tarefa 1.32).** Custo e recarga existem como dado, no
+`AbilityDef`, e o Aard é o primeiro asset: 30 de vigor e 4 s, como na tabela. A recarga conta a
+partir do início da conjuração, e o vigor é cobrado no mesmo instante. O efeito é da tarefa 1.18,
+e até lá o sinal cobra, recarrega e não faz nada.
+
+Esta seção não dá dois números que o sistema precisa, e eles foram decididos na tarefa: **0,3 s
+de conjuração** até o efeito e **0,4 s de recuperação**, 0,7 s no total, o mesmo da troca de
+espada. A tarefa 1.30 revê os dois. O "escalado por Inteligência" do primeiro parágrafo também
+não tem fórmula, e fica para a 1.18 decidir junto com a intensidade.
 
 ## 9. Pipeline de dano
 
