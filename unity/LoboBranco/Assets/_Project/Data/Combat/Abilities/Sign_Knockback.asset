@@ -17,3 +17,8 @@ MonoBehaviour:
   cooldownSeconds: 4
   castTime: 0.3
   recovery: 0.4
+  area:
+    shape: 0
+    range: 6
+    coneAngleDegrees: 90
+  effects: []

@@ -118,6 +118,9 @@ Uma escola é a combinação de três alavancas que **já existem no projeto**:
 2. ~~Afinidade de postura, que `StanceAffinityStage` já aplica.~~ **Corrigido na tarefa 1.31**, abaixo.
 3. Intensidade e custo de sinal, que o [doc 03 §8](03_COMBATE.md) já parametriza. **Custo e
    recarga moram no `AbilityDef` desde a tarefa 1.32**, e a escola lista as habilidades dela por vaga.
+   **Desde a 1.18b, a especialização também é dado:** o `SchoolDef` aponta o sinal especializado
+   e os efeitos de variante, que são somados aos do sinal. A intensidade usa a Inteligência, que é
+   o viés de atributo da tabela acima.
 
 Uma escola nova é um `SchoolDef` apontando para esses três assets, mais o filtro de vestígio
 do §4.1. Nenhum `if` por escola em código de combate. Se aparecer um, a escola está errada.
@@ -154,6 +157,7 @@ Detalhe e justificativa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-c
 | Efeito visual e som de impacto | Todos, localmente | Reagem ao evento do host |
 | Habilidade: custo e recarga | **O host** confere, cobra e pode recusar; o dono pede e prevê | Cobrada no início da conjuração. A recarga viaja como o instante em que volta, no relógio do servidor, e cada máquina calcula quanto falta. Ao contrário do vigor do golpe, aqui o host recusa, porque sinal de graça é janela de graça ([ADR 0011](../tech/adr/0011-habilidade-cobrada-no-inicio-recarga-como-instante.md)) |
 | Atordoar, derrubar, lentificar | **O host** aplica; todos veem | Instantes de fim no relógio do servidor, como a recarga. A lentidão vira modificador de `MoveSpeed` em todas as máquinas a partir do mesmo estado, e a folha do cliente não diverge da do host. Mora em componente, e não no grafo, pela ADR 0009 (tarefa 1.18a) |
+| Efeito de sinal | **O host** acha os alvos e aplica | No instante do efeito que o dono pede, com a posição que o host vê. O resultado viaja no estado que o alvo já replica, e nenhum efeito manda mensagem própria ([ADR 0012](../tech/adr/0012-efeito-de-sinal-em-asset-aplicado-pelo-host.md), tarefa 1.18b) |
 | Telegrafo de ataque de inimigo | **O host** decide o instante; todos desenham | Um carimbo de tempo por golpe, no relógio do servidor. Cada máquina calcula o aviso a partir do mesmo `AttackDef`, e o aviso do cliente com ping termina junto com a janela de dano do host (tarefa 1.23) |
 | Hitstop | **O host** soma ao golpe; o dono segura o dele pelo mesmo tempo | Nunca `Time.timeScale`, que no host congelaria a sessão inteira. A extensão do golpe é igual nas duas pontas, e a janela de Fluxo sobrevive ([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)) |
 | Tremor e soco de câmera | Só o dono, na tela dele | Reagem ao acerto confirmado pelo host e à vida do próprio bruxo caindo |

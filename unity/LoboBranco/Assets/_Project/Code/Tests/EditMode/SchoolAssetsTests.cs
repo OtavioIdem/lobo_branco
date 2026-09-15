@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using LoboBranco.Combat;
 using LoboBranco.Player;
 using NUnit.Framework;
 using UnityEditor;
@@ -62,6 +63,54 @@ namespace LoboBranco.Tests
             }
 
             Assert.AreEqual(0, report.Length, report.ToString());
+        }
+
+        /// <summary>
+        /// Intensidade zero nao da erro: todo sinal da escola cobra, acerta e sai com potencia
+        /// zero (tarefa 1.18b). O bloco de atributos precisa de Inteligencia e do multiplicador.
+        /// </summary>
+        [Test]
+        public void Toda_escola_do_projeto_conjura_com_intensidade()
+        {
+            CombatTuningDef tuning = LoadTuning();
+            var report = new StringBuilder();
+
+            foreach (SchoolDef school in LoadSchools())
+            {
+                if (school.statBlock == null) continue;
+
+                float intensity = tuning.SignIntensity(school.statBlock.CreateSheet());
+
+                if (intensity <= 0f)
+                    report.Append(school.name).Append(": intensidade de sinal ").Append(intensity)
+                        .Append(". Falta Intelligence ou SignIntensity no bloco de atributos.\n");
+            }
+
+            Assert.AreEqual(0, report.Length, report.ToString());
+        }
+
+        /// <summary>
+        /// O Lobo e a referencia do docs/13 secao 5, o kit que ja existia. Os sinais dele saem com
+        /// os numeros do asset, e e contra ele que a intensidade do Grifo vai ser medida na 1.33.
+        /// </summary>
+        [Test]
+        public void O_Lobo_conjura_com_os_numeros_do_asset()
+        {
+            var wolf = AssetDatabase.LoadAssetAtPath<SchoolDef>(WolfPath);
+            Assert.IsNotNull(wolf, $"Nao achei {WolfPath}.");
+
+            Assert.AreEqual(1f, LoadTuning().SignIntensity(wolf.statBlock.CreateSheet()), 0.0001f);
+        }
+
+        const string WolfPath = "Assets/_Project/Data/Player/School_Wolf.asset";
+        const string TuningPath = "Assets/_Project/Data/Combat/CombatTuning.asset";
+
+        static CombatTuningDef LoadTuning()
+        {
+            var tuning = AssetDatabase.LoadAssetAtPath<CombatTuningDef>(TuningPath);
+            Assert.IsNotNull(tuning, $"Nao achei {TuningPath}.");
+
+            return tuning;
         }
 
         [Test]

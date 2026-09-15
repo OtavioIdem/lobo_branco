@@ -168,6 +168,24 @@ de conjuração** até o efeito e **0,4 s de recuperação**, 0,7 s no total, o 
 espada. A tarefa 1.30 revê os dois. O "escalado por Inteligência" do primeiro parágrafo também
 não tem fórmula, e fica para a 1.18 decidir junto com a intensidade.
 
+**Nota de implementação, 2026-09-15 (tarefa 1.18b).** O efeito virou dado: cada sinal tem uma
+área e uma lista de efeitos, e só o host os aplica
+([ADR 0012](../tech/adr/0012-efeito-de-sinal-em-asset-aplicado-pelo-host.md)). Três decisões
+que esta seção não trazia:
+
+- **"Escalado por Inteligência" é a intensidade, e não o custo.** A intensidade é
+  `SignIntensity × Inteligência ÷ 10`, e o bruxo de nível 1 tem 10 de Inteligência: com ele, todo
+  sinal sai com os números desta tabela. O custo fica fixo, porque os 30 de vigor são o número
+  contra o qual o dilema do §7 foi medido. O `SignIntensity` é o multiplicador neutro em 1,0 em
+  que o sinal reforçado do §7 escreve.
+- **A intensidade escala potência, e nunca forma.** Duração, dano e força crescem; alcance,
+  abertura, custo e recarga não. Em coop, o cone é o que o companheiro aprende a ler.
+- **O cone do abridor tem 90 graus de abertura.** A tabela dá os 6 m e não a abertura. 90 graus
+  pega os dois barghests que flanqueiam e ainda obriga a mirar. A tarefa 1.30 revê.
+
+O sinal continua sem efeito em jogo até a 1.18c: ele cobra, recarrega, acha quem está no cone, e
+o painel de debug mostra quantos.
+
 ## 9. Pipeline de dano
 
 A ordem importa, e ela é o que faz o pilar P2 funcionar. Implementada como uma struct

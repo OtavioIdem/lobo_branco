@@ -54,5 +54,16 @@ namespace LoboBranco.Tests
             Assert.AreEqual(30f, knockback.staminaCost, "docs/03 secao 8: custo 30.");
             Assert.AreEqual(4f, knockback.cooldownSeconds, "docs/03 secao 8: recarga de 4 s.");
         }
+
+        /// <summary>A forma e o alcance sao do docs/03 secao 8. A abertura nao esta la, e nao e conferida.</summary>
+        [Test]
+        public void O_abridor_alcanca_o_cone_do_documento()
+        {
+            var knockback = AssetDatabase.LoadAssetAtPath<AbilityDef>(KnockbackPath);
+
+            Assert.IsNotNull(knockback, $"Nao achei {KnockbackPath}.");
+            Assert.AreEqual(SignAreaShape.Cone, knockback.area.shape, "docs/03 secao 8: cone.");
+            Assert.AreEqual(6f, knockback.area.range, "docs/03 secao 8: 6 m.");
+        }
     }
 }

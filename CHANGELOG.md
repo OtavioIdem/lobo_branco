@@ -8,6 +8,26 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-15 — M1 tarefa 1.18b: o efeito de sinal vira dado
+- `SignEffectDef`: um efeito de sinal e um asset, subclasse deste tipo. O `AbilityDef` ganhou uma
+  area (`SignArea`, cone ou raio) e uma lista de efeitos. Os efeitos de verdade sao das tarefas
+  1.18c a 1.18f (`tech/adr/0012`).
+- `SignResolver`: uma consulta de fisica sem alocacao, filtro de abertura, alvos do mais perto para
+  o mais longe. Quem conjurou e quem esta abatido ficam de fora, e uma criatura de dois colisores
+  recebe o efeito uma vez.
+- `PlayerSignEffects`: **so o host aplica**, no instante do efeito que a 1.32 ja pedia, com a
+  posicao que o host ve. O resultado viaja no estado que cada alvo ja replica: nenhum byte novo na
+  rede.
+- **Gancho de variante por escola.** O `SchoolDef` aponta o sinal especializado e os efeitos a mais,
+  que sao somados depois dos do sinal. O Lobo aponta o abridor, com a variante vazia.
+- **Intensidade de sinal = `SignIntensity` x Inteligencia / 10**, no `CombatTuningDef`. Escala
+  potencia e nunca area, custo ou recarga. O "escalado por Inteligencia" do docs/03 secao 8 foi lido
+  como intensidade, e nao como custo; a nota de la explica. O bloco do jogador nao tinha
+  `SignIntensity`, e o setup acrescenta; um teste falha para escola com intensidade zero.
+- O abridor ganhou o cone de 6 m do documento e **90 graus de abertura, decididos aqui**. Ele continua
+  sem efeito: o painel de debug mostra quantos alvos o cone pegou, e a area aparece na Scene view.
+- 346 testes passando, contra 308 antes. Build de Windows gerando.
+
 ### 2026-09-14 — M1 tarefa 1.18a: o inimigo pode ser atordoado, derrubado e lentificado
 - **A 1.18 foi dividida em oito partes e vem antes da 1.33.** Sem efeito de sinal, o Grifo seria
   um Lobo com outra postura inicial. O Axii ficou adiado ate existir inimigo humanoide.

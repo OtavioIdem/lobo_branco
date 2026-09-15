@@ -51,6 +51,7 @@ namespace LoboBranco.EditorTools
 
                 Entry(StatType.AttackDamage, 0f),      // o dano vem da arma; isto e bonus
                 Entry(StatType.DamageMultiplier, 1f),  // neutro; pocoes somam por cima
+                Entry(StatType.SignIntensity, 1f),     // neutro; a Inteligencia e que escala (tarefa 1.18b)
                 Entry(StatType.Armor, 4f),
 
                 Entry(StatType.MoveSpeed, 1f),
@@ -69,6 +70,10 @@ namespace LoboBranco.EditorTools
             // O MoveSpeed entrou na tarefa 1.18a, depois de o bloco ja existir. Sem ele, a
             // lentidao multiplica zero e nao pega (ver MonsterAssetsTests).
             EnsureStatEntry($"{StatsFolder}/StatBlock_Barghest.asset", StatType.MoveSpeed, 1f);
+
+            // O SignIntensity entrou na tarefa 1.18b, pelo mesmo motivo: zero nele e todo sinal
+            // sai com potencia zero (ver SchoolAssetsTests).
+            EnsureStatEntry($"{StatsFolder}/StatBlock_Player.asset", StatType.SignIntensity, 1f);
 
             CreateAttacks();
             CreateWeapons();
@@ -361,17 +366,27 @@ namespace LoboBranco.EditorTools
                 Debug.Log($"[CombatData] Criado: {path}");
             }
 
-            // As habilidades entraram na tarefa 1.32, depois de a escola ja existir. Mesmo
-            // arranjo do barghest: preencher so o que esta vazio.
-            if (asset.abilities != null && asset.abilities.Length > 0) return;
-
             var knockback = AssetDatabase.LoadAssetAtPath<AbilityDef>($"{AbilitiesFolder}/Sign_Knockback.asset");
             if (knockback == null) return;
 
-            // docs/13 secao 5: "equilibrado, espada e sinal". O sinal e o abridor do docs/03 secao 8.
-            asset.abilities = new[] { knockback };
-            EditorUtility.SetDirty(asset);
-            Debug.Log($"[CombatData] Habilidades ligadas em {path}.");
+            // As habilidades entraram na tarefa 1.32, depois de a escola ja existir. Mesmo
+            // arranjo do barghest: preencher so o que esta vazio.
+            if (asset.abilities == null || asset.abilities.Length == 0)
+            {
+                // docs/13 secao 5: "equilibrado, espada e sinal". O sinal e o abridor do docs/03 secao 8.
+                asset.abilities = new[] { knockback };
+                EditorUtility.SetDirty(asset);
+                Debug.Log($"[CombatData] Habilidades ligadas em {path}.");
+            }
+
+            // A especializacao entrou na tarefa 1.18b. O Lobo e especializado no abridor pelo
+            // docs/13 secao 5, e a variante sai vazia: o efeito dela ainda nao foi desenhado.
+            if (asset.specializedAbility == null)
+            {
+                asset.specializedAbility = knockback;
+                EditorUtility.SetDirty(asset);
+                Debug.Log($"[CombatData] Sinal especializado ligado em {path}.");
+            }
         }
 
         // ----------------------------------------------------------- habilidades
@@ -389,22 +404,37 @@ namespace LoboBranco.EditorTools
             EnsureFolder(AbilitiesFolder);
 
             string path = $"{AbilitiesFolder}/Sign_Knockback.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<AbilityDef>(path);
 
-            if (File.Exists(path))
+            if (asset == null)
             {
-                Debug.Log($"[CombatData] Ja existe, mantido: {path}");
-                return;
+                asset = ScriptableObject.CreateInstance<AbilityDef>();
+                asset.displayName = "Aard";
+                asset.staminaCost = 30f;       // docs/03 secao 8
+                asset.cooldownSeconds = 4f;    // docs/03 secao 8
+                asset.castTime = 0.3f;         // decidido na tarefa 1.32
+                asset.recovery = 0.4f;         // decidido na tarefa 1.32
+
+                AssetDatabase.CreateAsset(asset, path);
+                Debug.Log($"[CombatData] Criado: {path}");
             }
 
-            var asset = ScriptableObject.CreateInstance<AbilityDef>();
-            asset.displayName = "Aard";
-            asset.staminaCost = 30f;       // docs/03 secao 8
-            asset.cooldownSeconds = 4f;    // docs/03 secao 8
-            asset.castTime = 0.3f;         // decidido na tarefa 1.32
-            asset.recovery = 0.4f;         // decidido na tarefa 1.32
+            // A area entrou na tarefa 1.18b, depois de o asset ja existir. Os 6 m sao do docs/03
+            // secao 8; a abertura nao esta la, e 90 graus foi decidido na 1.18b: larga o bastante
+            // para pegar os dois barghests que flanqueiam, estreita o bastante para o abridor ser
+            // mirado. Os efeitos sao da tarefa 1.18c.
+            if (!asset.area.HasArea)
+            {
+                asset.area = new SignArea
+                {
+                    shape = SignAreaShape.Cone,
+                    range = 6f,
+                    coneAngleDegrees = 90f,
+                };
 
-            AssetDatabase.CreateAsset(asset, path);
-            Debug.Log($"[CombatData] Criado: {path}");
+                EditorUtility.SetDirty(asset);
+                Debug.Log($"[CombatData] Area ligada em {path}.");
+            }
         }
 
         // -------------------------------------------------------------- sensacao

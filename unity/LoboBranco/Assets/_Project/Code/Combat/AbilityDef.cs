@@ -9,9 +9,9 @@ namespace LoboBranco.Combat
     /// Grifo e um do Lobo sao dois assets deste tipo, e nenhum <c>if</c> de escola.
     ///
     /// O asset diz quanto custa, quanto demora para voltar e quanto tempo o bruxo fica preso
-    /// nele. O que a habilidade <em>faz</em> nao esta aqui: os efeitos dos sinais sao a tarefa
-    /// 1.18, e campo para efeito que ainda nao existe seria promessa, nao dado. Quem resolve
-    /// avisa o instante do efeito por evento, e e ali que a 1.18 pendura o cone e o empurrao.
+    /// nele. Desde a tarefa 1.18b ele diz tambem onde alcanca e o que faz: a area e os efeitos,
+    /// que o <see cref="SignResolver"/> aplica no host no instante do efeito. A variante de uma
+    /// escola nao mora aqui, e sim na escola, porque o mesmo sinal e de todas elas.
     ///
     /// A linha do tempo tem duas fases, e nao as tres do golpe: conjurar ate o efeito, e
     /// recuperar depois dele. Um sinal nao abre uma janela de dano por um intervalo; ele
@@ -38,6 +38,13 @@ namespace LoboBranco.Combat
         [Tooltip("Do efeito ao fim. Durante ela nada cancela, exceto a esquiva (docs/03 secao 1).")]
         [Min(0f)] public float recovery = 0.4f;
 
+        [Header("Efeito (tarefa 1.18)")]
+        [Tooltip("Onde o sinal alcanca. A intensidade nunca muda a area.")]
+        public SignArea area;
+
+        [Tooltip("O que acontece com cada criatura dentro da area, na ordem. A variante da escola vem depois.")]
+        public SignEffectDef[] effects;
+
         /// <summary>Conjuracao mais recuperacao. E quanto tempo o bruxo fica comprometido.</summary>
         public float TotalDuration => castTime + recovery;
 
@@ -58,6 +65,17 @@ namespace LoboBranco.Combat
 
             if (staminaCost <= 0f && cooldownSeconds <= 0f)
                 problems.Add("nao custa vigor e nao tem recarga, e habilidade de graca vira clique");
+
+            int before = problems.Count;
+            area.CollectProblems(problems);
+
+            for (int k = before; k < problems.Count; k++)
+                problems[k] = $"a area {problems[k]}";
+
+            if (effects != null && effects.Length > 0 && !area.HasArea)
+                problems.Add("tem efeito e nao tem area, e o efeito nao alcanca ninguem");
+
+            SignEffectDef.CollectListProblems(effects, "o efeito", problems);
         }
 
 #if UNITY_EDITOR

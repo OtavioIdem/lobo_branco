@@ -196,6 +196,7 @@ GameObject:
   - component: {fileID: 7014330983529522248}
   - component: {fileID: 8258041469082970047}
   - component: {fileID: 6328317272013361893}
+  - component: {fileID: 6167507190838458284}
   - component: {fileID: 1665933002941387394}
   - component: {fileID: 8824558061825589091}
   - component: {fileID: 2105638426287146009}
@@ -349,6 +350,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerAbilityCaster
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &6167507190838458284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415091062731458965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6939e96575d4eb4b9e40862c251561b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerSignEffects
+  tuning: {fileID: 11400000, guid: 397b3e7a452722b469df3d82a37a5eaf, type: 2}
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 512
+  maxCollidersPerQuery: 32
+  maxTargetsPerCast: 16
+  gizmoSeconds: 1.5
 --- !u!114 &1665933002941387394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,6 +404,7 @@ MonoBehaviour:
   attacker: {fileID: 8258041469082970047}
   vitals: {fileID: 2653360688372698588}
   caster: {fileID: 6328317272013361893}
+  signs: {fileID: 6167507190838458284}
   visible: 1
 --- !u!114 &2105638426287146009
 MonoBehaviour:

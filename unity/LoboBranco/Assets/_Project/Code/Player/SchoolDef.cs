@@ -59,6 +59,22 @@ namespace LoboBranco.Player
         [Tooltip("Uma habilidade por vaga, na ordem da roda de sinais. No maximo cinco, os sinais do docs/03 secao 8.")]
         public AbilityDef[] abilities;
 
+        [Header("Especializacao de sinal (docs/13 secao 5)")]
+        [Tooltip("O sinal em que a escola e especializada. Tem que estar entre as habilidades acima.")]
+        public AbilityDef specializedAbility;
+
+        [Tooltip("Efeitos que so esta escola soma ao sinal especializado, depois dos efeitos do sinal. " +
+                 "Vazio e valido: a variante de cada escola e desenhada junto com ela.")]
+        public SignEffectDef[] variantEffects;
+
+        /// <summary>
+        /// Os efeitos a mais desta escola para uma habilidade, ou nulo quando ela nao e a
+        /// especializada. E o gancho da variante: quem resolve o sinal pergunta aqui, e nenhum
+        /// codigo de combate sabe qual escola e especializada em que.
+        /// </summary>
+        public SignEffectDef[] VariantEffectsFor(AbilityDef ability)
+            => ability != null && ability == specializedAbility ? variantEffects : null;
+
         /// <summary>Quantas vagas a recarga replicada tem. Ver <see cref="AbilityReadyTimes"/>.</summary>
         public const int MaxAbilities = AbilityReadyTimes.Capacity;
 
@@ -100,6 +116,35 @@ namespace LoboBranco.Player
                 problems.Add($"a postura favorecida {favoredStance} nao tem golpe");
 
             CheckAbilities(problems);
+            CheckSpecialization(problems);
+        }
+
+        /// <summary>
+        /// A especializada tem que estar entre as habilidades, porque a variante so e perguntada
+        /// quando o sinal sai, e ele so sai de uma vaga. Fora das vagas, a variante existiria no
+        /// Inspector e nunca em jogo, sem erro nenhum.
+        /// </summary>
+        void CheckSpecialization(List<string> problems)
+        {
+            bool hasVariant = variantEffects != null && variantEffects.Length > 0;
+
+            if (specializedAbility == null)
+            {
+                if (hasVariant)
+                    problems.Add("tem efeitos de variante e nenhum sinal especializado, e a variante nunca sai");
+
+                return;
+            }
+
+            bool listed = false;
+            for (int i = 0; i < AbilityCount; i++)
+                if (abilities[i] == specializedAbility)
+                    listed = true;
+
+            if (!listed)
+                problems.Add($"e especializada em '{specializedAbility.name}', que nao esta em nenhuma vaga");
+
+            SignEffectDef.CollectListProblems(variantEffects, "o efeito de variante", problems);
         }
 
         /// <summary>

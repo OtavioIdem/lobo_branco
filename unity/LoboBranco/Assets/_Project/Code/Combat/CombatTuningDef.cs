@@ -1,3 +1,4 @@
+using LoboBranco.Stats;
 using UnityEngine;
 
 namespace LoboBranco.Combat
@@ -73,6 +74,11 @@ namespace LoboBranco.Combat
         [Tooltip("Quanto do vigor maximo o segundo suspiro devolve. 0,40 e os 40 por cento do documento.")]
         [Range(0f, 1f)] public float secondWindStaminaFraction = 0.40f;
 
+        [Header("Sinais (docs/03 secao 8)")]
+        [Tooltip("Inteligencia em que o sinal sai com os numeros do asset. O bruxo de nivel 1 tem 10 " +
+                 "(docs/02 secao 5); com o dobro, o sinal sai com o dobro de potencia. Tarefa 1.18b.")]
+        [Min(0.01f)] public float signReferenceIntelligence = 10f;
+
         [Header("Estagio 6 — oleo de lamina")]
         public float oilMatchMultiplier = 1.5f;
 
@@ -124,6 +130,29 @@ namespace LoboBranco.Combat
         /// </summary>
         public float StaminaCost(float baseCost, int flowChain)
             => flowChain >= flowStaminaDiscountChain ? baseCost * (1f - flowStaminaDiscount) : baseCost;
+
+        /// <summary>
+        /// A forca de um sinal, com 1,0 como os numeros do asset (tarefa 1.18b). Um lugar so, pelo
+        /// mesmo motivo do custo de vigor: todo efeito de sinal le daqui.
+        ///
+        /// Sao dois fatores, e cada um responde a uma pergunta. A <b>Inteligencia</b> e o atributo
+        /// que o docs/02 secao 5 poe na intensidade de sinais, e e o vies do Grifo no docs/13 secao
+        /// 5: com ela na conta, subir a Inteligencia de uma escola fortalece os sinais sem campo
+        /// novo. O <b>SignIntensity</b> e o multiplicador neutro em 1,0 onde pocao, talento e o
+        /// sinal reforcado da adrenalina (docs/03 secao 7) escrevem modificador.
+        ///
+        /// Um bloco sem nenhum dos dois devolve zero, e todo efeito sai com potencia zero sem erro.
+        /// Ha teste sobre as escolas do projeto para isso.
+        /// </summary>
+        public float SignIntensity(StatSheet stats)
+        {
+            if (stats == null) return 0f;
+
+            float multiplier = Mathf.Max(0f, stats.Get(StatType.SignIntensity));
+            float intelligence = Mathf.Max(0f, stats.Get(StatType.Intelligence));
+
+            return multiplier * intelligence / Mathf.Max(0.01f, signReferenceIntelligence);
+        }
 
         public float FlowMultiplier(int chain)
         {

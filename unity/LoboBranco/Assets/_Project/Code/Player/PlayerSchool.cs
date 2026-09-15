@@ -43,6 +43,10 @@ namespace LoboBranco.Player
         /// <summary>A habilidade de uma vaga, ou nulo sem escola ou com a vaga vazia.</summary>
         public AbilityDef AbilityAt(int slot) => school != null ? school.AbilityAt(slot) : null;
 
+        /// <summary>Os efeitos que a escola soma a uma habilidade, ou nulo sem variante (tarefa 1.18b).</summary>
+        public SignEffectDef[] VariantEffectsFor(AbilityDef ability)
+            => school != null ? school.VariantEffectsFor(ability) : null;
+
         void Awake()
         {
             // Erro e nao aviso: um bruxo sem escola nao tem atributos nem golpes, e o sintoma

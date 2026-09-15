@@ -23,6 +23,7 @@ namespace LoboBranco.Player
         [SerializeField] PlayerMeleeAttacker attacker;
         [SerializeField] CharacterVitals vitals;
         [SerializeField] PlayerAbilityCaster caster;
+        [SerializeField] PlayerSignEffects signs;
 
         [Tooltip("F1 alterna o painel em tempo de execucao.")]
         [SerializeField] bool visible = true;
@@ -38,6 +39,7 @@ namespace LoboBranco.Player
             if (attacker == null) attacker = GetComponent<PlayerMeleeAttacker>();
             if (vitals == null) vitals = GetComponent<CharacterVitals>();
             if (caster == null) caster = GetComponent<PlayerAbilityCaster>();
+            if (signs == null) signs = GetComponent<PlayerSignEffects>();
             if (cameraRig == null) cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
         }
 
@@ -201,8 +203,12 @@ namespace LoboBranco.Player
                     $"Conjurando        {cast.Elapsed,5:F2}s        efeito {(cast.Triggered ? "SAIU" : "...")}",
                     _style);
 
+            // Aloca string por quadro, como o resto do painel: e IMGUI de sandbox, fora do jogo final.
             if (caster.CanResolve && caster.LastTriggered != null)
-                GUILayout.Label($"Ultimo efeito     {caster.LastTriggered.displayName}", _style);
+                GUILayout.Label(
+                    $"Ultimo efeito     {caster.LastTriggered.displayName,-14} " +
+                    (signs != null ? $"{signs.LastTargetCount} alvo(s), intensidade {signs.LastIntensity:F2}" : ""),
+                    _style);
 
             if (caster.LastRefusal != AbilityRefusal.None)
                 GUILayout.Label($"Recusa do host    {caster.LastRefusal}", _style);

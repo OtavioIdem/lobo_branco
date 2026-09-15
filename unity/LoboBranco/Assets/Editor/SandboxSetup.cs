@@ -244,6 +244,9 @@ namespace LoboBranco.EditorTools
             // Nao tem nada para ligar: as habilidades sao da escola, e o conjurador pergunta a ela.
             player.AddComponent<PlayerAbilityCaster>();
 
+            // O que o sinal faz, no instante do efeito, so no host (tarefa 1.18b).
+            player.AddComponent<PlayerSignEffects>();
+
             player.AddComponent<PlayerBrain>();
             player.AddComponent<PlayerDebugOverlay>();
 
@@ -296,7 +299,14 @@ namespace LoboBranco.EditorTools
             overlay.FindProperty("attacker").objectReferenceValue = player.GetComponent<PlayerMeleeAttacker>();
             overlay.FindProperty("vitals").objectReferenceValue = player.GetComponent<CharacterVitals>();
             overlay.FindProperty("caster").objectReferenceValue = player.GetComponent<PlayerAbilityCaster>();
+            overlay.FindProperty("signs").objectReferenceValue = player.GetComponent<PlayerSignEffects>();
             overlay.ApplyModifiedPropertiesWithoutUndo();
+
+            // Mesma mascara explicita do atacante: um sinal do bruxo nao alcanca o companheiro.
+            var signs = new SerializedObject(player.GetComponent<PlayerSignEffects>());
+            signs.FindProperty("tuning").objectReferenceValue = Require<CombatTuningDef>(TuningPath);
+            signs.FindProperty("targetMask").intValue = GameLayers.PlayerAttackTargets;
+            signs.ApplyModifiedPropertiesWithoutUndo();
 
             WireVitals(player.GetComponent<CharacterVitals>(), PlayerStatsPath);
             WireProfile(player.GetComponent<DamageReceiver>(), WitcherProfilePath);

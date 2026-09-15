@@ -83,7 +83,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | ~~1.16~~ ✅ | Vigor: consumo, regeneração, atraso de 1,5 s | M | 03 §7 |
 | 1.17 ⚠️ | Adrenalina: ganho, três gastos. **Parcial**: recurso e ganhos prontos, e dos três gastos só o segundo suspiro. Nota no 03 §7 | M | 03 §7 |
 | ~~1.18a~~ ✅ | Estados de controle no inimigo: atordoado, derrubado, lento. Host decide, todos veem. Em componente, sem depender do grafo | M | 07 §6 |
-| 1.18b | Efeito de sinal como dado: área em cone ou raio sem alocação, escala por `SignIntensity`, gancho de variante por escola | M | 03 §8 |
+| ~~1.18b~~ ✅ | Efeito de sinal como dado: área em cone ou raio sem alocação, escala por `SignIntensity`, gancho de variante por escola. Nota abaixo | M | 03 §8 |
 | 1.18c | Aard: cone de 6 m, derruba leves, atordoa médios por 1,5 s | M | 03 §8 |
 | 1.18d | Igni: cone de 5 m, dano 0,8x pelo pipeline, Queimadura de 4/s por 5 s | M | 03 §8 |
 | 1.18e | Quen: absorve um golpe por 8 s e devolve 30% do dano ao quebrar | M | 03 §8 |
@@ -204,6 +204,20 @@ continua correndo enquanto o bruxo escolhe.
 Todas as escolas têm os cinco sinais, e cada uma é especializada em um, com uma variante de
 efeito só dela. No slice, Lobo no Aard e Grifo no Igni. A tabela e as escolas registradas fora
 do slice estão no [doc 13 §5](13_COOP_E_REDE.md).
+
+**Sobre o efeito de sinal da 1.18b, 2026-09-15.** Um efeito é um asset, subclasse de
+`SignEffectDef`, e a habilidade ganhou uma área (cone ou raio) e uma lista deles. Só o host
+aplica, no instante do efeito que a 1.32 já pedia, e o resultado chega nas outras máquinas pelo
+estado que cada alvo já replica: nenhum byte novo na rede. Os alvos saem do mais perto para o
+mais longe, e quem conjurou e quem está abatido ficam de fora
+([ADR 0012](../tech/adr/0012-efeito-de-sinal-em-asset-aplicado-pelo-host.md)).
+
+A **variante de escola** é o `SchoolDef` apontando o sinal especializado e os efeitos a mais, que
+são somados depois dos do sinal. O Lobo aponta o abridor, com a variante vazia, porque o efeito
+dela ainda não foi desenhado. A **intensidade** usa a Inteligência, e com o Lobo sai 1,0: a nota
+do [doc 03 §8](03_COMBATE.md) diz o que ela escala e o que não escala. O abridor ganhou o cone de
+6 m e 90 graus, e continua sem efeito: o painel de debug mostra quantos alvos o cone pegou, e o
+empurrão é a 1.18c.
 
 | ~~1.31~~ ✅ | `SchoolDef`: bloco de atributos, três golpes e postura favorecida. A intensidade de sinal é atributo. Nota acima | M | 13 §5.1 |
 | ~~1.32~~ ✅ | Habilidade com custo e recarga, como dado. O host cobra no início e pode recusar; a recarga viaja como instante. Sem efeito até a 1.18. Nota acima | G | 13 §5 |
