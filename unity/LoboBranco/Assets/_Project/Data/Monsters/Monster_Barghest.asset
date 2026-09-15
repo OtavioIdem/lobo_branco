@@ -15,6 +15,7 @@ MonoBehaviour:
   displayName: Barghest
   creatureClass: 1
   archetype: 1
+  bodyWeight: 1
   statBlock: {fileID: 11400000, guid: 0c1ed4a3909ac854fb00e65cd861ff3a, type: 2}
   sightRange: 18
   sightHalfAngle: 60
@@ -24,5 +25,6 @@ MonoBehaviour:
   meleeAttack: {fileID: 11400000, guid: 45b452f0ca0a8d04cbe856123afc2526, type: 2}
   naturalWeapon: {fileID: 11400000, guid: 4a532140ff1fb54449cb98b69beae42f, type: 2}
   attackCooldown: 1.2
+  engagementDistance: 1.6
   vulnerableToOil: 1
   resistances: []

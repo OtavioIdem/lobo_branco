@@ -65,5 +65,28 @@ namespace LoboBranco.Tests
             Assert.AreEqual(SignAreaShape.Cone, knockback.area.shape, "docs/03 secao 8: cone.");
             Assert.AreEqual(6f, knockback.area.range, "docs/03 secao 8: 6 m.");
         }
+
+        /// <summary>
+        /// "Derruba leves, atordoa medios 1,5 s", do docs/03 secao 8 (tarefa 1.18c). A duracao da
+        /// derrubada nao esta no documento e nao e conferida; o tipo de controle de cada porte e.
+        /// </summary>
+        [Test]
+        public void O_abridor_derruba_leves_e_atordoa_medios_como_o_documento()
+        {
+            var knockback = AssetDatabase.LoadAssetAtPath<AbilityDef>(KnockbackPath);
+            Assert.IsNotNull(knockback, $"Nao achei {KnockbackPath}.");
+
+            ControlEffectDef control = null;
+            if (knockback.effects != null)
+                foreach (SignEffectDef effect in knockback.effects)
+                    if (effect is ControlEffectDef found)
+                        control = found;
+
+            Assert.IsNotNull(control, "O abridor nao tem efeito de controle. Rode o setup de assets de combate.");
+            Assert.AreEqual(ControlKind.KnockedDown, control.light.control);
+            Assert.AreEqual(ControlKind.Stunned, control.medium.control);
+            Assert.AreEqual(1.5f, control.medium.seconds);
+            Assert.IsFalse(control.heavy.DoesSomething);
+        }
     }
 }

@@ -21,4 +21,5 @@ MonoBehaviour:
     shape: 0
     range: 6
     coneAngleDegrees: 90
-  effects: []
+  effects:
+  - {fileID: 11400000, guid: bfab01ee83beffe49a6a3fa2d1e96174, type: 2}

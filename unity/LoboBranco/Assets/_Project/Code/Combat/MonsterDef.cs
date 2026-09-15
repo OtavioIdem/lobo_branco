@@ -49,6 +49,10 @@ namespace LoboBranco.Combat
         [Tooltip("Decide qual postura tem afinidade com ela, no estagio 3.")]
         public StanceArchetype archetype = StanceArchetype.Agile;
 
+        [Tooltip("Leve, medio ou pesado. Decide se o abridor derruba, atordoa ou nao move a criatura " +
+                 "(docs/03 secao 8). Tarefa 1.18c.")]
+        public BodyWeight bodyWeight = BodyWeight.Medium;
+
         [Header("Numeros")]
         [Tooltip("Vitalidade, dano e armadura da especie. docs/03 secao 12.")]
         public StatBlockDef statBlock;

@@ -47,6 +47,9 @@ namespace LoboBranco.Combat
 
         public OilClass VulnerableToOil => profile != null ? profile.vulnerableToOil : OilClass.None;
 
+        /// <summary>O porte da especie. Sem perfil, medio: o meio da tabela do abridor (tarefa 1.18c).</summary>
+        public BodyWeight BodyWeight => profile != null ? profile.bodyWeight : BodyWeight.Medium;
+
         public float CurrentVitality => _vitals != null ? _vitals.CurrentVitality : 0f;
 
         public float MaxVitality => _vitals != null ? _vitals.MaxVitality : 0f;

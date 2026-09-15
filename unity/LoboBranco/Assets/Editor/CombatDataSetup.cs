@@ -24,6 +24,8 @@ namespace LoboBranco.EditorTools
         const string AbilitiesFolder = "Assets/_Project/Data/Combat/Abilities";
         const string PlayerFolder = "Assets/_Project/Data/Player";
         const string MonstersFolder = "Assets/_Project/Data/Monsters";
+        const string SignEffectsFolder = "Assets/_Project/Data/Combat/SignEffects";
+        const string KnockbackControlPath = SignEffectsFolder + "/SignEffect_Knockback_Control.asset";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -81,6 +83,9 @@ namespace LoboBranco.EditorTools
             CreateMonsters();
             CreateTelegraphStyle();
             CreateHitFeedback();
+
+            // Antes das habilidades: o abridor aponta para o efeito de controle.
+            CreateSignEffects();
             CreateAbilities();
 
             // Por ultimo: a escola aponta para golpes, habilidades e bloco de atributos criados acima.
@@ -260,6 +265,7 @@ namespace LoboBranco.EditorTools
                 barghest.creatureClass = CreatureClass.Beast;
                 barghest.archetype = StanceArchetype.Agile;   // docs/03 secao 4: postura Rapida
                 barghest.vulnerableToOil = OilClass.Beast;    // docs/05 secao 5: Oleo de Besta
+                barghest.bodyWeight = BodyWeight.Light;       // decidido na 1.18c, ver abaixo
                 barghest.statBlock = AssetDatabase.LoadAssetAtPath<StatBlockDef>($"{StatsFolder}/StatBlock_Barghest.asset");
 
                 AssetDatabase.CreateAsset(barghest, barghestPath);
@@ -270,6 +276,19 @@ namespace LoboBranco.EditorTools
             // Preencher so o que esta vazio e o que permite rodar este setup de novo sem
             // desfazer balanceamento ja afinado a mao.
             LinkIfMissing(barghest, barghestPath);
+
+            // O porte entrou na tarefa 1.18c, depois de o asset existir, e o zero do enum e medio.
+            // Nao da para distinguir "medio de proposito" de "nunca preenchido" pelo valor, entao
+            // a pergunta e ao arquivo: sem a linha, o campo nunca foi gravado.
+            //
+            // Leve porque a composicao Matilha do docs/03 secao 10 existe para ensinar o abridor, e
+            // um abridor que so atordoa barghest nao ensina nada que a espada nao ensine.
+            if (FieldNeverSaved(barghestPath, "bodyWeight"))
+            {
+                barghest.bodyWeight = BodyWeight.Light;
+                EditorUtility.SetDirty(barghest);
+                Debug.Log($"[CombatData] Porte leve ligado em {barghestPath}.");
+            }
 
             CreateWitcherProfile();
         }
@@ -419,6 +438,19 @@ namespace LoboBranco.EditorTools
                 Debug.Log($"[CombatData] Criado: {path}");
             }
 
+            // O efeito entrou na tarefa 1.18c. Preencher so a lista vazia, como o resto.
+            if (asset.effects == null || asset.effects.Length == 0)
+            {
+                var control = AssetDatabase.LoadAssetAtPath<ControlEffectDef>(KnockbackControlPath);
+
+                if (control != null)
+                {
+                    asset.effects = new SignEffectDef[] { control };
+                    EditorUtility.SetDirty(asset);
+                    Debug.Log($"[CombatData] Efeito de controle ligado em {path}.");
+                }
+            }
+
             // A area entrou na tarefa 1.18b, depois de o asset ja existir. Os 6 m sao do docs/03
             // secao 8; a abertura nao esta la, e 90 graus foi decidido na 1.18b: larga o bastante
             // para pegar os dois barghests que flanqueiam, estreita o bastante para o abridor ser
@@ -435,6 +467,22 @@ namespace LoboBranco.EditorTools
                 EditorUtility.SetDirty(asset);
                 Debug.Log($"[CombatData] Area ligada em {path}.");
             }
+        }
+
+        // -------------------------------------------------------- efeitos de sinal
+
+        /// <summary>
+        /// O controle do abridor, do docs/03 secao 8 (tarefa 1.18c). Os numeros ficam nos padroes do
+        /// proprio <see cref="ControlEffectDef"/>: derruba leves, atordoa medios por 1,5 s, e nao
+        /// move pesados. A derrubada de 2 s nao esta no documento e foi decidida na 1.18c: mais longa
+        /// que o atordoamento, porque derrubar e o controle mais forte da tabela.
+        ///
+        /// O nome do asset e o do efeito, e nao o do sinal (tech/adr/0005).
+        /// </summary>
+        static void CreateSignEffects()
+        {
+            EnsureFolder(SignEffectsFolder);
+            CreateIfMissing<ControlEffectDef>(KnockbackControlPath);
         }
 
         // -------------------------------------------------------------- sensacao
@@ -561,6 +609,13 @@ namespace LoboBranco.EditorTools
 
             return 0;
         }
+
+        /// <summary>
+        /// Se um campo novo nunca foi gravado no asset. Serve para campo de enum cujo zero e um
+        /// valor valido, em que o valor carregado nao diz se alguem escolheu ou se ninguem mexeu.
+        /// </summary>
+        static bool FieldNeverSaved(string assetPath, string fieldName)
+            => File.Exists(assetPath) && !File.ReadAllText(assetPath).Contains($"  {fieldName}:");
 
         static void CreateIfMissing<T>(string path) where T : ScriptableObject
         {

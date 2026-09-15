@@ -8,6 +8,19 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-15 — M1 tarefa 1.18c: o abridor derruba a matilha
+- **Q passa a controlar.** O abridor derruba criaturas leves por 2 s, atordoa as medias por 1,5 s e
+  nao move as pesadas (docs/03 secao 8). O barghest e leve: o sinal deita os dois cacadores da
+  sandbox, em todas as maquinas.
+- `BodyWeight`: toda criatura declara porte no `MonsterDef`. O arquetipo de postura nao servia,
+  porque "agil" nao diz se a criatura e leve ou media. Sem porte, ela conta como media.
+- `ControlEffectDef`: o primeiro efeito de sinal, com uma resposta por porte. A intensidade alonga o
+  controle e nunca troca o tipo.
+- **Decididos aqui, fora do documento:** derrubada de 2 s e barghest leve. A nota no docs/03 secao 8
+  explica, e registra o risco de dois bruxos alternando o abridor para manter um barghest no chao.
+- As capsulas paradas da sandbox nao tem controle e ignoram o abridor. Quebrar guarda e a 1.19.
+- 361 testes passando, contra 346 antes.
+
 ### 2026-09-15 — M1 tarefa 1.18b: o efeito de sinal vira dado
 - `SignEffectDef`: um efeito de sinal e um asset, subclasse deste tipo. O `AbilityDef` ganhou uma
   area (`SignArea`, cone ou raio) e uma lista de efeitos. Os efeitos de verdade sao das tarefas

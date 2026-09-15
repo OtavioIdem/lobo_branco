@@ -186,6 +186,25 @@ que esta seção não trazia:
 O sinal continua sem efeito em jogo até a 1.18c: ele cobra, recarrega, acha quem está no cone, e
 o painel de debug mostra quantos.
 
+**Nota de implementação, 2026-09-15 (tarefa 1.18c).** O abridor passou a controlar. "Leve" e
+"médio" não existiam como dado, e o arquétipo da §4 não serve para isso: um barghest e um bandido
+são ambos ágeis, e só um deles voa com um empurrão. Toda criatura declara agora um **porte**
+(leve, médio ou pesado) no `MonsterDef`. Quatro decisões que esta seção não trazia:
+
+- **A derrubada dura 2 s.** A tabela dá só o atordoamento de 1,5 s. Derrubar é o controle mais
+  forte, então dura mais.
+- **O barghest é leve.** A §12 não diz o porte dele, e a composição Matilha da §10 existe para
+  ensinar o abridor. Com o barghest médio, o abridor só atordoaria a matilha.
+- **Sem porte declarado, a criatura é média:** atordoada, nunca derrubada.
+- **A intensidade alonga o controle e não troca o tipo.** Um Grifo intenso segura o barghest no
+  chão por mais tempo, e nunca derruba o que esta tabela diz que só atordoa.
+
+Ficam de fora, com dono: **quebrar guarda** é a 1.19, e o **empurrão** da §11 é sensação e entra
+com ela. Um risco fica registrado para a 1.35: dois bruxos alternando o abridor a cada 2 s mantêm
+um barghest no chão para sempre, porque o controle nunca soma mas pode ser reaplicado quando
+acaba. Pode ser exatamente a sinergia que o portão M1 procura, ou pode ser controle eterno; o
+playtest decide antes de qualquer imunidade entrar.
+
 ## 9. Pipeline de dano
 
 A ordem importa, e ela é o que faz o pilar P2 funcionar. Implementada como uma struct
