@@ -62,6 +62,9 @@ automatizado, e ele precisa estar escrito em algum lugar antes de ser esquecido.
 ```
 Repeat Forever
 └── Selector
+    ├── Sequence                                  ← sem controle: fica parada (tarefa 1.18a)
+    │   ├── [Self] esta sem controle              ← condição, categoria Lobo Branco
+    │   └── Wait (0,1 s)
     ├── Sequence                                  ← o ramo de combate
     │   ├── [Self] esta cacando alguem            ← condição, categoria Lobo Branco
     │   ├── [Self] pega o alvo em [Target]        ← ação, categoria Lobo Branco
@@ -74,6 +77,12 @@ Repeat Forever
     │       └── Navigate To Target                 ← nó do pacote; ainda longe
     └── Wait                                       ← ocioso; vira patrulha quando houver rota
 ```
+
+O galho "sem controle" vem primeiro, mas não é ele que segura a criatura atordoada: o
+`EnemyAgent` e o `EnemyMeleeAttacker` já recusam andar, girar e golpear enquanto o
+`ControlStatus` diz que ela está sem controle, em qualquer galho. O galho só evita que a árvore
+peça a vez de golpear a cada quadro para uma criatura que não pode golpear. Um grafo montado
+sem ele continua correto, só mais ruidoso.
 
 A ordem dos dois últimos filhos do Selector interno é o que faz o token funcionar: `golpeia`
 pede a vez ao coordenador e devolve falha quando o alvo já tem dois atacantes, e é essa falha

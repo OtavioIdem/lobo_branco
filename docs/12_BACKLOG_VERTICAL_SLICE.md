@@ -82,7 +82,14 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | ~~1.15~~ ✅ | Aço e prata, com a troca de 0,7 s não-cancelável | M | 03 §3 |
 | ~~1.16~~ ✅ | Vigor: consumo, regeneração, atraso de 1,5 s | M | 03 §7 |
 | 1.17 ⚠️ | Adrenalina: ganho, três gastos. **Parcial**: recurso e ganhos prontos, e dos três gastos só o segundo suspiro. Nota no 03 §7 | M | 03 §7 |
-| 1.18 | Cinco sinais com custo, cooldown e efeito | G | 03 §8 |
+| ~~1.18a~~ ✅ | Estados de controle no inimigo: atordoado, derrubado, lento. Host decide, todos veem. Em componente, sem depender do grafo | M | 07 §6 |
+| 1.18b | Efeito de sinal como dado: área em cone ou raio sem alocação, escala por `SignIntensity`, gancho de variante por escola | M | 03 §8 |
+| 1.18c | Aard: cone de 6 m, derruba leves, atordoa médios por 1,5 s | M | 03 §8 |
+| 1.18d | Igni: cone de 5 m, dano 0,8x pelo pipeline, Queimadura de 4/s por 5 s | M | 03 §8 |
+| 1.18e | Quen: absorve um golpe por 8 s e devolve 30% do dano ao quebrar | M | 03 §8 |
+| 1.18f | Yrden: armadilha replicada de 4 m por 12 s, lentidão de 60% | M | 03 §8 |
+| 1.18g | Escolher o sinal: roda segurando Q, sem desacelerar o tempo, e teclas diretas | M | 02 §4 |
+| 1.18h ⏸ | Axii. **Adiado** até existir inimigo humanoide: nota abaixo | M | 03 §8 |
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |
 | ~~1.20~~ ✅ | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
 | 1.21 ⚠️ | Behavior tree base do inimigo. **Parcial**: sentidos, aquisição de alvo, golpe, nós customizados, prefab e NavMesh prontos; falta desenhar o grafo no editor gráfico. Nota abaixo | G | 07 §6 |
@@ -181,9 +188,26 @@ com a do host. Os tempos de conjurar e recuperar não estão no doc 03, e a nota
 foram escolhidos. A roda de sinais do doc 02 §4 também não existe, e até ela existir Q usa a
 primeira vaga.
 
+**Sobre a 1.18 vir antes da 1.33, e dividida, 2026-09-14.** Sem efeito de sinal, o Grifo seria
+um Lobo com outra postura inicial, e o portão M1 pede que um jogador faça o que o outro não
+consegue. Por isso os sinais vêm antes da segunda escola. A 1.18 foi dividida em oito partes
+porque cinco efeitos sobre um inimigo que ainda não sabe ficar atordoado não cabem numa tarefa.
+
+O **Axii ficou adiado**. Ele faz um humanoide lutar do lado do bruxo, e hoje não existe inimigo
+humanoide na sandbox. Fazer agora seria escrever troca de facção na busca de alvo sem nada para
+testar.
+
+A **escolha do sinal tem roda e teclas diretas**. A roda nunca desacelera o tempo, ao contrário
+do Witcher 3, pela [ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md): o mundo
+continua correndo enquanto o bruxo escolhe.
+
+Todas as escolas têm os cinco sinais, e cada uma é especializada em um, com uma variante de
+efeito só dela. No slice, Lobo no Aard e Grifo no Igni. A tabela e as escolas registradas fora
+do slice estão no [doc 13 §5](13_COOP_E_REDE.md).
+
 | ~~1.31~~ ✅ | `SchoolDef`: bloco de atributos, três golpes e postura favorecida. A intensidade de sinal é atributo. Nota acima | M | 13 §5.1 |
 | ~~1.32~~ ✅ | Habilidade com custo e recarga, como dado. O host cobra no início e pode recusar; a recarga viaja como instante. Sem efeito até a 1.18. Nota acima | G | 13 §5 |
-| 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Vontade. Zero `if` por escola | G | 13 §5 |
+| 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Inteligência, variante própria do Igni. Zero `if` por escola. Depois da 1.18 | G | 13 §5 |
 | 1.34 | Seleção de escola na entrada da sala | P | 13 §8 |
 | 1.35 | Rebalancear o doc 03 para dois jogadores. Os números foram feitos para um | G | 03 §12 |
 

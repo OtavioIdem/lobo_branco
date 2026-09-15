@@ -106,14 +106,16 @@ M0 fechado. Do M1 estão escritas as tarefas 1.1 a 1.9, a camada de rede inteira
 1.9i), o Fluxo (1.12), as três posturas (1.14), aço e prata (1.15), o Vigor (1.16), a
 Adrenalina parcial (1.17), o `MonsterDef` (1.20), a IA de inimigo parcial (1.21), o
 coordenador de encontro (1.22), o telegrafo de ataque replicado (1.23), hitstop, tremor e
-soco de câmera (1.25), a escola como dado (1.31) e a habilidade com custo e recarga (1.32).
+soco de câmera (1.25), a escola como dado (1.31), a habilidade com custo e recarga (1.32) e os
+estados de controle do inimigo (1.18a, primeira das oito partes da 1.18, que vem antes da 1.33).
 Existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
 de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes por postura
 que vêm da escola do bruxo (só o Lobo, por enquanto) com hitbox sem alocação, um sinal que
 cobra vigor e recarrega mas ainda não tem efeito (tarefa 1.18), sessão em que o dono simula o próprio bruxo enquanto o host resolve
 vida e dano (por IP direto ou por código de convite), e uma criatura que percebe por cone e
 por som, persegue por NavMesh, golpeia com telegrafo de 0,65 s visível em todas as máquinas e
-espera a vez rondando quando o alvo já tem dois atacantes. 292 testes passando, build gerando.
+espera a vez rondando quando o alvo já tem dois atacantes, e que pode ser atordoada, derrubada
+e lentificada pelo host sem depender do grafo. 308 testes passando, build gerando.
 
 **Nada de sensação mexe em `Time.timeScale`** (`tech/adr/0010`). A escala é global na máquina,
 e no host ela congelaria a sessão de todo mundo. Hitstop estende o golpe de quem bateu pelo

@@ -63,7 +63,12 @@ namespace LoboBranco.EditorTools
                 Entry(StatType.MaxVitality, 55f),
                 Entry(StatType.AttackDamage, 16f),
                 Entry(StatType.Armor, 2f),
+                Entry(StatType.MoveSpeed, 1f),         // neutro; a lentidao multiplica isto
             });
+
+            // O MoveSpeed entrou na tarefa 1.18a, depois de o bloco ja existir. Sem ele, a
+            // lentidao multiplica zero e nao pega (ver MonsterAssetsTests).
+            EnsureStatEntry($"{StatsFolder}/StatBlock_Barghest.asset", StatType.MoveSpeed, 1f);
 
             CreateAttacks();
             CreateWeapons();
@@ -481,6 +486,34 @@ namespace LoboBranco.EditorTools
 
             AssetDatabase.CreateAsset(asset, path);
             Debug.Log($"[CombatData] Criado: {path}");
+        }
+
+        /// <summary>
+        /// Acrescenta um atributo que falta num bloco que ja existe, sem tocar nos que estao la.
+        /// Mesmo principio do resto deste setup: rodar de novo nunca desfaz balanceamento afinado a
+        /// mao, e so preenche o que um sistema novo passou a precisar.
+        /// </summary>
+        static void EnsureStatEntry(string path, StatType stat, float value)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<StatBlockDef>(path);
+            if (asset == null) return;
+
+            var so = new SerializedObject(asset);
+            SerializedProperty array = so.FindProperty("entries");
+            int index = EnumIndexOf(stat);
+
+            for (int i = 0; i < array.arraySize; i++)
+                if (array.GetArrayElementAtIndex(i).FindPropertyRelative("stat").enumValueIndex == index)
+                    return;
+
+            array.arraySize++;
+            SerializedProperty element = array.GetArrayElementAtIndex(array.arraySize - 1);
+            element.FindPropertyRelative("stat").enumValueIndex = index;
+            element.FindPropertyRelative("value").floatValue = value;
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] {stat} acrescentado em {path}.");
         }
 
         /// <summary>

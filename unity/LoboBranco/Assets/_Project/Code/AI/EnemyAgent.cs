@@ -55,6 +55,7 @@ namespace LoboBranco.AI
         readonly EnemySenses _senses = new EnemySenses();
 
         CharacterVitals _vitals;
+        ControlStatus _control;
         NavMeshAgent _navAgent;
         Collider[] _candidates;
         LayerMask _resolvedTargetMask;
@@ -64,6 +65,7 @@ namespace LoboBranco.AI
         IDamageable _targetDamageable;
         float _scanRemaining;
         bool _navWasEnabled;
+        bool _held;
 
         // ---------------------------------------------------------------- leitura
 
@@ -72,6 +74,12 @@ namespace LoboBranco.AI
 
         /// <summary>Ja caiu. Uma criatura no chao nao decide nada.</summary>
         public bool IsDown => _vitals != null && _vitals.IsDown;
+
+        /// <summary>
+        /// Atordoada ou derrubada (tarefa 1.18a). Nao anda, nao gira e devolve a vez de golpear.
+        /// Sem <see cref="ControlStatus"/> no prefab, nunca.
+        /// </summary>
+        public bool IsIncapacitated => _control != null && _control.IsIncapacitated;
 
         /// <summary>O alvo corrente, ou nulo. E o que o no de aquisicao poe no quadro negro.</summary>
         public Transform Target => _target;
@@ -119,6 +127,7 @@ namespace LoboBranco.AI
         void Awake()
         {
             _vitals = GetComponent<CharacterVitals>();
+            _control = GetComponent<ControlStatus>();
             _navAgent = GetComponent<NavMeshAgent>();
             _candidates = new Collider[Mathf.Max(1, maxCandidates)];
 
@@ -173,6 +182,14 @@ namespace LoboBranco.AI
             }
 
             float deltaTime = Time.deltaTime;
+
+            // Sem controle ela para no lugar e devolve a vez de golpear, para que outra criatura
+            // possa atacar o bruxo enquanto esta esta no chao: em coop, derrubar uma e abrir a
+            // vaga dela. Os sentidos continuam contando, porque atordoada nao e esquecida.
+            bool incapacitated = IsIncapacitated;
+            SetHeld(incapacitated);
+
+            if (incapacitated) ReleaseAttackToken();
 
             _scanRemaining -= deltaTime;
             if (_scanRemaining <= 0f)
@@ -352,6 +369,9 @@ namespace LoboBranco.AI
         /// </summary>
         public bool MoveTo(Vector3 destination)
         {
+            // A trava mora aqui, e nao nos nos, para valer em qualquer galho do grafo.
+            if (IsIncapacitated) return false;
+
             if (_navAgent == null || !_navAgent.enabled || !_navAgent.isOnNavMesh) return false;
 
             _navAgent.SetDestination(destination);
@@ -373,7 +393,7 @@ namespace LoboBranco.AI
         /// </summary>
         public bool FaceTarget(float deltaTime, float toleranceDegrees = 12f)
         {
-            if (_target == null) return false;
+            if (_target == null || IsIncapacitated) return false;
 
             Vector3 toTarget = _target.position - transform.position;
             toTarget.y = 0f;
@@ -408,6 +428,26 @@ namespace LoboBranco.AI
             if (multiplier <= 0f) multiplier = 1f;
 
             _navAgent.speed = monster.moveSpeed * multiplier;
+        }
+
+        /// <summary>
+        /// Segura o corpo no lugar. Zerar a velocidade junto importa: so parar o caminho deixaria
+        /// o agente desacelerar, e um barghest atordoado deslizaria meio metro depois do Aard.
+        /// </summary>
+        void SetHeld(bool held)
+        {
+            if (_held == held) return;
+
+            _held = held;
+
+            if (_navAgent == null || !_navAgent.enabled || !_navAgent.isOnNavMesh) return;
+
+            _navAgent.isStopped = held;
+
+            if (!held) return;
+
+            _navAgent.ResetPath();
+            _navAgent.velocity = Vector3.zero;
         }
 
         void SetNavEnabled(bool value)

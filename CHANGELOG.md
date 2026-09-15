@@ -8,6 +8,27 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-14 — M1 tarefa 1.18a: o inimigo pode ser atordoado, derrubado e lentificado
+- **A 1.18 foi dividida em oito partes e vem antes da 1.33.** Sem efeito de sinal, o Grifo seria
+  um Lobo com outra postura inicial. O Axii ficou adiado ate existir inimigo humanoide.
+- **Todas as escolas terao os cinco sinais, e cada uma e especializada em um**, com uma variante
+  so dela: Lobo no Aard, Grifo no Igni. As escolas fora do slice e o conflito da Lince com a
+  ADR 0005 estao registrados no docs/13 secao 5.
+- `ControlState`: atordoamento, derrubada e lentidao guardados como o instante em que acabam, no
+  relogio do servidor. E a regra e o formato de rede ao mesmo tempo. Reaplicar nunca soma, entao
+  dois bruxos nao deixam uma criatura atordoada para sempre; na lentidao, a mais forte manda.
+- `ControlStatus`: o host aplica, todos veem. Sem controle, a criatura para no lugar, nao gira,
+  corta o golpe em andamento (o telegrafo para em todas as maquinas) e devolve a vez de golpear,
+  para outra poder atacar. Mora em componente, e nao no grafo, entao funciona antes de o grafo do
+  barghest existir.
+- A lentidao vira modificador de `MoveSpeed` em todas as maquinas. **O bloco do barghest nao tinha
+  `MoveSpeed`**, e um multiplicador sobre zero nao lentifica nada: o setup agora acrescenta o que
+  falta, e um teste falha para qualquer criatura sem o atributo.
+- `ControlStatusView`: em greybox, a capsula derrubada deita e a atordoada balanca. No editor, o
+  menu de contexto do `ControlStatus` atordoa, derruba e lentifica, para conferir sem sinal.
+- No `Enemy_Barghest`, nada muda ate um sinal aplicar controle (tarefas 1.18c e 1.18f).
+- 308 testes passando, contra 292 antes. Build de Windows gerando.
+
 ### 2026-09-14 — M1 tarefa 1.32: habilidade com custo e recarga
 - `AbilityDef`: habilidade em asset, com custo de vigor, recarga, tempo de conjurar e
   recuperacao. A escola lista as dela por vaga, e a vaga e o que viaja pela rede.

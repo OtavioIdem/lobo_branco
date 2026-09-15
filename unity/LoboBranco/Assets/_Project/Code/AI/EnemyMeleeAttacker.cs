@@ -47,6 +47,7 @@ namespace LoboBranco.AI
         MeleeHitbox _hitbox;
         IDamageable[] _results;
         CharacterVitals _vitals;
+        ControlStatus _control;
         LayerMask _resolvedMask;
 
         readonly AttackTimeline _timeline = new AttackTimeline();
@@ -79,12 +80,14 @@ namespace LoboBranco.AI
         public AttackPhase Phase => _timeline.CurrentPhase;
 
         /// <summary>Falso durante a pausa entre golpes, durante um golpe, e depois de cair.</summary>
-        public bool Ready => Attack != null && !Swinging && _cooldownRemaining <= 0f && !IsDown;
+        public bool Ready => Attack != null && !Swinging && _cooldownRemaining <= 0f && !IsDown && !IsIncapacitated;
 
         /// <summary>Quem resolve: o host, ou eu mesmo quando nao ha rede.</summary>
         public bool CanResolve => _vitals == null || _vitals.CanResolve;
 
         bool IsDown => _vitals != null && _vitals.IsDown;
+
+        bool IsIncapacitated => _control != null && _control.IsIncapacitated;
 
         /// <summary>Um golpe comecou. Dispara so em quem resolve, e e o que o telegrafo manda pela rede.</summary>
         public event Action SwingStarted;
@@ -100,6 +103,7 @@ namespace LoboBranco.AI
         void Awake()
         {
             _vitals = GetComponent<CharacterVitals>();
+            _control = GetComponent<ControlStatus>();
 
             if (tuning == null)
             {
@@ -123,8 +127,10 @@ namespace LoboBranco.AI
 
             // Criatura que cai no meio do golpe para de golpear na hora. Sem isto, quem
             // dirige o golpe e a arvore, e uma arvore que continua rodando deixaria um
-            // barghest morto terminar a garrada e acertar o bruxo que acabou de mata-lo.
-            if (Swinging && IsDown)
+            // barghest morto terminar a garrada e acertar o bruxo que acabou de mata-lo. Atordoar
+            // e derrubar cortam pelo mesmo motivo (tarefa 1.18a), e o corte viaja: o telegrafo
+            // para de avisar em todas as maquinas um golpe que nao vai mais sair.
+            if (Swinging && (IsDown || IsIncapacitated))
                 EndSwing();
 
             if (_cooldownRemaining > 0f)

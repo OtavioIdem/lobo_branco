@@ -576,6 +576,15 @@ namespace LoboBranco.EditorTools
             telegraph.FindProperty("style").objectReferenceValue = Require<TelegraphStyleDef>(TelegraphStylePath);
             telegraph.FindProperty("body").objectReferenceValue = enemy.transform.Find("Body_Greybox");
             telegraph.ApplyModifiedPropertiesWithoutUndo();
+
+            // Atordoar, derrubar e lentificar (tarefa 1.18a). Tambem e NetworkBehaviour, pelo
+            // mesmo motivo do telegrafo. A pose mexe so na rotacao e na altura do corpo, e o
+            // telegrafo so na cor e na escala, entao os dois dividem o corpo sem brigar.
+            enemy.AddComponent<ControlStatus>();
+
+            var controlView = new SerializedObject(enemy.AddComponent<ControlStatusView>());
+            controlView.FindProperty("body").objectReferenceValue = enemy.transform.Find("Body_Greybox");
+            controlView.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>

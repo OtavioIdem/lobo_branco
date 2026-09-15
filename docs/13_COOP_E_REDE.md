@@ -81,13 +81,30 @@ de IP em código, registrada na [ADR 0005](../tech/adr/0005-sistemas-agnosticos-
 Escolas de bruxo resolvem os dois e são melhores de projetar, porque cada uma já tem uma
 identidade de luta coerente.
 
-| Escola | Fantasia | Viés de atributo | Postura favorecida | Papel no grupo |
-|---|---|---|---|---|
-| **Lobo** | Equilibrado, espada e sinal | nenhum | Rápida | Referência. É o kit que já existe |
-| **Grifo** | Sinais intensos, controle | Vontade | Grupo | Segura o campo, ancora etéreo, quebra guarda |
-| **Gato** | Velocidade e veneno | Destreza | Rápida | Dano alto, sobrevive mal |
-| **Urso** | Armadura pesada, dano bruto | Vigor | Forte | Absorve o boss enquanto os outros trabalham |
-| **Víbora** | Duas espadas, execução | Destreza | Rápida | Fecha alvo ferido |
+| Escola | Fantasia | Viés de atributo | Postura favorecida | Sinal especializado | Papel no grupo |
+|---|---|---|---|---|---|
+| **Lobo** | Equilibrado, espada e sinal | nenhum | Rápida | Aard | Referência. É o kit que já existe |
+| **Grifo** | Sinais intensos, controle | ~~Vontade~~ Inteligência | Grupo | Igni | Segura o campo, quebra guarda, interrompe regeneração |
+| **Gato** | Velocidade e veneno | Destreza | Rápida | Axii | Dano alto, sobrevive mal |
+| **Urso** | Armadura pesada, dano bruto | Vigor | Forte | Quen | Absorve o boss enquanto os outros trabalham |
+| **Víbora** | Duas espadas, execução | Destreza | Rápida | Todos, sem variante | Fecha alvo ferido |
+
+**Especialização de sinal, decidida em 2026-09-14.** Todas as escolas têm acesso aos cinco
+sinais. Cada escola é especializada em um deles e ganha uma variante com efeito diferente, que
+só ela tem. A Víbora é a exceção: um bônus menor em todos os sinais, sem variante nenhuma. O
+efeito de cada variante é desenhado junto com a escola, e o do Grifo é a tarefa 1.33.
+
+Duas consequências para a tabela. **"Vontade" não existe como atributo:** o [doc 02 §5](02_GDD.md)
+põe a intensidade de sinal na Inteligência, e é ela o viés do Grifo. **O Grifo não ancora mais
+etéreo**, porque ancoragem é efeito do Yrden, e a especialização dele é o Igni. Quebrar guarda e
+interromper regeneração são do Igni pelo [doc 03 §8 e §10](03_COMBATE.md).
+
+Ficam registradas, e **fora do slice**, duas escolas que não estão na tabela. A **Mantícora**,
+especializada em Yrden. E a **Lince**, pensada para a Ciri, que melhora o dano da habilidade
+ancestral dela. A terceira escola só entra depois do portão M1 (risco X7 do §11). A Lince tem
+um problema além do escopo: uma escola de personagem nomeado contradiz este mesmo §5 e a
+[ADR 0005](../tech/adr/0005-sistemas-agnosticos-de-ip.md), e a habilidade ancestral seria um
+sistema novo. Ela volta a ser discutida depois do M1, junto com essa contradição.
 
 **No slice entram duas: Lobo e Grifo.** Não três, não cinco. Lobo porque já está construído.
 Grifo porque força o sistema de habilidade com custo e recarga a existir de verdade, e esse
@@ -136,6 +153,7 @@ Detalhe e justificativa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-c
 | IA, encontro, attack token | **O host** | O coordenador de token do doc 07 §6 já é peça única por natureza |
 | Efeito visual e som de impacto | Todos, localmente | Reagem ao evento do host |
 | Habilidade: custo e recarga | **O host** confere, cobra e pode recusar; o dono pede e prevê | Cobrada no início da conjuração. A recarga viaja como o instante em que volta, no relógio do servidor, e cada máquina calcula quanto falta. Ao contrário do vigor do golpe, aqui o host recusa, porque sinal de graça é janela de graça ([ADR 0011](../tech/adr/0011-habilidade-cobrada-no-inicio-recarga-como-instante.md)) |
+| Atordoar, derrubar, lentificar | **O host** aplica; todos veem | Instantes de fim no relógio do servidor, como a recarga. A lentidão vira modificador de `MoveSpeed` em todas as máquinas a partir do mesmo estado, e a folha do cliente não diverge da do host. Mora em componente, e não no grafo, pela ADR 0009 (tarefa 1.18a) |
 | Telegrafo de ataque de inimigo | **O host** decide o instante; todos desenham | Um carimbo de tempo por golpe, no relógio do servidor. Cada máquina calcula o aviso a partir do mesmo `AttackDef`, e o aviso do cliente com ping termina junto com a janela de dano do host (tarefa 1.23) |
 | Hitstop | **O host** soma ao golpe; o dono segura o dele pelo mesmo tempo | Nunca `Time.timeScale`, que no host congelaria a sessão inteira. A extensão do golpe é igual nas duas pontas, e a janela de Fluxo sobrevive ([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)) |
 | Tremor e soco de câmera | Só o dono, na tela dele | Reagem ao acerto confirmado pelo host e à vida do próprio bruxo caindo |

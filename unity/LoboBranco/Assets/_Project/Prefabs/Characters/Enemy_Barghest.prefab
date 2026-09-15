@@ -109,6 +109,8 @@ GameObject:
   - component: {fileID: 5631679369086755462}
   - component: {fileID: 3135784218698979072}
   - component: {fileID: 8829121345188657873}
+  - component: {fileID: 236695268999910190}
+  - component: {fileID: 6728981425439726347}
   m_Layer: 9
   m_Name: Enemy_Barghest
   m_TagString: Untagged
@@ -357,6 +359,34 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   style: {fileID: 11400000, guid: ec063156babaa1d4bbdee36ff30abfa7, type: 2}
   body: {fileID: 2871562434738043197}
+--- !u!114 &236695268999910190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3524103765472324796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d8c6fb61901b4dbe3c0f67e9f4c4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.ControlStatus
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &6728981425439726347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3524103765472324796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88572de98897b384d9c6142d54447ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.ControlStatusView
+  body: {fileID: 2871562434738043197}
+  stunSwayDegrees: 12
+  stunSwayFrequency: 2.5
 --- !u!1 &5576446439107279541
 GameObject:
   m_ObjectHideFlags: 0
