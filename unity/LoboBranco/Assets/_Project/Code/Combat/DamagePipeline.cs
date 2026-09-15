@@ -52,6 +52,27 @@ namespace LoboBranco.Combat
             new ResistanceStage(),          // 11
         };
 
+        /// <summary>
+        /// Os estagios que valem para o dano de um sinal (tarefa 1.18d), na mesma ordem canonica,
+        /// e sem os que sao de lamina.
+        ///
+        /// Postura, afinidade, material, Fluxo, oleo e critico falam da espada e do golpe, e um
+        /// sinal nao tem nenhum dos dois: fogo nao e aco nem prata, e oleo esta na lamina. O bonus
+        /// plano do estagio 1 tambem fica de fora, porque ele soma ao dano da arma. O que sobra vale
+        /// para qualquer dano: pesquisar o bestiario, a pocao, a armadura e a resistencia ao tipo,
+        /// que e onde mora a fraqueza a fogo do docs/03 secao 8.
+        ///
+        /// Lista separada, e nao estagio perguntando a origem do dano: os onze estagios continuam
+        /// sem saber que sinal existe, e a razao de 5,3 vezes do golpe fica intocada.
+        /// </summary>
+        public static IDamageStage[] CreateSignStages() => new IDamageStage[]
+        {
+            new BestiaryKnowledgeStage(),   //  7
+            new BuffStage(),                //  8
+            new ArmorStage(),               // 10
+            new ResistanceStage(),          // 11
+        };
+
         /// <summary>Calcula o dano sem aplicar. Use para previsao e para teste.</summary>
         public DamageResult Resolve(in DamageRequest request)
         {

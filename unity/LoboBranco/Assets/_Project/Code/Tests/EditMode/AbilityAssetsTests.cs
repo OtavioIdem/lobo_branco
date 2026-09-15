@@ -55,6 +55,53 @@ namespace LoboBranco.Tests
             Assert.AreEqual(4f, knockback.cooldownSeconds, "docs/03 secao 8: recarga de 4 s.");
         }
 
+        const string FirePath = "Assets/_Project/Data/Combat/Abilities/Sign_Fire.asset";
+        const string WolfPath = "Assets/_Project/Data/Player/School_Wolf.asset";
+
+        /// <summary>
+        /// A linha do fogo no docs/03 secao 8 (tarefa 1.18d): custo, recarga, cone de 5 m, dano 0,8x e
+        /// Queimadura de 4 por segundo por 5 s. A abertura nao esta no documento e nao e conferida.
+        /// </summary>
+        [Test]
+        public void O_fogo_tem_os_numeros_do_documento()
+        {
+            var fire = AssetDatabase.LoadAssetAtPath<AbilityDef>(FirePath);
+            Assert.IsNotNull(fire, $"Nao achei {FirePath}. Rode 'Lobo Branco/Setup/6. Criar assets de combate'.");
+
+            Assert.AreEqual(35f, fire.staminaCost, "docs/03 secao 8: custo 35.");
+            Assert.AreEqual(5f, fire.cooldownSeconds, "docs/03 secao 8: recarga de 5 s.");
+            Assert.AreEqual(SignAreaShape.Cone, fire.area.shape);
+            Assert.AreEqual(5f, fire.area.range, "docs/03 secao 8: cone de 5 m.");
+
+            DamageEffectDef damage = null;
+            BurnEffectDef burn = null;
+
+            if (fire.effects != null)
+                foreach (SignEffectDef effect in fire.effects)
+                {
+                    if (effect is DamageEffectDef d) damage = d;
+                    if (effect is BurnEffectDef b) burn = b;
+                }
+
+            Assert.IsNotNull(damage, "O fogo nao fere.");
+            Assert.IsNotNull(burn, "O fogo nao queima.");
+            Assert.AreEqual(0.8f, damage.weaponDamageMultiplier);
+            Assert.AreEqual(DamageType.Fire, damage.damageType);
+            Assert.AreEqual(4f, burn.damagePerSecond);
+            Assert.AreEqual(5f, burn.seconds);
+        }
+
+        [Test]
+        public void O_Lobo_tem_o_fogo_numa_vaga()
+        {
+            var wolf = AssetDatabase.LoadAssetAtPath<LoboBranco.Player.SchoolDef>(WolfPath);
+            var fire = AssetDatabase.LoadAssetAtPath<AbilityDef>(FirePath);
+
+            Assert.IsNotNull(wolf);
+            Assert.IsNotNull(fire);
+            CollectionAssert.Contains(wolf.abilities, fire, "Todas as escolas tem os cinco sinais (docs/13 secao 5).");
+        }
+
         /// <summary>A forma e o alcance sao do docs/03 secao 8. A abertura nao esta la, e nao e conferida.</summary>
         [Test]
         public void O_abridor_alcanca_o_cone_do_documento()

@@ -448,6 +448,9 @@ namespace LoboBranco.EditorTools
             // DamageReceiver, que o RequireComponent traz junto com o CharacterVitals.
             enemy.AddComponent<CombatDummy>();
 
+            // O alvo parado queima, e o piscar a cada tique mostra o compasso (tarefa 1.18d).
+            enemy.AddComponent<BurnStatus>();
+
             // A especie e o bloco de atributos apontam para os mesmos numeros: o
             // MonsterDef descreve o barghest e referencia o StatBlock dele.
             WireProfile(enemy.GetComponent<DamageReceiver>(), EnemyMonsterPath);
@@ -595,6 +598,10 @@ namespace LoboBranco.EditorTools
             var controlView = new SerializedObject(enemy.AddComponent<ControlStatusView>());
             controlView.FindProperty("body").objectReferenceValue = enemy.transform.Find("Body_Greybox");
             controlView.ApplyModifiedPropertiesWithoutUndo();
+
+            // A Queimadura do fogo (tarefa 1.18d). Componente comum, e nao de rede: so o host conta
+            // os tiques, e o dano de cada um viaja na vida.
+            enemy.AddComponent<BurnStatus>();
         }
 
         /// <summary>

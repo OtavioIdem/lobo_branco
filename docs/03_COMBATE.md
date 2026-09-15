@@ -205,6 +205,27 @@ um barghest no chão para sempre, porque o controle nunca soma mas pode ser reap
 acaba. Pode ser exatamente a sinergia que o portão M1 procura, ou pode ser controle eterno; o
 playtest decide antes de qualquer imunidade entrar.
 
+**Nota de implementação, 2026-09-15 (tarefa 1.18d).** O fogo fere e queima. Esta seção dá "cone
+5 m, dano 0,8x, Queimadura 4/s por 5 s", e cinco coisas precisaram de decisão:
+
+- **O 0,8x é da espada na mão.** Com 12 de base, o fogo sai 9,6 antes da armadura. Um número de
+  dano próprio seria esquecido quando a espada melhorar.
+- **O dano do sinal passa por 4 dos 11 estágios da §9:** bestiário, poção, armadura e resistência.
+  Postura, afinidade, material, Fluxo, óleo e crítico são de lâmina; com o material na conta, o
+  fogo sairia 0,35x contra monstro com aço na mão. É outra lista de estágios, na mesma ordem, e
+  os onze do golpe e a razão de 5,3 vezes não mudam.
+- **A Queimadura ignora a armadura e respeita a resistência a fogo.** Com a subtração plana, 4
+  por tique viraria 1 contra o alghoul de 12 de armadura, e o fogo seria pior justamente contra
+  quem ele deveria abrir. São tiques de 1 s, 20 de dano no total, e a intensidade escala o dano
+  por segundo e não a duração.
+- **Reaplicar não soma:** a Queimadura mais forte manda, como a lentidão. Dois bruxos com fogo
+  no mesmo barghest não dobram o dano.
+- **O cone tem 60 graus**, mais estreito que os 90 do abridor: o abridor derruba a matilha em
+  volta, e o fogo é mirado no alvo que tem a fraqueza. A tarefa 1.30 revê.
+
+Quebrar guarda continua na 1.19, e interromper a regeneração da Besta (§10) espera a Besta. O
+Lobo recebe o fogo na segunda vaga, e ele só pode ser conjurado quando a roda da 1.18g existir.
+
 ## 9. Pipeline de dano
 
 A ordem importa, e ela é o que faz o pilar P2 funcionar. Implementada como uma struct

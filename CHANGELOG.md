@@ -8,6 +8,21 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-15 — M1 tarefa 1.18d: o fogo fere e queima
+- **O Igni existe como asset, e ainda nao sai do Q.** Custo 35, recarga de 5 s, cone de 5 m: dano
+  de 0,8 vezes a espada na mao, como fogo, e Queimadura de 4 por segundo por 5 s (docs/03 secao 8).
+  O Lobo o tem na segunda vaga, e ele so pode ser conjurado com a roda da tarefa 1.18g.
+- `DamageEffectDef`: dano de sinal pelo pipeline, mas so por 4 dos 11 estagios: bestiario, pocao,
+  armadura e resistencia. Postura, material, Fluxo, oleo e critico sao de lamina. E outra lista de
+  estagios; os onze do golpe e a razao de 5,3 vezes nao mudam.
+- `BurnState` e `BurnStatus`: a Queimadura em tiques de 1 s, contada so no host, e o dano de cada
+  tique viaja na vida. **Ignora armadura e respeita resistencia a fogo.** Reaplicar nunca soma; a
+  mais forte manda. Morte pela queimadura rende carga de adrenalina a quem acendeu.
+- Capsulas paradas e cacadores da sandbox queimam.
+- **Decididos aqui, fora do documento:** base na espada na mao, queimadura sem armadura e cone de 60
+  graus. A nota no docs/03 secao 8 explica cada um.
+- 392 testes passando, contra 361 antes. Build de Windows gerando.
+
 ### 2026-09-15 — M1 tarefa 1.18c: o abridor derruba a matilha
 - **Q passa a controlar.** O abridor derruba criaturas leves por 2 s, atordoa as medias por 1,5 s e
   nao move as pesadas (docs/03 secao 8). O barghest e leve: o sinal deita os dois cacadores da

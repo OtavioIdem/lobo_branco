@@ -85,7 +85,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | ~~1.18a~~ ✅ | Estados de controle no inimigo: atordoado, derrubado, lento. Host decide, todos veem. Em componente, sem depender do grafo | M | 07 §6 |
 | ~~1.18b~~ ✅ | Efeito de sinal como dado: área em cone ou raio sem alocação, escala por `SignIntensity`, gancho de variante por escola. Nota abaixo | M | 03 §8 |
 | ~~1.18c~~ ✅ | Aard: cone de 6 m, derruba leves, atordoa médios por 1,5 s. Porte da criatura no `MonsterDef`. Nota no 03 §8 | M | 03 §8 |
-| 1.18d | Igni: cone de 5 m, dano 0,8x pelo pipeline, Queimadura de 4/s por 5 s | M | 03 §8 |
+| ~~1.18d~~ ✅ | Igni: cone de 5 m, dano 0,8x pelo pipeline, Queimadura de 4/s por 5 s. Conjurável em jogo só com a roda da 1.18g. Nota no 03 §8 | M | 03 §8 |
 | 1.18e | Quen: absorve um golpe por 8 s e devolve 30% do dano ao quebrar | M | 03 §8 |
 | 1.18f | Yrden: armadilha replicada de 4 m por 12 s, lentidão de 60% | M | 03 §8 |
 | 1.18g | Escolher o sinal: roda segurando Q, sem desacelerar o tempo, e teclas diretas | M | 02 §4 |

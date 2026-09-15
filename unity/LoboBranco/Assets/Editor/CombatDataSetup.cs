@@ -26,6 +26,9 @@ namespace LoboBranco.EditorTools
         const string MonstersFolder = "Assets/_Project/Data/Monsters";
         const string SignEffectsFolder = "Assets/_Project/Data/Combat/SignEffects";
         const string KnockbackControlPath = SignEffectsFolder + "/SignEffect_Knockback_Control.asset";
+        const string FireDamagePath = SignEffectsFolder + "/SignEffect_Fire_Damage.asset";
+        const string FireBurnPath = SignEffectsFolder + "/SignEffect_Fire_Burn.asset";
+        const string FireSignPath = AbilitiesFolder + "/Sign_Fire.asset";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -87,6 +90,7 @@ namespace LoboBranco.EditorTools
             // Antes das habilidades: o abridor aponta para o efeito de controle.
             CreateSignEffects();
             CreateAbilities();
+            CreateFireSign();
 
             // Por ultimo: a escola aponta para golpes, habilidades e bloco de atributos criados acima.
             CreateSchools();
@@ -398,6 +402,20 @@ namespace LoboBranco.EditorTools
                 Debug.Log($"[CombatData] Habilidades ligadas em {path}.");
             }
 
+            // O fogo entrou na tarefa 1.18d, na vaga seguinte. Todas as escolas tem os cinco sinais
+            // (docs/13 secao 5). Ate a roda da 1.18g, Q so usa a primeira vaga, e o fogo espera la.
+            var fire = AssetDatabase.LoadAssetAtPath<AbilityDef>(FireSignPath);
+            if (fire != null && System.Array.IndexOf(asset.abilities, fire) < 0)
+            {
+                var slots = new AbilityDef[asset.abilities.Length + 1];
+                asset.abilities.CopyTo(slots, 0);
+                slots[slots.Length - 1] = fire;
+
+                asset.abilities = slots;
+                EditorUtility.SetDirty(asset);
+                Debug.Log($"[CombatData] Fogo ligado na vaga {slots.Length - 1} de {path}.");
+            }
+
             // A especializacao entrou na tarefa 1.18b. O Lobo e especializado no abridor pelo
             // docs/13 secao 5, e a variante sai vazia: o efeito dela ainda nao foi desenhado.
             if (asset.specializedAbility == null)
@@ -483,6 +501,63 @@ namespace LoboBranco.EditorTools
         {
             EnsureFolder(SignEffectsFolder);
             CreateIfMissing<ControlEffectDef>(KnockbackControlPath);
+
+            // O fogo (tarefa 1.18d). Os numeros ficam nos padroes dos proprios tipos, que sao os do
+            // docs/03 secao 8: 0,8 vezes a espada como fogo, e Queimadura de 4 por segundo por 5 s.
+            CreateIfMissing<DamageEffectDef>(FireDamagePath);
+            CreateIfMissing<BurnEffectDef>(FireBurnPath);
+
+            var damage = AssetDatabase.LoadAssetAtPath<DamageEffectDef>(FireDamagePath);
+            if (damage != null && damage.tuning == null)
+            {
+                damage.tuning = AssetDatabase.LoadAssetAtPath<CombatTuningDef>($"{CombatFolder}/CombatTuning.asset");
+                EditorUtility.SetDirty(damage);
+                Debug.Log($"[CombatData] Multiplicadores ligados em {FireDamagePath}.");
+            }
+        }
+
+        /// <summary>
+        /// O fogo do docs/03 secao 8 (tarefa 1.18d). Custo e recarga sao do documento; conjurar e
+        /// recuperar repetem os do abridor, porque o documento nao os da e os dois sinais sao
+        /// decisoes do mesmo peso.
+        ///
+        /// A abertura de 60 graus nao esta no documento e foi decidida na 1.18d. O fogo e mais
+        /// estreito que o abridor de proposito: o abridor derruba a matilha em volta, e o fogo e
+        /// mirado no alvo que tem a fraqueza.
+        /// </summary>
+        static void CreateFireSign()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<AbilityDef>(FireSignPath);
+
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<AbilityDef>();
+                asset.displayName = "Igni";
+                asset.staminaCost = 35f;       // docs/03 secao 8
+                asset.cooldownSeconds = 5f;    // docs/03 secao 8
+                asset.castTime = 0.3f;         // o mesmo do abridor
+                asset.recovery = 0.4f;         // o mesmo do abridor
+                asset.area = new SignArea
+                {
+                    shape = SignAreaShape.Cone,
+                    range = 5f,                // docs/03 secao 8
+                    coneAngleDegrees = 60f,    // decidido na 1.18d
+                };
+
+                AssetDatabase.CreateAsset(asset, FireSignPath);
+                Debug.Log($"[CombatData] Criado: {FireSignPath}");
+            }
+
+            if (asset.effects != null && asset.effects.Length > 0) return;
+
+            var damage = AssetDatabase.LoadAssetAtPath<DamageEffectDef>(FireDamagePath);
+            var burn = AssetDatabase.LoadAssetAtPath<BurnEffectDef>(FireBurnPath);
+            if (damage == null || burn == null) return;
+
+            // O dano antes da queimadura: se o dano matar, a queimadura nao acende num cadaver.
+            asset.effects = new SignEffectDef[] { damage, burn };
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] Efeitos ligados em {FireSignPath}.");
         }
 
         // -------------------------------------------------------------- sensacao
