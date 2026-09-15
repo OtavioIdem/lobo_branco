@@ -55,8 +55,8 @@ namespace LoboBranco.Tests
                 Locomotion = _locomocao,
                 Attacker = _atacante,
                 Buffer = _buffer,
-                LightAttack = _leve,
-                HeavyAttack = _forte,
+                CurrentAttack = _leve,
+                CurrentStance = Stance.Fast,
             };
 
             _machine = new PlayerStateMachine(_context);
@@ -113,7 +113,44 @@ namespace LoboBranco.Tests
             _machine.TryChangeState(PlayerStateId.Attack);
         }
 
+        // --------------------------------------------------------------- vigor
+
+        /// <summary>
+        /// Faltar vigor nao perde o input: ele fica guardado e o golpe sai sozinho quando
+        /// o vigor voltar, dentro da janela de 0,2 s do buffer. E a diferenca entre o
+        /// combate parecer lento e parecer quebrado (docs/03 secao 7).
+        /// </summary>
+        [Test]
+        public void Sem_vigor_o_golpe_espera_em_vez_de_sumir()
+        {
+            var vigor = new VigorFalso { Disponivel = 2f };
+            _context.Vitals = vigor;
+            _context.AttackStaminaCost = 4f;
+
+            _buffer.Push(BufferedAction.AttackLight);
+            Avancar(0.05f);
+
+            Assert.AreEqual(PlayerStateId.Locomotion, _machine.CurrentId, "Sem vigor, o golpe nao comeca.");
+            Assert.IsTrue(_buffer.HasPending, "E o input continua guardado.");
+
+            vigor.Disponivel = 10f;
+            Avancar(0.05f);
+
+            Assert.AreEqual(PlayerStateId.Attack, _machine.CurrentId);
+            Assert.AreEqual(1, _atacante.Golpes.Count);
+        }
+
         // ------------------------------------------------------------ dublês
+
+        sealed class VigorFalso : IStaminaSource
+        {
+            public float Disponivel;
+
+            public float CurrentStamina => Disponivel;
+            public float MaxStamina => 100f;
+
+            public bool CanAfford(float cost) => cost <= Disponivel;
+        }
 
         sealed class LocomocaoFalsa : ILocomotionDriver
         {
@@ -202,7 +239,7 @@ namespace LoboBranco.Tests
 
             Assert.AreEqual(0, _atacante.Aberturas, "Nao existe golpe sem anticipacao (docs/03 secao 11).");
             Assert.AreEqual(0, _atacante.Consultas);
-            Assert.AreEqual(AttackState.Phase.Anticipation, _attackState.CurrentPhase);
+            Assert.AreEqual(AttackPhase.Anticipation, _attackState.CurrentPhase);
         }
 
         [Test]
@@ -224,7 +261,7 @@ namespace LoboBranco.Tests
 
             Assert.AreEqual(1, _atacante.Fechamentos);
             Assert.IsFalse(_atacante.JanelaAberta);
-            Assert.AreEqual(AttackState.Phase.Recovery, _attackState.CurrentPhase);
+            Assert.AreEqual(AttackPhase.Recovery, _attackState.CurrentPhase);
         }
 
         [Test]
@@ -352,13 +389,23 @@ namespace LoboBranco.Tests
             Assert.IsFalse(_buffer.HasPending, "O buffer so pode ser consumido uma vez.");
         }
 
+        /// <summary>
+        /// O golpe guardado sai na postura que estiver valendo quando ele sair, e nao na
+        /// que valia quando o botao foi apertado. E a consequencia direta da camada 2 do
+        /// docs/03 secao 2: quem escolhe o golpe e a postura, nao o botao.
+        /// </summary>
         [Test]
-        public void Ataque_pesado_guardado_vira_golpe_pesado()
+        public void Ataque_guardado_sai_na_postura_que_estiver_valendo()
         {
             ComecarGolpe(_leve);
             Avancar(_leve.TotalDuration - 0.05f);
 
             _buffer.Push(BufferedAction.AttackHeavy);
+
+            // A troca de postura terminou durante a recuperacao do golpe anterior.
+            _context.CurrentAttack = _forte;
+            _context.CurrentStance = Stance.Strong;
+
             Avancar(0.1f);
 
             Assert.AreEqual(2, _atacante.Golpes.Count);

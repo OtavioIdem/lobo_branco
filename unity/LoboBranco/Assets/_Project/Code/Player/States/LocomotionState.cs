@@ -46,22 +46,53 @@ namespace LoboBranco.Player
 
             switch (buffer.Pending)
             {
+                // Os dois botoes de ataque dao no mesmo golpe, o da postura corrente
+                // (docs/03 secao 4). A tabela do documento tem uma linha por postura e
+                // nao uma por botao, e a camada 2 do combate so existe porque e a postura
+                // que decide o golpe. O que vai distinguir os dois botoes dentro de uma
+                // mesma postura e uma pergunta de design ainda em aberto.
                 case BufferedAction.AttackLight:
-                    TryAttack(context, context.LightAttack, BufferedAction.AttackLight);
-                    break;
-
                 case BufferedAction.AttackHeavy:
-                    TryAttack(context, context.HeavyAttack, BufferedAction.AttackHeavy);
+                    TryAttack(context, context.CurrentAttack, buffer.Pending);
                     break;
 
-                // Esquiva, aparo e sinal sao as tarefas 1.10, 1.11 e 1.18. Ate la o
-                // buffer guarda o input e ele expira sozinho, sem virar transicao.
+                case BufferedAction.CastSign:
+                    TryCast(context);
+                    break;
+
+                // Esquiva e aparo sao as tarefas 1.10 e 1.11. Ate la o buffer guarda o
+                // input e ele expira sozinho, sem virar transicao.
             }
+        }
+
+        /// <summary>
+        /// Recusado fica guardado, como o golpe sem vigor: uma recarga que volta dentro dos 0,2 s
+        /// do buffer solta o sinal sozinha, e apertar um pouco cedo nao vira apertar em vao.
+        /// </summary>
+        static void TryCast(PlayerStateContext context)
+        {
+            IAbilityCaster caster = context.Abilities;
+            if (caster == null) return;
+
+            int slot = context.SelectedAbilitySlot;
+            if (caster.CanCast(slot) != AbilityRefusal.None) return;
+
+            context.PendingAbilitySlot = slot;
+
+            if (context.Machine.TryChangeState(PlayerStateId.CastSign))
+                context.Buffer.TryConsume(BufferedAction.CastSign);
+            else
+                context.PendingAbilitySlot = PlayerStateContext.NoAbilitySlot;
         }
 
         static void TryAttack(PlayerStateContext context, AttackDef attack, BufferedAction action)
         {
             if (attack == null) return;
+
+            // Sem vigor o golpe nao comeca, e o input continua guardado: dentro da janela
+            // de 0,2 s do buffer, o golpe sai sozinho assim que o vigor voltar. E por isso
+            // que faltar vigor parece atraso e nao parece input perdido (docs/03 secao 7).
+            if (context.Vitals != null && !context.Vitals.CanAfford(context.AttackStaminaCost)) return;
 
             // Consumir so depois de saber que a transicao aconteceu: se o ataque for
             // recusado, o input continua guardado e tenta de novo no frame seguinte,

@@ -52,47 +52,162 @@ Justificativa completa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-co
 
 | # | Tarefa | Tam. | Doc |
 |---|---|---|---|
-| 1.9a | Instalar NGO, Transport, Services Core, Authentication, Relay e Multiplayer Play Mode | P | ADR 0008 |
-| 1.9b | `NetworkManager` na cena de bootstrap, transporte direto por IP, duas cápsulas na mesma cena | M | ADR 0008 |
-| 1.9c | Prefab de jogador em rede: `NetworkObject`, spawn por conexão, câmera e input só do dono | M | 13 §6 |
-| 1.9d | `PlayerBrain` reescrito com autoridade. É o único arquivo que a rede obriga a reescrever | G | 13 §7 |
-| 1.9e | `StatSheet` autoritativo no host e replicado. Cliente lê, nunca escreve | G | 13 §6 |
-| 1.9f | Ataque vira pedido: RPC do dono, `MeleeHitbox` e `DamagePipeline` rodando só no host | G | 13 §6 |
-| 1.9g | Painel de debug mostra papel, dono, autoridade e ida-e-volta de cada personagem | P | 13 §11 |
-| 1.9h | Relay: autenticação anônima, criar sessão, gerar e entrar por código de convite | G | ADR 0008 |
-| 1.9i | UI mínima de sala: hospedar, colar código, entrar, ver quem está dentro | M | 13 §8 |
+| ~~1.9a~~ ✅ | Instalar NGO, Transport, Services Core, Authentication, Relay e Multiplayer Play Mode | P | ADR 0008 |
+| ~~1.9b~~ ✅ | `NetworkManager` na cena de bootstrap, transporte direto por IP, duas cápsulas na mesma cena | M | ADR 0008 |
+| ~~1.9c~~ ✅ | Prefab de jogador em rede: `NetworkObject`, spawn por conexão, câmera e input só do dono | M | 13 §6 |
+| ~~1.9d~~ ✅ | `PlayerBrain` reescrito com autoridade. É o único arquivo que a rede obriga a reescrever | G | 13 §7 |
+| ~~1.9e~~ ✅ | `StatSheet` autoritativo no host e replicado. Cliente lê, nunca escreve | G | 13 §6 |
+| ~~1.9f~~ ✅ | Ataque vira pedido: RPC do dono, `MeleeHitbox` e `DamagePipeline` rodando só no host | G | 13 §6 |
+| ~~1.9g~~ ✅ | Painel de debug mostra papel, dono, autoridade e ida-e-volta de cada personagem | P | 13 §11 |
+| ~~1.9h~~ ✅ | Relay: autenticação anônima, criar sessão, gerar e entrar por código de convite | G | ADR 0008 |
+| ~~1.9i~~ ✅ | UI mínima de sala: hospedar, colar código, entrar, ver quem está dentro | M | 13 §8 |
 
 **Portão da rede:** duas pessoas em máquinas diferentes entram na mesma `Sandbox_Combate`
 por código, batem no mesmo `CombatDummy`, e o dano bate igual nas duas telas. Só depois disso
 a tarefa 1.10 começa.
 
+O código das nove tarefas está escrito, mas **o portão continua fechado**, e ele não fecha
+sozinho: ele é um teste manual com duas pessoas. Falta também ligar o projeto ao Unity
+Gaming Services em Project Settings > Services, senão o Relay responde que o projeto não
+existe. Até isso acontecer, o caminho testável é o IP direto, que é exatamente o que o
+risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
+
 | # | Tarefa | Tam. | Doc |
 |---|---|---|---|
 | 1.10 | Estados `Dodge` e `Roll` com frames de invulnerabilidade | M | 03 §5 |
 | 1.11 | Estados `Parry` e `Riposte` com a janela de 0,18 s | G | 03 §5 |
-| 1.12 | Sistema de Fluxo com a janela de 0,22 s e os cinco níveis de bônus | M | 03 §6 |
+| ~~1.12~~ ✅ | Sistema de Fluxo com a janela de 0,22 s e os cinco níveis de bônus | M | 03 §6 |
 | 1.13 | Indicador visual do Fluxo (brilho na lâmina, via Shader Graph) | M | 03 §6 |
-| 1.14 | Três posturas, com troca e afinidade de arquétipo | M | 03 §4 |
-| 1.15 | Aço e prata, com a troca de 0,7 s não-cancelável | M | 03 §3 |
-| 1.16 | Vigor: consumo, regeneração, atraso de 1,5 s | M | 03 §7 |
-| 1.17 | Adrenalina: ganho, três gastos | M | 03 §7 |
-| 1.18 | Cinco sinais com custo, cooldown e efeito | G | 03 §8 |
+| ~~1.14~~ ✅ | Três posturas, com troca e afinidade de arquétipo | M | 03 §4 |
+| ~~1.15~~ ✅ | Aço e prata, com a troca de 0,7 s não-cancelável | M | 03 §3 |
+| ~~1.16~~ ✅ | Vigor: consumo, regeneração, atraso de 1,5 s | M | 03 §7 |
+| 1.17 ⚠️ | Adrenalina: ganho, três gastos. **Parcial**: recurso e ganhos prontos, e dos três gastos só o segundo suspiro. Nota no 03 §7 | M | 03 §7 |
+| ~~1.18a~~ ✅ | Estados de controle no inimigo: atordoado, derrubado, lento. Host decide, todos veem. Em componente, sem depender do grafo | M | 07 §6 |
+| 1.18b | Efeito de sinal como dado: área em cone ou raio sem alocação, escala por `SignIntensity`, gancho de variante por escola | M | 03 §8 |
+| 1.18c | Aard: cone de 6 m, derruba leves, atordoa médios por 1,5 s | M | 03 §8 |
+| 1.18d | Igni: cone de 5 m, dano 0,8x pelo pipeline, Queimadura de 4/s por 5 s | M | 03 §8 |
+| 1.18e | Quen: absorve um golpe por 8 s e devolve 30% do dano ao quebrar | M | 03 §8 |
+| 1.18f | Yrden: armadilha replicada de 4 m por 12 s, lentidão de 60% | M | 03 §8 |
+| 1.18g | Escolher o sinal: roda segurando Q, sem desacelerar o tempo, e teclas diretas | M | 02 §4 |
+| 1.18h ⏸ | Axii. **Adiado** até existir inimigo humanoide: nota abaixo | M | 03 §8 |
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |
-| 1.20 | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
-| 1.21 | Behavior tree base do inimigo (patrulha, detecção, engajamento, ataque) | G | 07 §6 |
-| 1.22 | Coordenador de encontro com attack token (máximo 2) | M | 07 §6 |
-| 1.23 | Telegrafo de ataque: animação de anticipação de 0,4 a 0,9 s | M | 03 §10 |
+| ~~1.20~~ ✅ | `MonsterDef` como ScriptableObject | P | 07 §4.1 |
+| 1.21 ⚠️ | Behavior tree base do inimigo. **Parcial**: sentidos, aquisição de alvo, golpe, nós customizados, prefab e NavMesh prontos; falta desenhar o grafo no editor gráfico. Nota abaixo | G | 07 §6 |
+| ~~1.22~~ ✅ | Coordenador de encontro com attack token. **Máximo 2 por alvo**, e não por encontro: nota abaixo | M | 07 §6 |
+| ~~1.23~~ ✅ | Telegrafo de ataque de 0,4 a 0,9 s. Em greybox, cor e pose; o aviso é replicado por instante de início. Nota abaixo | M | 03 §10 |
 | 1.24 | Ataques `Unblockable` com tell vermelho | P | 03 §5 |
-| 1.25 | Hitstop, screen shake por Cinemachine Impulse, camera punch | M | 03 §11 |
+| ~~1.25~~ ✅ | Hitstop, screen shake por Cinemachine Impulse, camera punch. **Sem `timeScale`**: nota abaixo | M | 03 §11 |
 | 1.26 | Partículas de impacto por material do alvo | M | 03 §11 |
 | 1.27 | Knockback proporcional ao peso do alvo | P | 03 §11 |
 | 1.28 | Slow-motion no último inimigo morto | P | 03 §11 |
 | 1.29 | Painel de debug: vitalidade, vigor, postura, Fluxo, e o log de dano | M | 11 §6 |
 | 1.30 | Balancear com os números do doc 03 §12 e ajustar até o TTD alvo | G | 03 §12 |
 
-| 1.31 | `SchoolDef`: junta bloco de atributos, afinidade de postura e intensidade de sinal | M | 13 §5.1 |
-| 1.32 | Habilidade com custo e recarga, como dado. É a infraestrutura das escolas futuras | G | 13 §5 |
-| 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Vontade. Zero `if` por escola | G | 13 §5 |
+**Sobre a ordem, 2026-09-12.** A 1.20 foi feita antes da 1.18 de propósito, e vale escrever
+por quê antes que pareça capricho. Os cinco sinais são, quase todos, efeitos sobre o inimigo:
+Aard derruba e atordoa, Igni queima, Yrden lentifica, Axii vira o lado. Cápsula de sandbox
+não cai, não queima e não muda de lado, então construir os sinais agora seria construir os
+efeitos duas vezes: uma contra a cápsula e outra quando o inimigo da 1.21 existir. A 1.18
+entra depois da 1.21, junto da 1.19, que é a regra que dá sentido a ela.
+
+**Sobre a 1.21 ficar parcial, 2026-09-12.** Tudo que é código está escrito e testado: o
+cone de visão com memória, a busca de alvo, o golpe com telegrafo de 0,65 s, os quatro nós
+customizados, o prefab do barghest e a malha de navegação da sandbox. O que falta é o
+próprio grafo, e ele **não pode ser montado por script**: o tipo de asset de autoria do
+`com.unity.behavior` é interno ao pacote. Resta uma sessão no editor gráfico, arrastando os
+nós que já existem, e apontar o grafo resultante no prefab `Enemy_Barghest`. A divisão entre
+o que vive no grafo e o que vive em componente está na
+[ADR 0009](../tech/adr/0009-percepcao-em-componente-arvore-no-grafo.md).
+
+O jogador passou a ser atingível na mesma tarefa, pelo `DamageReceiver`. Isso não era um
+item do backlog e deveria ter sido: até aqui, o pipeline de dano só tinha alvo de um lado.
+
+**Sobre o token da 1.22 ser por alvo, 2026-09-12.** O `docs/07` §6 escreve "um coordenador
+por encontro concede no máximo 2 tokens", e esse número foi pensado para um jogador. Em coop
+de quatro, um teto global de dois faria um encontro de oito criaturas ter seis paradas
+assistindo, e o segundo, o terceiro e o quarto jogador nunca seriam atacados. O teto passou a
+valer **por alvo**: cada bruxo enfrenta no máximo dois de cada vez, e um grupo grande continua
+sendo um grupo grande. O número em si está no `CombatTuningDef`.
+
+O token só melhora o combate com o `CircleTargetAction` do lado dele. Sem ter para onde
+esperar, a terceira criatura seria recusada, cairia no galho de perseguir e ficaria encostada
+no bruxo sem bater, e inimigo parado a meio metro parece travado. Rondando, a espera vira
+ameaça.
+
+**Sobre o telegrafo da 1.23 ser de rede antes de ser de arte, 2026-09-14.** A linha do tempo
+do golpe roda só no host, então no cliente não existe anticipação nenhuma para desenhar: sem
+um aviso replicado, quem hospeda vê o tell e o companheiro apanha sem aviso. O host manda um
+único instante por golpe, no relógio do servidor, e cada máquina calcula o aviso a partir do
+mesmo `AttackDef`. Com ping, o cliente começa o aviso atrasado, mas termina junto com a
+janela de dano do host. Recomeçar do zero ao receber daria a todo cliente um aviso que acaba
+depois de o golpe já ter acertado.
+
+Não há `Animator` ainda, então a "animação de anticipação" da tarefa é, em greybox, a cápsula
+que muda de cor e se abaixa. O aviso **enche** até a janela abrir, em vez de só ligar: um
+aviso que liga diz que o golpe vem, e um aviso que enche diz quando. A cor é âmbar e nunca
+vermelha, porque vermelho é o tell de `Unblockable` da 1.24. Quando as animações entrarem no
+M4, a pose substitui o encolher, e o instante que viaja pela rede continua o mesmo.
+
+**Sobre o hitstop da 1.25 não congelar o tempo, 2026-09-14.** O jeito comum de fazer hitstop é
+mexer em `Time.timeScale`, e em coop isso é proibido: a escala é global na máquina, e no host
+ela congelaria a simulação de todos os jogadores. Congelar só o dono também quebra, porque o
+host mede a janela de Fluxo de 0,22 s pelo próprio relógio, e um dono parado 0,08 s perderia um
+terço dela. O hitstop estende o golpe de quem bateu pela mesma duração nas duas pontas: o host
+soma à contagem dele, e o dono segura a própria linha do tempo quando a confirmação chega. É um
+hitstop por golpe, e não por alvo. A regra vale também para a câmera lenta da 1.28, que fica
+decidida antes de existir: só apresentação, nunca simulação
+([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)).
+
+**Sobre o `SchoolDef` da 1.31, 2026-09-14.** O `docs/13` §5.1 dizia que a afinidade de postura
+de uma escola já era aplicada pelo `StanceAffinityStage`, e isso estava errado: aquele estágio
+compara a postura do golpe com o arquétipo do alvo, e a escola de quem bate não entra na conta.
+A escola passou a ser dona dos três golpes, e a postura favorecida é a postura inicial e a vaga
+do golpe mais bem feito. É dado de golpe, não multiplicador novo, então a razão de 5,3 vezes
+fica intacta. A intensidade de sinal já era atributo, e mora no bloco de atributos da escola.
+Custo de sinal e filtro de vestígio ficaram de fora, porque sinais e investigação ainda não
+existem. O Lobo sai idêntico ao kit que já existia; nada muda em jogo nesta tarefa.
+
+Um teste falha se aparecer uma terceira escola em `Assets/_Project/Data`. O slice é Lobo e
+Grifo, e uma escola nova é só um asset, que é a porta mais fácil para o escopo crescer.
+
+**Sobre a habilidade da 1.32, 2026-09-14.** Uma habilidade é um `AbilityDef`: custo de vigor,
+recarga, tempo de conjurar e recuperação. A escola lista as dela por vaga, e é a vaga que viaja
+pela rede, como a postura viaja no golpe. O efeito ficou de fora, porque os efeitos dos sinais
+são a 1.18: o host dispara um evento no instante do efeito, e é ali que o empurrão vai pendurar.
+
+A autoridade tem uma diferença para o golpe, e ela é deliberada. O vigor do golpe o host cobra
+sempre e nunca recusa. A habilidade ele pode recusar, porque sinal de graça é janela de graça,
+e janela é o recurso mais caro do combate. A recusa quase nunca acontece, e quando acontece o
+dono corta a conjuração. A recarga viaja como o instante em que volta, no relógio do servidor,
+e não como contagem ([ADR 0011](../tech/adr/0011-habilidade-cobrada-no-inicio-recarga-como-instante.md)).
+
+**O Lobo ganhou o primeiro sinal, e ele não faz nada ainda.** É o abridor do doc 03 §8, com os
+30 de vigor e os 4 s de recarga do documento. Isso muda o jogo de propósito: Q passa a gastar
+vigor. É o que permite conferir, no portão da rede, que a recarga do companheiro conta junto
+com a do host. Os tempos de conjurar e recuperar não estão no doc 03, e a nota de lá diz quais
+foram escolhidos. A roda de sinais do doc 02 §4 também não existe, e até ela existir Q usa a
+primeira vaga.
+
+**Sobre a 1.18 vir antes da 1.33, e dividida, 2026-09-14.** Sem efeito de sinal, o Grifo seria
+um Lobo com outra postura inicial, e o portão M1 pede que um jogador faça o que o outro não
+consegue. Por isso os sinais vêm antes da segunda escola. A 1.18 foi dividida em oito partes
+porque cinco efeitos sobre um inimigo que ainda não sabe ficar atordoado não cabem numa tarefa.
+
+O **Axii ficou adiado**. Ele faz um humanoide lutar do lado do bruxo, e hoje não existe inimigo
+humanoide na sandbox. Fazer agora seria escrever troca de facção na busca de alvo sem nada para
+testar.
+
+A **escolha do sinal tem roda e teclas diretas**. A roda nunca desacelera o tempo, ao contrário
+do Witcher 3, pela [ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md): o mundo
+continua correndo enquanto o bruxo escolhe.
+
+Todas as escolas têm os cinco sinais, e cada uma é especializada em um, com uma variante de
+efeito só dela. No slice, Lobo no Aard e Grifo no Igni. A tabela e as escolas registradas fora
+do slice estão no [doc 13 §5](13_COOP_E_REDE.md).
+
+| ~~1.31~~ ✅ | `SchoolDef`: bloco de atributos, três golpes e postura favorecida. A intensidade de sinal é atributo. Nota acima | M | 13 §5.1 |
+| ~~1.32~~ ✅ | Habilidade com custo e recarga, como dado. O host cobra no início e pode recusar; a recarga viaja como instante. Sem efeito até a 1.18. Nota acima | G | 13 §5 |
+| 1.33 | Escola Grifo: sinais intensos, postura Grupo, viés de Inteligência, variante própria do Igni. Zero `if` por escola. Depois da 1.18 | G | 13 §5 |
 | 1.34 | Seleção de escola na entrada da sala | P | 13 §8 |
 | 1.35 | Rebalancear o doc 03 para dois jogadores. Os números foram feitos para um | G | 03 §12 |
 

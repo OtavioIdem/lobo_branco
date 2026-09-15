@@ -30,6 +30,7 @@ namespace LoboBranco.Tests
         public OilClass VulnerableToOil => OilClass.Beast;
 
         public float GetResistance(DamageType type) => 1f;
+        public bool IsDown => false;
         public void ApplyDamage(in DamageResult result) => Recebidos.Add(result.Amount);
     }
 

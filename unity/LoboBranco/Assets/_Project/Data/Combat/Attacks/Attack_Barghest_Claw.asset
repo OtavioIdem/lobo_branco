@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd563901b06945a4684062c5512339e9, type: 3}
+  m_Name: Attack_Barghest_Claw
+  m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.AttackDef
+  stance: 1
+  strikeTime: 1
+  recovery: 0.45
+  hitboxOpenAt: 0.65
+  hitboxCloseAt: 0.85
+  hitboxFromAnimationEvent: 0
+  staminaCost: 0
+  maxTargets: 1
+  arcDegrees: 90
+  reach: 2
+  radius: 0.5
+  heightOffset: 1

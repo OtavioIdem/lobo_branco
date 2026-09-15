@@ -10,7 +10,8 @@
         "TW1R.Camera",
         "TW1R.Player",
         "TW1R.Quests",
-        "TW1R.Save"
+        "TW1R.Save",
+        "Unity.Netcode.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

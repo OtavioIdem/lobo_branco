@@ -102,15 +102,46 @@ Estas não são preferências de estilo, são o que mantém o projeto navegável
 
 ## Estado atual
 
-M0 fechado. M1 nas tarefas 1.1 a 1.9: existe jogador com câmera de terceira pessoa,
-folha de atributos com modificadores, pipeline de dano de 11 estágios, máquina de estados
-com buffer de input de 0,2 s, e golpes leve e forte com hitbox sem alocação.
-115 testes passando, build gerando.
+M0 fechado. Do M1 estão escritas as tarefas 1.1 a 1.9, a camada de rede inteira (1.9a a
+1.9i), o Fluxo (1.12), as três posturas (1.14), aço e prata (1.15), o Vigor (1.16), a
+Adrenalina parcial (1.17), o `MonsterDef` (1.20), a IA de inimigo parcial (1.21), o
+coordenador de encontro (1.22), o telegrafo de ataque replicado (1.23), hitstop, tremor e
+soco de câmera (1.25), a escola como dado (1.31), a habilidade com custo e recarga (1.32) e os
+estados de controle do inimigo (1.18a, primeira das oito partes da 1.18, que vem antes da 1.33).
+Existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
+de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes por postura
+que vêm da escola do bruxo (só o Lobo, por enquanto) com hitbox sem alocação, um sinal que
+cobra vigor e recarrega mas ainda não tem efeito (tarefa 1.18), sessão em que o dono simula o próprio bruxo enquanto o host resolve
+vida e dano (por IP direto ou por código de convite), e uma criatura que percebe por cone e
+por som, persegue por NavMesh, golpeia com telegrafo de 0,65 s visível em todas as máquinas e
+espera a vez rondando quando o alvo já tem dois atacantes, e que pode ser atordoada, derrubada
+e lentificada pelo host sem depender do grafo. 308 testes passando, build gerando.
 
-O próximo passo **não** é mais a tarefa 1.10. É a **camada de rede** (`docs/13`, ADR 0008),
-e ela entra antes de esquiva, aparo e riposte. Dois motivos: a FSM tem dois estados hoje e
-vai ter doze no fim do M1, e a janela de aparo de 0,18 s é menor que o ping de muita gente,
-o que faz de "quem decide se o aparo aconteceu" uma pergunta de rede e não de combate.
+**Nada de sensação mexe em `Time.timeScale`** (`tech/adr/0010`). A escala é global na máquina,
+e no host ela congelaria a sessão de todo mundo. Hitstop estende o golpe de quem bateu pelo
+mesmo tempo no host e no dono; câmera lenta, quando vier, é só apresentação.
+
+Duas coisas estão pendentes e **nenhuma delas é código**.
+
+A primeira é o **grafo de behavior tree** da tarefa 1.21. O asset de árvore do
+`com.unity.behavior` é authoring do editor gráfico e o tipo dele é interno ao pacote, então
+ele é a única coisa do projeto que não pode ser montada por script. Os cinco nós customizados,
+o prefab `Enemy_Barghest`, o coordenador de encontro e a malha de navegação já existem: falta
+abrir o editor, montar a árvore com eles e apontar o grafo no prefab. A receita está no
+apêndice da `tech/adr/0009`.
+
+A segunda é o **portão da rede** do `docs/12`: duas pessoas em máquinas diferentes entram na
+mesma `Sandbox_Combate`, batem na mesma cápsula, e o dano bate igual nas duas telas. Ele não
+fecha sozinho, porque é teste manual com duas pessoas, e o caminho do Relay ainda depende de
+ligar o projeto ao Unity Gaming Services em Project Settings > Services. Esquiva, aparo e
+riposte só depois disso. Dois motivos: a FSM tem poucos estados hoje e vai ter doze no fim do
+M1, e a janela de aparo de 0,18 s é menor que o ping de muita gente, o que faz de "quem
+decide se o aparo aconteceu" uma pergunta de rede e não de combate.
+
+A regra prática de quem escreve sistema novo: o cliente pede, o host decide, todo mundo
+assiste. Um sistema novo começa respondendo quem tem autoridade, e a resposta vai no
+cabeçalho do arquivo. Estado que só diverge em jogo é o que viaja; o que sai de asset já
+está nas duas máquinas e replicar seria mandar o que o outro lado já tem.
 
 A janela de dano é dirigida por tempo decorrido, não por evento de animação, porque ainda
 não existe `Animator` no projeto. O `AttackDef` tem uma chave para inverter isso quando as
