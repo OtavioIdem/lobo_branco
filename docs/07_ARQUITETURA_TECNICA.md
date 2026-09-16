@@ -105,6 +105,7 @@ unity/LoboBranco/
 │   │   ├── Code/
 │   │   │   ├── Core/              TW1R.Core.asmdef
 │   │   │   ├── Stats/             TW1R.Stats.asmdef
+│   │   │   ├── Net/               TW1R.Net.asmdef
 │   │   │   ├── Camera/            TW1R.Camera.asmdef
 │   │   │   ├── Combat/            TW1R.Combat.asmdef
 │   │   │   ├── Player/            TW1R.Player.asmdef
@@ -143,6 +144,10 @@ unity/LoboBranco/
 **Regra:** nada nosso fora de `_Project`. Assets de terceiros nunca entram em `_Project`.
 Isso torna possível deletar ou atualizar um pacote sem caçar arquivos.
 
+Uma exceção, e só uma: `Assets/DefaultNetworkPrefabs.asset`. É a lista de prefabs de rede
+que o NGO gera e mantém sozinho, e o caminho dela é fixo no pacote. Mover exigiria mexer em
+configuração interna do Netcode, que é mais frágil do que a exceção. Ela é versionada.
+
 ### Assembly Definitions — por que se dar esse trabalho
 
 Sem `.asmdef`, cada mudança em qualquer script recompila tudo. Com 12 módulos, mudar UI
@@ -156,24 +161,36 @@ dele na tabela, nunca acima nem ao lado:
 |---|---|---|
 | 5 | `Bootstrap` | todos |
 | 4 | `UI` | Core, Stats, Combat, Inventory, Alchemy, Progression, Quests, Investigation, Dialogue |
-| 3 | `Player` | Core, Stats, Combat, Camera |
-| 3 | `AI` | Core, Stats, Combat |
+| 3 | `Player` | Core, Stats, Combat, Camera, Net |
+| 3 | `AI` | Core, Stats, Combat, Net |
 | 3 | `Alchemy` | Core, Stats, Inventory |
 | 3 | `Quests` | Core, Dialogue |
 | 2 | `Combat`, `Inventory`, `Progression`, `Investigation` | Core, Stats |
 | 2 | `Camera` | Core |
-| 1 | `Stats`, `Save`, `Dialogue` | Core |
+| 1 | `Stats`, `Save`, `Dialogue`, `Net` | Core |
 | 0 | `Core` | nada |
 
 `Core` não depende de nada. Se `Core` precisar de algo, o algo está no lugar errado.
 
-Dois módulos merecem explicação, porque não são óbvios:
+Três módulos merecem explicação, porque não são óbvios:
 
 - **`Camera`** existe separado de `Player` porque o pivô de câmera também serve cutscene,
   câmera de diálogo e câmera livre de debug. Ele não lê input: recebe deltas. Isso é o que
   o torna reutilizável e testável em EditMode.
 - **`Player`** é o dono da máquina de estados e do leitor de input. Ele conhece `Camera`,
   e não o contrário. Se a câmera precisasse conhecer o jogador, haveria ciclo.
+- **`Net`** (ADR 0008) fica no nível 1, logo acima de `Core`, porque quase todo módulo de
+  gameplay vai precisar perguntar quem tem autoridade, e um módulo de rede acima deles
+  fecharia o grafo em ciclo. Ele hospeda a sessão, o transporte e o painel de autoridade,
+  e **não conhece nenhum sistema de jogo**: quem conhece rede é o sistema, nunca o contrário.
+  Se `Net` precisar referenciar `Player` ou `Combat`, a dependência está invertida.
+
+**O pacote do Netcode não é um módulo nosso e não entra nessa tabela.** Qualquer módulo que
+tenha estado replicado referencia `Unity.Netcode.Runtime` direto, sem passar por `Net`, do
+mesmo jeito que já referencia `UnityEngine`. `Combat` é o primeiro caso: o `CharacterVitals`
+é um `NetworkBehaviour` porque a vida é do host (ADR 0008), e fazer essa vida passar por
+`Net` seria exatamente a inversão que o parágrafo acima proíbe. O que continua valendo é o
+sentido da seta: `Combat` sabe que existe rede, `Net` não sabe que existe combate.
 
 ## 4. Padrões de código
 
@@ -393,6 +410,21 @@ Selector raiz
 de ataque simultâneos. Sem isso, 5 barghests atacam ao mesmo tempo e o combate é injusto e
 ilegível. Isso é o truque mais importante de IA de combate, e quase todo jogo de ação bom
 faz alguma versão dele.
+
+**Corrigido em coop (2026-09-12, tarefa 1.22): o teto é por alvo, não por encontro.** O
+número 2 acima foi pensado para um jogador. Com quatro, um teto de encontro faria um grupo
+de oito criaturas ter seis paradas assistindo, e o segundo, o terceiro e o quarto jogador
+nunca seriam atacados. Cada alvo tem as próprias duas vagas, e o número vive no
+`CombatTuningDef`. Quem é recusado não fica parado: ronda o alvo à distância de engajamento
+da espécie, porque inimigo imóvel a meio metro parece travamento, e travado é pior do que
+injusto.
+
+**O que fica fora do grafo (2026-09-12, tarefa 1.21).** O grafo carrega só a estrutura de
+decisão. Percepção, busca de alvo, giro e golpe são componentes, porque um nó só executa
+enquanto o galho dele está ativo: com a percepção dentro de um nó, a criatura enxergaria
+apenas enquanto patrulha e ficaria cega enquanto persegue. Os números de percepção moram
+no `MonsterDef` e a matemática do cone mora numa classe pura com teste em EditMode.
+Justificativa completa na [ADR 0009](../tech/adr/0009-percepcao-em-componente-arvore-no-grafo.md).
 
 ## 7. Câmera
 

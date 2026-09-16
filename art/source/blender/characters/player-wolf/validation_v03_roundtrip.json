@@ -1,0 +1,48 @@
+{
+  "result": "PASS",
+  "blender_version": "5.2.1 LTS",
+  "source": {
+    "meshes": 171,
+    "triangles": 460258,
+    "height_m": 1.850000023841858,
+    "floor_z": 0.0,
+    "materials": [
+      "M_PlayerWolf_Chainmail",
+      "M_PlayerWolf_DarkLeather",
+      "M_PlayerWolf_Eyes",
+      "M_PlayerWolf_HarnessLeather",
+      "M_PlayerWolf_Linen",
+      "M_PlayerWolf_SilverHair",
+      "M_PlayerWolf_Skin",
+      "M_PlayerWolf_Steel",
+      "M_PlayerWolf_Stubble",
+      "M_PlayerWolf_WovenCloth"
+    ],
+    "color_layers": true,
+    "degenerate_triangles": 0
+  },
+  "fbx_roundtrip": {
+    "meshes": 171,
+    "triangles": 460258,
+    "height_m": 1.8500000319123888,
+    "floor_z": -8.070530910231355e-09,
+    "materials": [
+      "M_PlayerWolf_Chainmail",
+      "M_PlayerWolf_DarkLeather",
+      "M_PlayerWolf_Eyes",
+      "M_PlayerWolf_HarnessLeather",
+      "M_PlayerWolf_Linen",
+      "M_PlayerWolf_SilverHair",
+      "M_PlayerWolf_Skin",
+      "M_PlayerWolf_Steel",
+      "M_PlayerWolf_Stubble",
+      "M_PlayerWolf_WovenCloth"
+    ],
+    "color_layers": true,
+    "degenerate_triangles": 0
+  },
+  "source_v02_unchanged": true,
+  "stage": "High resolution authoring study; not optimized for Unity",
+  "unity_tested": false,
+  "procedural_shaders_baked": false
+}

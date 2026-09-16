@@ -91,6 +91,6 @@ namespace LoboBranco.Combat
             return sb.ToString();
         }
 
-        public DamageResult ToResult() => new DamageResult(Amount, Type, IsCritical, MultiplierSoFar);
+        public DamageResult ToResult() => new DamageResult(Amount, Type, IsCritical, MultiplierSoFar, Attacker);
     }
 }
