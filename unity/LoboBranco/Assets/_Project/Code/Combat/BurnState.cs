@@ -19,8 +19,13 @@ namespace LoboBranco.Combat
     public struct BurnState
     {
         /// <summary>
-        /// Folga de relogio na conta dos tiques. Somar o intervalo cinco vezes em ponto flutuante
-        /// pode passar do fim por um fio, e o ultimo tique sumiria.
+        /// Folga de relogio na conta dos tiques, dos dois lados da comparacao.
+        ///
+        /// Somar o intervalo cinco vezes em ponto flutuante pode passar do fim por um fio, e o ultimo
+        /// tique sumiria. Pelo mesmo motivo, o tique agendado para o instante exato em que alguem
+        /// pergunta tem que vencer: <c>T+1+1</c> e <c>T+2</c> sao o mesmo instante para quem joga e
+        /// podem diferir no ultimo bit, e sem a folga a queimadura tira 4 em vez de 8 de vez em
+        /// quando, dependendo de que horas a partida comecou.
         /// </summary>
         const double TickEpsilon = 0.0001d;
 
@@ -71,7 +76,7 @@ namespace LoboBranco.Combat
 
             int ticks = 0;
 
-            while (NextTickAt <= now && NextTickAt <= Until + TickEpsilon)
+            while (NextTickAt <= now + TickEpsilon && NextTickAt <= Until + TickEpsilon)
             {
                 ticks++;
                 NextTickAt += TickSeconds;

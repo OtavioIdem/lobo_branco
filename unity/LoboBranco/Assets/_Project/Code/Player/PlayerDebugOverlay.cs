@@ -24,6 +24,7 @@ namespace LoboBranco.Player
         [SerializeField] CharacterVitals vitals;
         [SerializeField] PlayerAbilityCaster caster;
         [SerializeField] PlayerSignEffects signs;
+        [SerializeField] WardStatus ward;
 
         [Tooltip("F1 alterna o painel em tempo de execucao.")]
         [SerializeField] bool visible = true;
@@ -40,6 +41,7 @@ namespace LoboBranco.Player
             if (vitals == null) vitals = GetComponent<CharacterVitals>();
             if (caster == null) caster = GetComponent<PlayerAbilityCaster>();
             if (signs == null) signs = GetComponent<PlayerSignEffects>();
+            if (ward == null) ward = GetComponent<WardStatus>();
             if (cameraRig == null) cameraRig = FindAnyObjectByType<ThirdPersonCameraRig>();
         }
 
@@ -208,6 +210,12 @@ namespace LoboBranco.Player
                 GUILayout.Label(
                     $"Ultimo efeito     {caster.LastTriggered.displayName,-14} " +
                     (signs != null ? $"{signs.LastTargetCount} alvo(s), intensidade {signs.LastIntensity:F2}" : ""),
+                    _style);
+
+            // O escudo aparece em todas as maquinas, porque o estado dele viaja (tarefa 1.18e).
+            if (ward != null && ward.IsUp)
+                GUILayout.Label(
+                    $"Escudo            de pe por {ward.Remaining:F1}s   devolve {ward.ReflectFraction:P0}",
                     _style);
 
             if (caster.LastRefusal != AbilityRefusal.None)

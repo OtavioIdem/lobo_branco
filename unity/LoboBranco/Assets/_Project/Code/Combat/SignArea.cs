@@ -12,6 +12,13 @@ namespace LoboBranco.Combat
 
         /// <summary>Em volta de quem conjura, inclusive pelas costas.</summary>
         Radius = 1,
+
+        /// <summary>
+        /// Quem conjura, e mais ninguem (tarefa 1.18e). O escudo do docs/03 secao 8 nao procura
+        /// alvo: ele e o unico sinal cujo alvo ja e conhecido antes de qualquer consulta, e por isso
+        /// nao custa fisica nenhuma.
+        /// </summary>
+        Self = 2,
     }
 
     /// <summary>
@@ -38,8 +45,11 @@ namespace LoboBranco.Combat
         [Tooltip("Abertura total do cone, em graus. Ignorado no raio.")]
         [Range(0f, 360f)] public float coneAngleDegrees;
 
-        /// <summary>Uma habilidade sem alcance nao procura alvo nenhum.</summary>
-        public bool HasArea => range > 0f;
+        /// <summary>
+        /// A habilidade alcanca alguem. Em quem conjura isso vale sempre, porque o alvo nao depende
+        /// de distancia; nas outras formas, um alcance de zero nao alcanca ninguem.
+        /// </summary>
+        public bool HasArea => shape == SignAreaShape.Self || range > 0f;
 
         /// <summary>
         /// Se um ponto esta dentro da abertura. Nao confere o alcance: quem ja filtrou por
@@ -49,7 +59,7 @@ namespace LoboBranco.Combat
         /// <param name="planarForward">Frente de quem conjura, ja achatada e normalizada.</param>
         public bool IsWithinAngle(Vector3 origin, Vector3 planarForward, Vector3 point)
         {
-            if (shape == SignAreaShape.Radius) return true;
+            if (shape != SignAreaShape.Cone) return true;
 
             Vector3 toPoint = point - origin;
             toPoint.y = 0f;

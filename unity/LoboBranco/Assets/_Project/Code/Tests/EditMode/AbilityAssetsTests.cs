@@ -91,6 +91,28 @@ namespace LoboBranco.Tests
             Assert.AreEqual(5f, burn.seconds);
         }
 
+        /// <summary>A linha do escudo no docs/03 secao 8 (tarefa 1.18e): 25 de vigor, 6 s, 8 s e 30%.</summary>
+        [Test]
+        public void O_escudo_tem_os_numeros_do_documento()
+        {
+            const string WardPath = "Assets/_Project/Data/Combat/Abilities/Sign_Ward.asset";
+            var ward = AssetDatabase.LoadAssetAtPath<AbilityDef>(WardPath);
+            Assert.IsNotNull(ward, $"Nao achei {WardPath}. Rode 'Lobo Branco/Setup/6. Criar assets de combate'.");
+
+            Assert.AreEqual(25f, ward.staminaCost, "docs/03 secao 8: custo 25.");
+            Assert.AreEqual(6f, ward.cooldownSeconds, "docs/03 secao 8: recarga de 6 s.");
+            Assert.AreEqual(SignAreaShape.Self, ward.area.shape, "O escudo e em quem conjura.");
+
+            WardEffectDef effect = null;
+            if (ward.effects != null)
+                foreach (SignEffectDef e in ward.effects)
+                    if (e is WardEffectDef found) effect = found;
+
+            Assert.IsNotNull(effect, "O escudo nao ergue nada.");
+            Assert.AreEqual(8f, effect.seconds, "docs/03 secao 8: por 8 s.");
+            Assert.AreEqual(0.3f, effect.reflectFraction, "docs/03 secao 8: devolve 30%.");
+        }
+
         [Test]
         public void O_Lobo_tem_o_fogo_numa_vaga()
         {

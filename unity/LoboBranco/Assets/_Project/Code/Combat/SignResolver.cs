@@ -85,6 +85,18 @@ namespace LoboBranco.Combat
 
             SignArea area = ability.area;
 
+            // O escudo nao procura ninguem: o alvo e quem conjurou, e nenhuma consulta de fisica
+            // acontece. E a unica forma em que quem conjura entra na lista.
+            if (area.shape == SignAreaShape.Self)
+            {
+                if (cast.Caster == null || cast.Caster.IsDown) return 0;
+
+                _targets[0] = cast.Caster;
+                _sqrDistances[0] = 0f;
+                _count = 1;
+                return _count;
+            }
+
             Vector3 planar = new Vector3(cast.Forward.x, 0f, cast.Forward.z);
             bool hasFacing = planar.sqrMagnitude > 0.000001f;
 

@@ -171,7 +171,8 @@ namespace LoboBranco.Tests
             _queima.Apply(Conjuracao(), alvo);
             burn.Step(Time.timeAsDouble + 2.0);
 
-            Assert.IsTrue(alvo.IsDown);
+            Assert.IsTrue(alvo.IsDown,
+                $"vida {alvo.CurrentVitality}, queimando {burn.IsBurning}, tique de {burn.DamagePerTick}");
             Assert.IsFalse(burn.IsBurning, "A morte leva a queimadura junto.");
             Assert.AreEqual(1, _bruxo.CurrentAdrenaline);
         }

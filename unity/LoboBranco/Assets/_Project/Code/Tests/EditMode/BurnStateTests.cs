@@ -54,6 +54,21 @@ namespace LoboBranco.Tests
             Assert.AreEqual(5, TiquesAte(10d));
         }
 
+        /// <summary>
+        /// O tique agendado para o instante exato em que alguem pergunta tem que vencer. Quem
+        /// pergunta calcula <c>T+2</c> de uma vez, e o compasso chegou la somando <c>T+1+1</c>: em
+        /// ponto flutuante os dois podem diferir no ultimo bit. Sem folga, a queimadura tira 4 em vez
+        /// de 8 dependendo de que horas a partida comecou, e o teste passa ou falha por sorte.
+        /// </summary>
+        [Test]
+        public void Tique_no_instante_exato_vence_com_relogio_quebrado()
+        {
+            const double Relogio = 12.3456789d;
+            _queima.Ignite(Relogio, 4f, 5f, 1f);
+
+            Assert.AreEqual(2, TiquesAte(Relogio + 2d));
+        }
+
         [Test]
         public void Acaba_no_fim_da_duracao()
         {

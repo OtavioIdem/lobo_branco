@@ -29,6 +29,8 @@ namespace LoboBranco.EditorTools
         const string FireDamagePath = SignEffectsFolder + "/SignEffect_Fire_Damage.asset";
         const string FireBurnPath = SignEffectsFolder + "/SignEffect_Fire_Burn.asset";
         const string FireSignPath = AbilitiesFolder + "/Sign_Fire.asset";
+        const string WardPath = SignEffectsFolder + "/SignEffect_Ward.asset";
+        const string WardSignPath = AbilitiesFolder + "/Sign_Ward.asset";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -91,6 +93,7 @@ namespace LoboBranco.EditorTools
             CreateSignEffects();
             CreateAbilities();
             CreateFireSign();
+            CreateWardSign();
 
             // Por ultimo: a escola aponta para golpes, habilidades e bloco de atributos criados acima.
             CreateSchools();
@@ -402,19 +405,11 @@ namespace LoboBranco.EditorTools
                 Debug.Log($"[CombatData] Habilidades ligadas em {path}.");
             }
 
-            // O fogo entrou na tarefa 1.18d, na vaga seguinte. Todas as escolas tem os cinco sinais
-            // (docs/13 secao 5). Ate a roda da 1.18g, Q so usa a primeira vaga, e o fogo espera la.
-            var fire = AssetDatabase.LoadAssetAtPath<AbilityDef>(FireSignPath);
-            if (fire != null && System.Array.IndexOf(asset.abilities, fire) < 0)
-            {
-                var slots = new AbilityDef[asset.abilities.Length + 1];
-                asset.abilities.CopyTo(slots, 0);
-                slots[slots.Length - 1] = fire;
-
-                asset.abilities = slots;
-                EditorUtility.SetDirty(asset);
-                Debug.Log($"[CombatData] Fogo ligado na vaga {slots.Length - 1} de {path}.");
-            }
+            // O fogo (1.18d) e o escudo (1.18e) entraram nas vagas seguintes. Todas as escolas tem os
+            // cinco sinais (docs/13 secao 5). Ate a roda da 1.18g, Q so usa a primeira vaga, e os
+            // outros esperam la.
+            EnsureAbilitySlot(asset, path, AssetDatabase.LoadAssetAtPath<AbilityDef>(FireSignPath));
+            EnsureAbilitySlot(asset, path, AssetDatabase.LoadAssetAtPath<AbilityDef>(WardSignPath));
 
             // A especializacao entrou na tarefa 1.18b. O Lobo e especializado no abridor pelo
             // docs/13 secao 5, e a variante sai vazia: o efeito dela ainda nao foi desenhado.
@@ -424,6 +419,21 @@ namespace LoboBranco.EditorTools
                 EditorUtility.SetDirty(asset);
                 Debug.Log($"[CombatData] Sinal especializado ligado em {path}.");
             }
+        }
+
+        /// <summary>Poe um sinal na proxima vaga livre da escola, se ele ja nao estiver em alguma.</summary>
+        static void EnsureAbilitySlot(SchoolDef school, string schoolPath, AbilityDef ability)
+        {
+            if (ability == null || school.abilities == null) return;
+            if (System.Array.IndexOf(school.abilities, ability) >= 0) return;
+
+            var slots = new AbilityDef[school.abilities.Length + 1];
+            school.abilities.CopyTo(slots, 0);
+            slots[slots.Length - 1] = ability;
+
+            school.abilities = slots;
+            EditorUtility.SetDirty(school);
+            Debug.Log($"[CombatData] '{ability.name}' ligado na vaga {slots.Length - 1} de {schoolPath}.");
         }
 
         // ----------------------------------------------------------- habilidades
@@ -487,6 +497,41 @@ namespace LoboBranco.EditorTools
             }
         }
 
+        /// <summary>
+        /// O escudo do docs/03 secao 8 (tarefa 1.18e). Custo e recarga sao do documento; conjurar e
+        /// recuperar repetem os dos outros sinais.
+        ///
+        /// A area e a forma <c>Self</c>: o escudo nao procura alvo, e por isso nao tem alcance nem
+        /// abertura para decidir.
+        /// </summary>
+        static void CreateWardSign()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<AbilityDef>(WardSignPath);
+
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<AbilityDef>();
+                asset.displayName = "Quen";
+                asset.staminaCost = 25f;       // docs/03 secao 8
+                asset.cooldownSeconds = 6f;    // docs/03 secao 8
+                asset.castTime = 0.3f;
+                asset.recovery = 0.4f;
+                asset.area = new SignArea { shape = SignAreaShape.Self };
+
+                AssetDatabase.CreateAsset(asset, WardSignPath);
+                Debug.Log($"[CombatData] Criado: {WardSignPath}");
+            }
+
+            if (asset.effects != null && asset.effects.Length > 0) return;
+
+            var ward = AssetDatabase.LoadAssetAtPath<WardEffectDef>(WardPath);
+            if (ward == null) return;
+
+            asset.effects = new SignEffectDef[] { ward };
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] Efeito ligado em {WardSignPath}.");
+        }
+
         // -------------------------------------------------------- efeitos de sinal
 
         /// <summary>
@@ -506,6 +551,9 @@ namespace LoboBranco.EditorTools
             // docs/03 secao 8: 0,8 vezes a espada como fogo, e Queimadura de 4 por segundo por 5 s.
             CreateIfMissing<DamageEffectDef>(FireDamagePath);
             CreateIfMissing<BurnEffectDef>(FireBurnPath);
+
+            // O escudo (tarefa 1.18e): 8 s e 30% de troco, os padroes do proprio tipo.
+            CreateIfMissing<WardEffectDef>(WardPath);
 
             var damage = AssetDatabase.LoadAssetAtPath<DamageEffectDef>(FireDamagePath);
             if (damage != null && damage.tuning == null)

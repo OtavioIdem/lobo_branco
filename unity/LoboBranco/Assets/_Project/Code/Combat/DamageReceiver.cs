@@ -36,6 +36,7 @@ namespace LoboBranco.Combat
         [SerializeField] MonsterDef profile;
 
         CharacterVitals _vitals;
+        IDamageAbsorber _absorber;
 
         // ---------------------------------------------------------------- leitura
 
@@ -80,6 +81,21 @@ namespace LoboBranco.Combat
         /// </summary>
         public float GetResistance(DamageType type) => profile != null ? profile.GetResistance(type) : 1f;
 
+        /// <summary>
+        /// Quem passa a engolir o dano deste personagem. O escudo se anuncia ao acordar, e nao e
+        /// procurado aqui: quem chega depois deste componente nunca seria encontrado por uma busca no
+        /// <c>Awake</c>, e num prefab isso funciona por sorte, porque la todos os componentes existem
+        /// antes de qualquer <c>Awake</c>. Um absorvedor acrescentado em tempo de execucao, como a
+        /// pocao de pele de pedra do M2, nao tem essa sorte.
+        /// </summary>
+        public void SetAbsorber(IDamageAbsorber absorber) => _absorber = absorber;
+
+        /// <summary>Para de engolir. So quem esta registrado consegue sair, para nao derrubar outro.</summary>
+        public void ClearAbsorber(IDamageAbsorber absorber)
+        {
+            if (ReferenceEquals(_absorber, absorber)) _absorber = null;
+        }
+
         public void ApplyDamage(in DamageResult result)
         {
             // Chegar aqui sem autoridade significa que alguem rodou o pipeline no lugar
@@ -91,6 +107,11 @@ namespace LoboBranco.Combat
             }
 
             if (IsDown) return;
+
+            // O escudo vem antes da vida (tarefa 1.18e). Quem absorve nao e conhecido deste
+            // componente: ele pergunta ao contrato, e no M2 a pocao de pele de pedra responde a
+            // mesma pergunta sem uma linha nova aqui.
+            if (_absorber != null && _absorber.TryAbsorb(result)) return;
 
             _vitals.ApplyDamage(result.Amount);
 

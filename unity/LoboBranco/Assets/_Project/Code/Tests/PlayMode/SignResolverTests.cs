@@ -167,6 +167,17 @@ namespace LoboBranco.Tests
                 "Um cone sem frente acertaria para qualquer lado.");
         }
 
+        [UnityTest]
+        public IEnumerator Area_em_quem_conjura_alcanca_so_ele_e_nao_consulta_a_fisica()
+        {
+            _sinal.area = new SignArea { shape = SignAreaShape.Self };
+            CriarCriatura("Frente", new Vector3(0f, 0f, 2f));
+            yield return null;
+
+            Assert.AreEqual(1, Resolver(), "O escudo da 1.18e e o unico sinal cujo alvo ja e conhecido.");
+            CollectionAssert.AreEqual(new[] { "base:Bruxo:2" }, _registro);
+        }
+
         // ------------------------------------------------------------------ ordem
 
         [UnityTest]

@@ -226,6 +226,24 @@ playtest decide antes de qualquer imunidade entrar.
 Quebrar guarda continua na 1.19, e interromper a regeneração da Besta (§10) espera a Besta. O
 Lobo recebe o fogo na segunda vaga, e ele só pode ser conjurado quando a roda da 1.18g existir.
 
+**Nota de implementação, 2026-09-15 (tarefa 1.18e).** O escudo existe, e ele trouxe duas peças
+que faltavam. A primeira é uma **forma de área nova**, em quem conjura: o escudo é o único sinal
+cujo alvo já é conhecido antes de qualquer consulta, e ele não custa física nenhuma. A segunda é
+**quem bateu**, que agora viaja no resultado de dano: sem isso o alvo sabe que apanhou e não de
+quem, e não havia para onde devolver os 30%.
+
+- **Absorve um evento de dano inteiro**, de 8 ou de 80, e quebra. É o que faz do escudo uma
+  decisão de quando erguer, e não um colete de vida extra.
+- **O troco não passa pelo pipeline de novo.** Aquele dano já foi resolvido uma vez; rodar os
+  estágios outra vez aplicaria a armadura de quem bateu a um dano que já é o que ele causou.
+- **A intensidade escala o troco, e não a duração.** Como o escudo absorve o golpe inteiro, o
+  retorno é a única potência que existe nele, e uma duração que crescesse tiraria o compromisso.
+- **Erguer de novo substitui**, nunca soma: dois escudos não absorvem dois golpes.
+
+O escudo entra na frente da vida por um contrato, e não por conhecer sinais: a poção de pele de
+pedra do M2 entra pela mesma porta. Ele absorve qualquer dano que chegue por ela, inclusive um
+tique de Queimadura — o que só vai importar quando alguma criatura puser fogo no bruxo.
+
 ## 9. Pipeline de dano
 
 A ordem importa, e ela é o que faz o pilar P2 funcionar. Implementada como uma struct

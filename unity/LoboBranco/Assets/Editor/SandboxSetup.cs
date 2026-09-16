@@ -239,6 +239,10 @@ namespace LoboBranco.EditorTools
             // atravessa o jogador sem tirar nada, e nada aparece no Console.
             player.AddComponent<DamageReceiver>();
 
+            // O escudo, antes do atacante: ele entra na frente da vida quando o golpe chega
+            // (tarefa 1.18e). O DamageReceiver o acha por contrato no Awake.
+            player.AddComponent<WardStatus>();
+
             player.AddComponent<PlayerMeleeAttacker>();
 
             // Nao tem nada para ligar: as habilidades sao da escola, e o conjurador pergunta a ela.
@@ -300,6 +304,7 @@ namespace LoboBranco.EditorTools
             overlay.FindProperty("vitals").objectReferenceValue = player.GetComponent<CharacterVitals>();
             overlay.FindProperty("caster").objectReferenceValue = player.GetComponent<PlayerAbilityCaster>();
             overlay.FindProperty("signs").objectReferenceValue = player.GetComponent<PlayerSignEffects>();
+            overlay.FindProperty("ward").objectReferenceValue = player.GetComponent<WardStatus>();
             overlay.ApplyModifiedPropertiesWithoutUndo();
 
             // Mesma mascara explicita do atacante: um sinal do bruxo nao alcanca o companheiro.

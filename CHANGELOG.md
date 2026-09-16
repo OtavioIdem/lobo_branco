@@ -8,6 +8,27 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-15 — M1 tarefa 1.18e: o escudo absorve um golpe e devolve o troco
+- **O Quen existe como asset**, com os numeros do docs/03 secao 8: 25 de vigor, 6 s de recarga,
+  absorve um golpe por 8 s e devolve 30% do dano a quem bateu. O Lobo o tem na terceira vaga, e ele
+  so pode ser conjurado com a roda da tarefa 1.18g.
+- **Forma de area nova, em quem conjura.** O escudo e o unico sinal cujo alvo ja e conhecido antes
+  de qualquer consulta, e ele nao custa fisica nenhuma.
+- **O resultado de dano passou a carregar quem bateu.** Sem isso, o alvo sabia que apanhou e nao de
+  quem, e nao havia para onde devolver o troco.
+- `WardState` e `WardStatus`: o escudo como instante de queda replicado, erguido e quebrado so pelo
+  host. **Aqui o estado viaja, e na Queimadura nao**: o escudo e decisao do jogador, e ele precisa
+  ver na propria tela se ainda esta protegido.
+- **O escudo entra na frente da vida por contrato** (`IDamageAbsorber`), e o `DamageReceiver` nao
+  conhece sinal nenhum: a pocao de pele de pedra do M2 entra pela mesma porta.
+- Absorve um golpe de 8 ou de 80 pelo mesmo preco, o troco nao passa pelo pipeline de novo, e a
+  intensidade escala o que volta e nao a duracao. O painel de debug mostra o escudo de pe.
+- **Consertado um tique de Queimadura que sumia por arredondamento** (tarefa 1.18d). O compasso
+  chega ao instante somando, e quem pergunta calcula de uma vez; em ponto flutuante os dois podem
+  diferir no ultimo bit, e a queimadura tirava 4 em vez de 8 dependendo de que horas a partida
+  comecou. O teste que pegou isso falhava so as vezes.
+- 416 testes passando, contra 392 antes. Build de Windows gerando.
+
 ### 2026-09-15 — M1 tarefa 1.18d: o fogo fere e queima
 - **O Igni existe como asset, e ainda nao sai do Q.** Custo 35, recarga de 5 s, cone de 5 m: dano
   de 0,8 vezes a espada na mao, como fogo, e Queimadura de 4 por segundo por 5 s (docs/03 secao 8).
