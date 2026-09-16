@@ -1,7 +1,7 @@
 {
     "name": "TW1R.Player",
     "rootNamespace": "LoboBranco.Player",
-    "references": ["TW1R.Core","TW1R.Stats","TW1R.Combat","TW1R.Camera","Unity.InputSystem"],
+    "references": ["TW1R.Core","TW1R.Stats","TW1R.Combat","TW1R.Camera","TW1R.Net","Unity.Cinemachine","Unity.InputSystem","Unity.Netcode.Runtime"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

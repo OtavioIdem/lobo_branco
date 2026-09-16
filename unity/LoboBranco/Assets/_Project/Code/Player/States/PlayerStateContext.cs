@@ -50,7 +50,80 @@ namespace LoboBranco.Player
         /// <summary>Golpe escolhido por quem pediu a transicao, consumido pelo estado de ataque.</summary>
         public AttackDef PendingAttack;
 
-        public AttackDef LightAttack;
-        public AttackDef HeavyAttack;
+        /// <summary>
+        /// O golpe da postura que esta valendo agora (docs/03 secao 4). Quem escreve e o
+        /// <see cref="PlayerBrain"/>, uma vez por frame, a partir do
+        /// <see cref="StanceSelector"/>.
+        ///
+        /// E um campo so, e nao um por botao, porque a postura e que decide o golpe: se o
+        /// botao direito desse um golpe Forte com a postura Rapida valendo, escolher
+        /// postura nao seria decisao nenhuma e a camada 2 do combate morreria.
+        /// </summary>
+        public AttackDef CurrentAttack;
+
+        /// <summary>Postura corrente, para os estados que precisam dela sem olhar o golpe.</summary>
+        public Stance CurrentStance;
+
+        // --------------------------------------------------------------- espadas
+
+        /// <summary>Quem carrega as duas espadas. Nulo e valido: o estado de troca nao troca nada.</summary>
+        public IWeaponHolder Weapons;
+
+        // ----------------------------------------------------------------- vigor
+
+        /// <summary>
+        /// So para perguntar se da. Nulo e valido, e significa "vigor ainda nao cobra
+        /// nada", que e como o jogo estava ate a tarefa 1.16.
+        /// </summary>
+        public IStaminaSource Vitals;
+
+        /// <summary>
+        /// Custo de vigor do golpe corrente, ja com o desconto de Fluxo. Escrito pelo
+        /// <see cref="PlayerBrain"/> uma vez por frame, junto da postura, porque ele muda
+        /// quando a corrente muda e nao so quando a postura muda.
+        /// </summary>
+        public float AttackStaminaCost;
+
+        /// <summary>
+        /// Espada pedida por quem iniciou a troca, consumida no fim dela. Nula quando nao
+        /// ha troca em andamento, o que e diferente de "trocar para a que ja esta na mao".
+        /// </summary>
+        public WeaponMaterial? PendingWeapon;
+
+        // --------------------------------------------------------------- hitstop
+
+        /// <summary>
+        /// Segundos que o golpe corrente deve ficar parado, pedidos quando o host confirma
+        /// que ele conectou (tech/adr/0010). Consumido pelo estado de ataque; fora dele,
+        /// quem escreve e o <see cref="PlayerBrain"/> zera, porque um acerto confirmado
+        /// depois de a esquiva cortar o golpe nao tem o que congelar.
+        /// </summary>
+        public float PendingHitstop;
+
+        // ----------------------------------------------------------- habilidades
+
+        /// <summary>Vaga nenhuma. Valor de <see cref="PendingAbilitySlot"/> fora de uma transicao.</summary>
+        public const int NoAbilitySlot = -1;
+
+        /// <summary>
+        /// Quem conjura (tarefa 1.32). Nulo e valido: o botao de sinal nao faz nada, como era
+        /// antes de a habilidade existir.
+        /// </summary>
+        public IAbilityCaster Abilities;
+
+        /// <summary>
+        /// A vaga que o botao de sinal usa. Escrita pelo <see cref="PlayerBrain"/>. Ate a roda de
+        /// sinais do docs/02 secao 4 existir, e sempre a primeira.
+        /// </summary>
+        public int SelectedAbilitySlot;
+
+        /// <summary>Vaga escolhida por quem pediu a transicao, consumida pelo estado de sinal.</summary>
+        public int PendingAbilitySlot = NoAbilitySlot;
+
+        /// <summary>
+        /// O host recusou a conjuracao em andamento (tech/adr/0011). Escrito pelo
+        /// <see cref="PlayerBrain"/> quando a recusa chega, consumido pelo estado de sinal.
+        /// </summary>
+        public bool CastRefused;
     }
 }

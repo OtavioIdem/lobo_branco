@@ -13,6 +13,15 @@ namespace LoboBranco.Player
     {
         PlayerStateId Id { get; }
 
+        /// <summary>
+        /// Verdadeiro enquanto a acao esta comprometida e nao pode ser abortada. Esta no
+        /// contrato, e nao so na classe base, porque a regra de ouro nao e a unica coisa
+        /// que precisa da resposta: trocar de postura tambem depende dela (docs/03 secao 4),
+        /// e perguntar isso com um cast seria abrir a porta para uma segunda definicao de
+        /// "comprometido".
+        /// </summary>
+        bool IsCommitted { get; }
+
         void OnEnter(PlayerStateContext context);
 
         void OnTick(PlayerStateContext context, float deltaTime);

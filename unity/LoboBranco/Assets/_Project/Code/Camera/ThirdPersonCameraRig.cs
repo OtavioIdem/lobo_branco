@@ -36,6 +36,19 @@ namespace LoboBranco.CameraSystem
         float _yaw;
         float _pitch = 12f;
 
+        // Somado so na hora de escrever a rotacao, e nunca no pitch do jogador: e o que
+        // impede dez golpes seguidos de deixarem a camera vinte graus mais baixa.
+        readonly CameraPunch _punch = new CameraPunch();
+
+        /// <summary>Deslocamento do soco de camera agora, em graus. O painel de debug mostra isto.</summary>
+        public float PunchOffset => _punch.Offset;
+
+        /// <summary>
+        /// Da o soco de camera do docs/03 secao 11. Quem chama e o dono do personagem, na
+        /// tela dele: camera e local por natureza, e o companheiro nao sente o seu golpe.
+        /// </summary>
+        public void Punch(float degrees, float recoverySeconds) => _punch.Kick(degrees, recoverySeconds);
+
         /// <summary>Rotacao horizontal atual, em graus. O movimento do jogador usa isto.</summary>
         public float Yaw => _yaw;
 
@@ -58,11 +71,16 @@ namespace LoboBranco.CameraSystem
             set => followTarget = value;
         }
 
+        /// <summary>Segundos de tolerancia antes de reclamar da falta de alvo.</summary>
+        const float MissingTargetGrace = 3f;
+
+        bool _warnedAboutTarget;
+
         void Awake()
         {
-            if (followTarget == null)
-                Debug.LogWarning($"{nameof(ThirdPersonCameraRig)} sem followTarget. O pivo vai ficar parado.", this);
-
+            // Nao adianta reclamar aqui: com rede, o alvo so aparece quando o personagem
+            // do dono nasce, e isso e depois do Awake do pivo. O aviso foi para LateUpdate,
+            // com folga, porque um aviso que aparece sempre e um aviso que ninguem le.
             SnapToTarget();
         }
 
@@ -100,7 +118,16 @@ namespace LoboBranco.CameraSystem
         // LateUpdate para rodar depois de todo movimento do jogador no frame.
         void LateUpdate()
         {
-            if (followTarget == null) return;
+            if (followTarget == null)
+            {
+                if (!_warnedAboutTarget && Time.timeSinceLevelLoad > MissingTargetGrace)
+                {
+                    _warnedAboutTarget = true;
+                    Debug.LogWarning($"{nameof(ThirdPersonCameraRig)} segue sem followTarget. O pivo fica parado.", this);
+                }
+
+                return;
+            }
 
             transform.position = followTarget.position + Vector3.up * pivotHeight;
             transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);

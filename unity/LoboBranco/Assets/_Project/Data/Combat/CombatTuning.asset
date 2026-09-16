@@ -21,6 +21,16 @@ MonoBehaviour:
   steelVsMonster: 0.35
   silverVsHumanoid: 0.5
   silverVsMonster: 1
+  flowWindowSeconds: 0.22
+  flowStaminaDiscountChain: 3
+  flowStaminaDiscount: 0.2
+  staminaRegenDelay: 1.5
+  combatMemorySeconds: 5
+  adrenalineMaxCharges: 3
+  adrenalineFlowLinksForFirstCharge: 5
+  adrenalineFlowLinksPerCharge: 2
+  secondWindCost: 2
+  secondWindStaminaFraction: 0.4
   flowBonusByChain:
   - 1
   - 1

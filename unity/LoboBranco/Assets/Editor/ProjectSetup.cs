@@ -30,6 +30,15 @@ namespace LoboBranco.EditorTools
             "com.unity.splines",
             "com.unity.probuilder",
             "com.unity.nuget.newtonsoft-json",
+
+            // Rede. A lista e a da ADR 0008; transport vem junto com NGO, mas fica declarado
+            // porque a versao dele importa e dependencia implicita nao aparece no manifest.
+            "com.unity.netcode.gameobjects",
+            "com.unity.transport",
+            "com.unity.services.core",
+            "com.unity.services.authentication",
+            "com.unity.services.relay",
+            "com.unity.multiplayer.playmode",
         };
 
         static readonly string[] PackagesToRemove =
@@ -37,7 +46,6 @@ namespace LoboBranco.EditorTools
             "com.unity.visualscripting",        // nao usamos; custa tempo de compilacao
             "com.unity.collab-proxy",           // versionamento e Git
             "com.unity.purchasing",             // sem compra no app; ainda cria Assets/Resources/BillingMode.json
-            "com.unity.multiplayer.center",     // jogo e single player (doc 00 secao 5)
             "com.unity.xr.legacyinputhelpers",  // sem XR, e depende do Input Manager antigo
         };
 

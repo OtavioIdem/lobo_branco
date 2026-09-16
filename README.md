@@ -37,6 +37,8 @@ em sessão privada aberta por código de convite. O pivô para coop é de 2026-0
 
 ## Agentes e skills
 
+### Claude Code
+
 Sete agentes especializados por setor, em `.claude/agents/`. Chame pelo nome, ou deixe
 que sejam escolhidos pela descrição.
 
@@ -64,6 +66,32 @@ Seis skills para os procedimentos que se repetem, em `.claude/skills/`.
 O `CLAUDE.md` é lido automaticamente a cada sessão e carrega o essencial do projeto.
 **Abra o Claude Code com `E:\Unity_Games\TW1-Remaster` como diretório**, senão nada
 disso é encontrado.
+
+### Codex — célula de design
+
+O Codex usa `AGENTS.md` como contexto do projeto, seis agentes especializados em
+`.codex/agents/` e seis skills compartilhadas em `.agents/skills/`.
+
+| Agente | Responsabilidade |
+|---|---|
+| `design_lead` | Coordena escopo, decisões e handoffs do time |
+| `systems_designer` | Mecânicas, coop, balanceamento e planilhas |
+| `art_director` | Art bible, linguagem visual e aprovação de briefs |
+| `level_designer` | Greybox, fluxo, arenas e investigação espacial |
+| `blender_artist` | Modelagem, UV, bake, rig, LOD, colisão e FBX |
+| `unity_technical_artist` | Importação URP, materiais, prefabs, VFX e desempenho |
+
+| Skill | Procedimento |
+|---|---|
+| `avaliar-design-jogo` | Avaliar ideia, escopo, pilares e teste |
+| `definir-direcao-visual` | Criar ou revisar a art bible |
+| `criar-brief-asset` | Transformar requisito de gameplay em brief de produção |
+| `produzir-asset-blender` | Produzir asset 3D game-ready no Blender |
+| `integrar-asset-unity` | Importar e validar o handoff Blender → Unity |
+| `greybox-zona-coop` | Projetar e testar espaço para 2–4 jogadores |
+
+Abra o Codex com `E:\Unity_Games\TW1-Remaster` como diretório para que os agentes e
+skills de escopo do repositório sejam descobertos.
 
 ## Estrutura de pastas
 
