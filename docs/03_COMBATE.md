@@ -244,6 +244,27 @@ O escudo entra na frente da vida por um contrato, e não por conhecer sinais: a 
 pedra do M2 entra pela mesma porta. Ele absorve qualquer dano que chegue por ela, inclusive um
 tique de Queimadura — o que só vai importar quando alguma criatura puser fogo no bruxo.
 
+**Nota de implementação, 2026-09-15 (tarefa 1.18f).** A armadilha é o primeiro sinal que deixa
+algo no mundo em vez de agir num alvo, e por isso é o primeiro **objeto de rede que nasce em
+jogo**: quatro pessoas precisam ver o mesmo círculo no mesmo chão. Ela nasce pelo host e é
+registrada no `NetworkManager`; sem rede, nasce local e funciona igual.
+
+- **O que viaja é só o instante em que ela some.** Raio e força da lentidão vêm do prefab, que é
+  o mesmo em todas as máquinas, e a lentidão em si já viaja no estado de cada criatura.
+- **A lentidão é reaplicada em pulsos curtos**, e não aplicada uma vez pelos 12 s. É o que faz
+  quem sai da armadilha voltar a correr sozinho, sem ninguém precisar avisar.
+- **A intensidade estica o tempo de campo, e não os 60%.** Escalar a lentidão até 100% seria
+  imobilizar: a armadilha deixaria de segurar o campo e passaria a prender.
+- **A armadilha nasce onde o bruxo está**, e por isso a área deste sinal é a mesma do escudo, em
+  quem conjura. Um sinal de área largaria uma armadilha por criatura atingida.
+- O disco é violeta, e não âmbar nem vermelho: essas duas cores já significam telegrafo e golpe
+  imparável na §5, e uma armadilha vermelha ensinaria a esquivar dela.
+
+**Ancorar seres etéreos fica de fora**, e a regra 2 desta seção continua sem dono. Não existe
+criatura etérea no slice: implementar agora seria escrever intangibilidade sem nada para testar.
+Ela volta quando o primeiro espectro entrar, e é lá que a regra "lâmina não toca sem âncora"
+precisa nascer inteira.
+
 ## 9. Pipeline de dano
 
 A ordem importa, e ela é o que faz o pilar P2 funcionar. Implementada como uma struct

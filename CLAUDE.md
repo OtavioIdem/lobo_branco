@@ -110,17 +110,18 @@ soco de câmera (1.25), a escola como dado (1.31), a habilidade com custo e reca
 das oito partes da 1.18, que vem antes da 1.33: os estados de controle do inimigo (1.18a), o
 efeito de sinal como dado, com área, intensidade e variante por escola (1.18b), o abridor que
 derruba leves e atordoa médios, com o porte da criatura no `MonsterDef` (1.18c), o fogo que fere
-pelo pipeline e queima em tiques só no host (1.18d), e o escudo que absorve um golpe e devolve
-30% a quem bateu (1.18e). O fogo e o escudo existem como asset e só saem em jogo com a roda da
-1.18g, porque até ela o Q usa a primeira vaga.
+pelo pipeline e queima em tiques só no host (1.18d), o escudo que absorve um golpe e devolve
+30% a quem bateu (1.18e), e a armadilha replicada que segura o campo (1.18f). Fogo, escudo e
+armadilha existem como asset e só saem em jogo com a roda da 1.18g, porque até ela o Q usa a
+primeira vaga. Falta da 1.18 só a roda (1.18g); o Axii (1.18h) está adiado.
 Existe jogador com câmera de terceira pessoa, folha de atributos com modificadores, pipeline
 de dano de 11 estágios, máquina de estados com buffer de input de 0,2 s, golpes por postura
 que vêm da escola do bruxo (só o Lobo, por enquanto) com hitbox sem alocação, um sinal que
-cobra vigor, recarrega e derruba os barghests no cone (o Yrden é a 1.18f), sessão em que o dono simula o próprio bruxo enquanto o host resolve
+cobra vigor, recarrega e derruba os barghests no cone, sessão em que o dono simula o próprio bruxo enquanto o host resolve
 vida e dano (por IP direto ou por código de convite), e uma criatura que percebe por cone e
 por som, persegue por NavMesh, golpeia com telegrafo de 0,65 s visível em todas as máquinas e
 espera a vez rondando quando o alvo já tem dois atacantes, e que pode ser atordoada, derrubada
-e lentificada pelo host sem depender do grafo. 416 testes passando, build gerando.
+e lentificada pelo host sem depender do grafo. 429 testes passando, build gerando.
 
 **Nada de sensação mexe em `Time.timeScale`** (`tech/adr/0010`). A escala é global na máquina,
 e no host ela congelaria a sessão de todo mundo. Hitstop estende o golpe de quem bateu pelo

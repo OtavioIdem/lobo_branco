@@ -65,6 +65,9 @@ namespace LoboBranco.Combat
         /// <summary>A fracao de velocidade tirada agora. Zero sem lentidao.</summary>
         public float SlowAt(double now) => now < SlowedUntil ? SlowFraction : 0f;
 
+        /// <summary>Segundos ate a lentidao passar, nunca negativo.</summary>
+        public float SlowRemainingAt(double now) => now < SlowedUntil ? (float)(SlowedUntil - now) : 0f;
+
         // --------------------------------------------------------------- escrita
 
         // As tres devolvem verdadeiro so quando o estado mudou. E o que decide se o host

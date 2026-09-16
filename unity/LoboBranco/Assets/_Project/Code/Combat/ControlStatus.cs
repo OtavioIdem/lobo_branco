@@ -63,6 +63,12 @@ namespace LoboBranco.Combat
         public float SlowFraction => State.SlowAt(Now);
 
         /// <summary>
+        /// Segundos ate a lentidao passar. A armadilha da tarefa 1.18f reaplica em pulsos curtos, e
+        /// e por aqui que se ve que quem saiu de dentro dela volta a correr sozinho.
+        /// </summary>
+        public float SlowRemaining => State.SlowRemainingAt(Now);
+
+        /// <summary>
         /// O estado mudou, em todas as maquinas. O fim natural nao dispara nada: cada maquina
         /// chega nele sozinha pelo relogio, e quem precisa saber pergunta.
         /// </summary>

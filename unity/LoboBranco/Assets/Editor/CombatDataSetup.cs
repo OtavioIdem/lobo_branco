@@ -31,6 +31,8 @@ namespace LoboBranco.EditorTools
         const string FireSignPath = AbilitiesFolder + "/Sign_Fire.asset";
         const string WardPath = SignEffectsFolder + "/SignEffect_Ward.asset";
         const string WardSignPath = AbilitiesFolder + "/Sign_Ward.asset";
+        const string TrapPath = SignEffectsFolder + "/SignEffect_Trap_Slow.asset";
+        const string TrapSignPath = AbilitiesFolder + "/Sign_Trap.asset";
 
         [MenuItem("Lobo Branco/Setup/6. Criar assets de combate")]
         public static void CreateCombatData()
@@ -94,6 +96,7 @@ namespace LoboBranco.EditorTools
             CreateAbilities();
             CreateFireSign();
             CreateWardSign();
+            CreateTrapSign();
 
             // Por ultimo: a escola aponta para golpes, habilidades e bloco de atributos criados acima.
             CreateSchools();
@@ -410,6 +413,7 @@ namespace LoboBranco.EditorTools
             // outros esperam la.
             EnsureAbilitySlot(asset, path, AssetDatabase.LoadAssetAtPath<AbilityDef>(FireSignPath));
             EnsureAbilitySlot(asset, path, AssetDatabase.LoadAssetAtPath<AbilityDef>(WardSignPath));
+            EnsureAbilitySlot(asset, path, AssetDatabase.LoadAssetAtPath<AbilityDef>(TrapSignPath));
 
             // A especializacao entrou na tarefa 1.18b. O Lobo e especializado no abridor pelo
             // docs/13 secao 5, e a variante sai vazia: o efeito dela ainda nao foi desenhado.
@@ -532,6 +536,40 @@ namespace LoboBranco.EditorTools
             Debug.Log($"[CombatData] Efeito ligado em {WardSignPath}.");
         }
 
+        /// <summary>
+        /// O sinal de campo do docs/03 secao 8 (tarefa 1.18f). Custo e recarga sao do documento.
+        ///
+        /// A area e a forma <c>Self</c> porque a armadilha nasce onde o bruxo esta: o alcance e a
+        /// duracao dela sao do proprio prefab, e nao desta area.
+        /// </summary>
+        static void CreateTrapSign()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<AbilityDef>(TrapSignPath);
+
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<AbilityDef>();
+                asset.displayName = "Yrden";
+                asset.staminaCost = 35f;       // docs/03 secao 8
+                asset.cooldownSeconds = 8f;    // docs/03 secao 8
+                asset.castTime = 0.3f;
+                asset.recovery = 0.4f;
+                asset.area = new SignArea { shape = SignAreaShape.Self };
+
+                AssetDatabase.CreateAsset(asset, TrapSignPath);
+                Debug.Log($"[CombatData] Criado: {TrapSignPath}");
+            }
+
+            if (asset.effects != null && asset.effects.Length > 0) return;
+
+            var trap = AssetDatabase.LoadAssetAtPath<TrapEffectDef>(TrapPath);
+            if (trap == null) return;
+
+            asset.effects = new SignEffectDef[] { trap };
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"[CombatData] Efeito ligado em {TrapSignPath}.");
+        }
+
         // -------------------------------------------------------- efeitos de sinal
 
         /// <summary>
@@ -554,6 +592,10 @@ namespace LoboBranco.EditorTools
 
             // O escudo (tarefa 1.18e): 8 s e 30% de troco, os padroes do proprio tipo.
             CreateIfMissing<WardEffectDef>(WardPath);
+
+            // A armadilha (tarefa 1.18f): 12 s. O prefab dela e ligado pelo SandboxSetup, que roda
+            // depois deste e e quem monta prefab.
+            CreateIfMissing<TrapEffectDef>(TrapPath);
 
             var damage = AssetDatabase.LoadAssetAtPath<DamageEffectDef>(FireDamagePath);
             if (damage != null && damage.tuning == null)

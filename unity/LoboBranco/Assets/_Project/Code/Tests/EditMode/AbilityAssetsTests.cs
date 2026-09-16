@@ -113,6 +113,38 @@ namespace LoboBranco.Tests
             Assert.AreEqual(0.3f, effect.reflectFraction, "docs/03 secao 8: devolve 30%.");
         }
 
+        /// <summary>
+        /// A linha da armadilha no docs/03 secao 8 (tarefa 1.18f): 35 de vigor, 8 s de recarga, 4 m
+        /// por 12 s e lentidao de 60%. O raio e a lentidao moram no prefab, que e o mesmo em todas as
+        /// maquinas, e por isso sao conferidos la.
+        /// </summary>
+        [Test]
+        public void A_armadilha_tem_os_numeros_do_documento()
+        {
+            const string TrapSignPath = "Assets/_Project/Data/Combat/Abilities/Sign_Trap.asset";
+            var sign = AssetDatabase.LoadAssetAtPath<AbilityDef>(TrapSignPath);
+            Assert.IsNotNull(sign, $"Nao achei {TrapSignPath}. Rode 'Lobo Branco/Setup/6. Criar assets de combate'.");
+
+            Assert.AreEqual(35f, sign.staminaCost, "docs/03 secao 8: custo 35.");
+            Assert.AreEqual(8f, sign.cooldownSeconds, "docs/03 secao 8: recarga de 8 s.");
+            Assert.AreEqual(SignAreaShape.Self, sign.area.shape, "A armadilha nasce onde o bruxo esta.");
+
+            TrapEffectDef trap = null;
+            if (sign.effects != null)
+                foreach (SignEffectDef e in sign.effects)
+                    if (e is TrapEffectDef found) trap = found;
+
+            Assert.IsNotNull(trap, "O sinal nao deixa armadilha nenhuma.");
+            Assert.AreEqual(12f, trap.seconds, "docs/03 secao 8: por 12 s.");
+            Assert.IsNotNull(trap.trapPrefab,
+                "A armadilha nao tem prefab. Rode 'Lobo Branco/Setup/5. Montar sandbox de combate'.");
+
+            var body = trap.trapPrefab.GetComponent<SignTrap>();
+            Assert.IsNotNull(body);
+            Assert.AreEqual(4f, body.Radius, "docs/03 secao 8: 4 m.");
+            Assert.AreEqual(0.6f, body.SlowFraction, "docs/03 secao 8: lentidao de 60%.");
+        }
+
         [Test]
         public void O_Lobo_tem_o_fogo_numa_vaga()
         {

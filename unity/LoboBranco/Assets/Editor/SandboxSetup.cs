@@ -42,6 +42,9 @@ namespace LoboBranco.EditorTools
         const string GroupAttackPath = "Assets/_Project/Data/Combat/Attacks/Attack_Group.asset";
         const string PlayerTuningPath = "Assets/_Project/Data/Player/PlayerTuning.asset";
         const string EnemyMaterialPath = "Assets/_Project/Art/Materials/M_Greybox_Enemy.mat";
+        const string TrapMaterialPath = "Assets/_Project/Art/Materials/M_Greybox_Trap.mat";
+        const string TrapPrefabPath = "Assets/_Project/Prefabs/VFX/Trap_Slow.prefab";
+        const string TrapEffectPath = "Assets/_Project/Data/Combat/SignEffects/SignEffect_Trap_Slow.asset";
 
         const string PlayerPrefabPath = "Assets/_Project/Prefabs/Characters/Player.prefab";
         const string EnemyPrefabPath = "Assets/_Project/Prefabs/Characters/Enemy_Barghest.prefab";
@@ -71,6 +74,7 @@ namespace LoboBranco.EditorTools
             // Os prefabs primeiro: o NetworkManager da cena precisa apontar para eles.
             GameObject prefab = BuildPlayerPrefab();
             GameObject enemyPrefab = BuildEnemyPrefab();
+            GameObject trapPrefab = BuildTrapPrefab();
 
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
@@ -88,7 +92,7 @@ namespace LoboBranco.EditorTools
             var pivot = CreateCameraPivot(null);
             CreateVirtualCamera(pivot.transform);
             EnsureBrainOnMainCamera();
-            CreateNetworkManager(prefab);
+            CreateNetworkManager(prefab, trapPrefab);
             CreateEnemies();
 
             // A malha de navegacao antes dos cacadores: um NavMeshAgent que nasce fora da
@@ -174,7 +178,7 @@ namespace LoboBranco.EditorTools
         /// Cria o objeto de rede da cena. Ele nao decide nada de jogo: hospeda o
         /// <see cref="NetworkManager"/>, o transporte direto por IP e o painel de debug.
         /// </summary>
-        static void CreateNetworkManager(GameObject playerPrefab)
+        static void CreateNetworkManager(GameObject playerPrefab, GameObject trapPrefab)
         {
             var go = new GameObject(NetworkRoot);
 
@@ -185,6 +189,15 @@ namespace LoboBranco.EditorTools
             manager.NetworkConfig.NetworkTransport = transport;
             manager.NetworkConfig.PlayerPrefab = playerPrefab;
             manager.NetworkConfig.ConnectionApproval = true;
+
+            // A armadilha da tarefa 1.18f nasce em jogo, e nao esta na cena: o host so consegue
+            // faze-la nascer se ela estiver registrada aqui, nos dois lados. A lista entra no hash de
+            // configuracao que cliente e servidor comparam no aperto de mao, entao um lado sem ela
+            // vira recusa de conexao, e nao armadilha invisivel.
+            if (trapPrefab != null)
+                manager.NetworkConfig.Prefabs.Add(new NetworkPrefab { Prefab = trapPrefab });
+            else
+                Debug.LogError($"[Sandbox] Nao achei {TrapPrefabPath}. O sinal de armadilha nao vai nascer.");
 
             go.AddComponent<NetLauncher>();
             go.AddComponent<NetSpawnRing>();
@@ -460,6 +473,90 @@ namespace LoboBranco.EditorTools
             // MonsterDef descreve o barghest e referencia o StatBlock dele.
             WireProfile(enemy.GetComponent<DamageReceiver>(), EnemyMonsterPath);
             WireVitals(enemy.GetComponent<CharacterVitals>(), EnemyStatsPath);
+        }
+
+        // --------------------------------------------------------------- armadilha
+
+        /// <summary>
+        /// A armadilha do sinal de campo (tarefa 1.18f), em prefab. Ela nasce em jogo pelo host e
+        /// precisa estar registrada no <c>NetworkManager</c>, e nao na cena.
+        ///
+        /// Autoridade de posicao no servidor: ela nao se move, mas quem a faz nascer e destroi e o
+        /// host, como no monstro (ADR 0008).
+        ///
+        /// O disco de greybox nao tem colisor: quem consulta quem esta dentro e a varredura do
+        /// proprio componente, e um colisor aqui so serviria para a espada do bruxo bater na
+        /// armadilha.
+        /// </summary>
+        [MenuItem("Lobo Branco/Setup/9. Montar prefab de armadilha")]
+        public static GameObject BuildTrapPrefab()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(TrapPrefabPath) ?? string.Empty);
+
+            var trap = new GameObject("Trap_Slow");
+
+            // O NetworkObject antes do componente de rede, como no cacador.
+            trap.AddComponent<NetworkObject>();
+            var sign = trap.AddComponent<SignTrap>();
+
+            var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            disc.name = "Disc_Greybox";
+            disc.transform.SetParent(trap.transform, false);
+            Object.DestroyImmediate(disc.GetComponent<Collider>());
+
+            var renderer = disc.GetComponent<Renderer>();
+            if (renderer != null) renderer.sharedMaterial = LoadOrCreateTrapMaterial();
+
+            var so = new SerializedObject(sign);
+            so.FindProperty("disc").objectReferenceValue = disc.transform;
+            so.FindProperty("targetMask").intValue = GameLayers.PlayerAttackTargets;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject saved = PrefabUtility.SaveAsPrefabAsset(trap, TrapPrefabPath);
+            Object.DestroyImmediate(trap);
+
+            EnsureNetworkPrefabHash(saved);
+            LinkTrapEffect(saved);
+
+            Debug.Log($"[Sandbox] Prefab de armadilha gravado em {TrapPrefabPath}.");
+            return saved;
+        }
+
+        /// <summary>
+        /// Liga o prefab no asset de efeito. O asset e criado pelo setup de combate, que roda antes
+        /// deste e nao tem prefab para apontar; e aqui que os dois se encontram.
+        /// </summary>
+        static void LinkTrapEffect(GameObject prefab)
+        {
+            var effect = AssetDatabase.LoadAssetAtPath<TrapEffectDef>(TrapEffectPath);
+            if (effect == null || effect.trapPrefab == prefab) return;
+
+            effect.trapPrefab = prefab;
+            EditorUtility.SetDirty(effect);
+            AssetDatabase.SaveAssets();
+
+            Debug.Log($"[Sandbox] Armadilha ligada em {TrapEffectPath}.");
+        }
+
+        static Material LoadOrCreateTrapMaterial()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(TrapMaterialPath);
+            if (existing != null) return existing;
+
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null)
+            {
+                Debug.LogError("[Sandbox] Shader Lit da URP nao encontrado; a armadilha fica com o material padrao.");
+                return null;
+            }
+
+            // Violeta, e nao ambar nem vermelho: essas duas cores ja significam telegrafo de ataque
+            // e golpe imparavel (docs/03 secao 5), e uma armadilha vermelha ensinaria a esquivar.
+            var material = new Material(shader);
+            material.SetColor("_BaseColor", new Color(0.45f, 0.25f, 0.85f));
+
+            AssetDatabase.CreateAsset(material, TrapMaterialPath);
+            return material;
         }
 
         // --------------------------------------------------------------- cacadores

@@ -87,7 +87,7 @@ risco X8 do [doc 13 §11](13_COOP_E_REDE.md) previu.
 | ~~1.18c~~ ✅ | Aard: cone de 6 m, derruba leves, atordoa médios por 1,5 s. Porte da criatura no `MonsterDef`. Nota no 03 §8 | M | 03 §8 |
 | ~~1.18d~~ ✅ | Igni: cone de 5 m, dano 0,8x pelo pipeline, Queimadura de 4/s por 5 s. Conjurável em jogo só com a roda da 1.18g. Nota no 03 §8 | M | 03 §8 |
 | ~~1.18e~~ ✅ | Quen: absorve um golpe por 8 s e devolve 30% do dano ao quebrar. Área em quem conjura, e o atacante no resultado de dano. Nota no 03 §8 | M | 03 §8 |
-| 1.18f | Yrden: armadilha replicada de 4 m por 12 s, lentidão de 60% | M | 03 §8 |
+| ~~1.18f~~ ✅ | Yrden: armadilha replicada de 4 m por 12 s, lentidão de 60%. Ancorar etéreos fica para quando existir espectro. Nota no 03 §8 | M | 03 §8 |
 | 1.18g | Escolher o sinal: roda segurando Q, sem desacelerar o tempo, e teclas diretas | M | 02 §4 |
 | 1.18h ⏸ | Axii. **Adiado** até existir inimigo humanoide: nota abaixo | M | 03 §8 |
 | 1.19 | Quebra de guarda e ancoragem de etéreos (regras que dão sentido aos sinais) | M | 03 §8 |

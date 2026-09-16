@@ -22,5 +22,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b85d40b5dba838b4eb6af269cd335efb, type: 2}
   - {fileID: 11400000, guid: 657a551af88cf14468ebf12d4b3020fe, type: 2}
   - {fileID: 11400000, guid: 3bf42c363bd03f7488dc4838b0390bfa, type: 2}
+  - {fileID: 11400000, guid: eb1886456d99a1849a6271535c405081, type: 2}
   specializedAbility: {fileID: 11400000, guid: b85d40b5dba838b4eb6af269cd335efb, type: 2}
   variantEffects: []

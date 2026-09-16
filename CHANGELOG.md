@@ -8,6 +8,24 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-15 — M1 tarefa 1.18f: a armadilha segura o campo
+- **O Yrden existe como asset**, com os numeros do docs/03 secao 8: 35 de vigor, 8 s de recarga, e
+  uma armadilha de 4 m que fica 12 s no chao lentificando em 60% quem estiver dentro. O Lobo o tem
+  na quarta vaga, e ele so pode ser conjurado com a roda da tarefa 1.18g.
+- **O primeiro objeto de rede que nasce em jogo.** O host o faz nascer e destroi, e ele esta
+  registrado no `NetworkManager` da cena: sem registro nos dois lados, a conexao e recusada, o que e
+  melhor que armadilha invisivel. Sem rede, nasce local e funciona igual.
+- **Viaja so o instante em que ela some.** Raio e lentidao vem do prefab, igual nas duas maquinas, e
+  a lentidao de cada criatura ja viaja no estado dela.
+- **A lentidao e reaplicada em pulsos curtos**, e nao pelos 12 s de uma vez: quem sai da armadilha
+  volta a correr sozinho.
+- A intensidade estica o tempo de campo, e nao os 60%: escalar a lentidao seria imobilizar.
+- **Ancorar etereos ficou de fora**, com motivo escrito no docs/03 secao 8: nao existe criatura
+  eterea no slice, e a regra precisa nascer inteira junto com o primeiro espectro.
+- Consertado antes de existir em jogo: uma armadilha que ninguem armou se destruia no primeiro
+  quadro, porque "sem prazo" estava sendo lido como "prazo vencido".
+- 429 testes passando, contra 416 antes. Build de Windows gerando.
+
 ### 2026-09-15 — M1 tarefa 1.18e: o escudo absorve um golpe e devolve o troco
 - **O Quen existe como asset**, com os numeros do docs/03 secao 8: 25 de vigor, 6 s de recarga,
   absorve um golpe por 8 s e devolve 30% do dano a quem bateu. O Lobo o tem na terceira vaga, e ele
