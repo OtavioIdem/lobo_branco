@@ -199,6 +199,7 @@ GameObject:
   - component: {fileID: 6328317272013361893}
   - component: {fileID: 6167507190838458284}
   - component: {fileID: 1665933002941387394}
+  - component: {fileID: 6650088637938145747}
   - component: {fileID: 8824558061825589091}
   - component: {fileID: 2105638426287146009}
   - component: {fileID: 6588835061401535998}
@@ -399,6 +400,24 @@ MonoBehaviour:
   cameraRig: {fileID: 0}
   tuning: {fileID: 11400000, guid: 5195ffb022076dc46ae34319b5bb7c62, type: 2}
   lockCursor: 1
+--- !u!114 &6650088637938145747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415091062731458965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62e8d62b1e652d249bc7c57504ae36c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TW1R.Player::LoboBranco.Player.PlayerSignWheel
+  input: {fileID: 0}
+  brain: {fileID: 0}
+  school: {fileID: 0}
+  caster: {fileID: 0}
+  pointerSensitivity: 0.02
+  wheelRadius: 120
 --- !u!114 &8824558061825589091
 MonoBehaviour:
   m_ObjectHideFlags: 0

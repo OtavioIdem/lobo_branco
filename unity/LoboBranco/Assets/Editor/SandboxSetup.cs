@@ -265,6 +265,11 @@ namespace LoboBranco.EditorTools
             player.AddComponent<PlayerSignEffects>();
 
             player.AddComponent<PlayerBrain>();
+
+            // A roda de sinais (tarefa 1.18g). Nao tem nada para ligar: ela acha o leitor de input,
+            // o cerebro, a escola e o conjurador ao lado dela.
+            player.AddComponent<PlayerSignWheel>();
+
             player.AddComponent<PlayerDebugOverlay>();
 
             // Corpo greybox: capsula da altura certa, sem collider proprio

@@ -8,6 +8,21 @@ Formato: uma linha por mudanca que o jogador ou o dev perceberia.
 
 - 2026-09-12: PlayerWolf proxy v02 com rosto definido, barba curta, corpo e membros revistos; fonte v01 preservada, 14.698 triangulos e round-trip FBX validado.
 
+### 2026-09-15 — M1 tarefa 1.18g: da para escolher o sinal
+- **Os quatro sinais viraram jogaveis.** Ate aqui o Q usava sempre a primeira vaga, entao fogo,
+  escudo e armadilha existiam como asset e ninguem conseguia lanca-los. Segurar Q abre a roda, e as
+  teclas 3 a 7 escolhem direto.
+- **A roda nunca desacelera o tempo** (`tech/adr/0010`), ao contrario do Witcher 3: em coop a escala
+  e global na maquina, e no host ela congelaria a sessao de todo mundo enquanto um jogador escolhe.
+- **O sinal passa a sair quando Q e solto.** Lancar e escolher dividem a tecla, e sem o toque
+  segurar para abrir a roda lancaria o sinal antes. Toque e espera usam o mesmo 0,3 s.
+- **Fechar a roda nao conjura:** o sinal escolhido sai no proximo toque, e soltar a roda nunca gasta
+  vigor sem o jogador mandar.
+- `SignWheelSelection`: a regra da escolha, sem input e sem tela, com a conta de angulo e a zona
+  morta que impede trocar de sinal sem querer. Escolher e local do dono: nada disso viaja.
+- A roda de greybox e IMGUI e mostra recarga por vaga, ate o HUD do docs/02 secao 7 existir.
+- 441 testes passando, contra 429 antes. Build de Windows gerando.
+
 ### 2026-09-15 — M1 tarefa 1.18f: a armadilha segura o campo
 - **O Yrden existe como asset**, com os numeros do docs/03 secao 8: 35 de vigor, 8 s de recarga, e
   uma armadilha de 4 m que fica 12 s no chao lentificando em 60% quem estiver dentro. O Lobo o tem

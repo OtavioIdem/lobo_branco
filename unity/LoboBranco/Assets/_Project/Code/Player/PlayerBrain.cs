@@ -66,6 +66,17 @@ namespace LoboBranco.Player
         /// <summary>A vaga de habilidade que o botao de sinal usa. O painel de debug mostra isto.</summary>
         public int SelectedAbilitySlot => _context != null ? _context.SelectedAbilitySlot : 0;
 
+        /// <summary>
+        /// Troca o sinal selecionado (tarefa 1.18g). Quem chama e a roda, e e escolha local do dono:
+        /// nada disso viaja. A vaga so vai para o host quando a conjuracao e pedida (tech/adr/0011).
+        /// </summary>
+        public void SelectAbilitySlot(int slot)
+        {
+            if (_context == null || slot < 0) return;
+
+            _context.SelectedAbilitySlot = slot;
+        }
+
         /// <summary>Verdadeiro no personagem que esta maquina controla. Falso nos companheiros.</summary>
         public bool DrivesThisCharacter => _drivesThisCharacter;
 
