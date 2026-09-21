@@ -1,7 +1,7 @@
 {
     "name": "TW1R.AI",
     "rootNamespace": "LoboBranco.AI",
-    "references": ["TW1R.Core","TW1R.Stats","TW1R.Combat"],
+    "references": ["TW1R.Core","TW1R.Stats","TW1R.Combat","Unity.Behavior","Unity.Netcode.Runtime"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

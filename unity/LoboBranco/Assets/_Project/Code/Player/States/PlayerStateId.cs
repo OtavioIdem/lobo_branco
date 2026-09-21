@@ -22,5 +22,8 @@ namespace LoboBranco.Player
         Death = 9,
         Interact = 10,
         DialogueLocked = 11,
+
+        /// <summary>Troca de aco para prata ou o contrario. 0,7 s e nem a esquiva corta (docs/03 secao 3).</summary>
+        SwapWeapon = 12,
     }
 }

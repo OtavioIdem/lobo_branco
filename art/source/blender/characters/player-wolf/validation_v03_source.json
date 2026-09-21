@@ -1,0 +1,27 @@
+{
+  "version": "5.2.1 LTS",
+  "source": "E:\\Unity_Games\\TW1-Remaster\\art\\source\\blender\\characters\\player-wolf\\SM_PlayerWolf_Proxy_v02.blend",
+  "source_sha256": "affab7c441f231852d84a396b483fa351aa09d075cae98e4512ec31a4d2bf54f",
+  "meshes": 171,
+  "triangles": 460258,
+  "height_m": 1.850000023841858,
+  "floor_z": 0.0,
+  "materials": [
+    "M_PlayerWolf_Skin",
+    "M_PlayerWolf_SilverHair",
+    "M_PlayerWolf_Stubble",
+    "M_PlayerWolf_Eyes",
+    "M_PlayerWolf_DarkLeather",
+    "M_PlayerWolf_HarnessLeather",
+    "M_PlayerWolf_WovenCloth",
+    "M_PlayerWolf_Linen",
+    "M_PlayerWolf_Steel",
+    "M_PlayerWolf_Chainmail"
+  ],
+  "stage": "authoring_detail_study",
+  "procedural_materials": true,
+  "uv_baked": false,
+  "rigged": false,
+  "unity_tested": false,
+  "export_note": "Geometria detalhada e cores de vertice. Materiais procedurais exigem bake ou shaders equivalentes."
+}

@@ -161,6 +161,28 @@ Crie `Assets/_Project/Scenes/Sandbox_Combate.unity` com:
 Essa cena é onde você vai passar 60% do tempo de desenvolvimento. Investir duas horas nela
 em M0 economiza dezenas depois. Nunca teste combate na cena do vilarejo.
 
+Para remontar a cena inteira do zero, incluindo o prefab de jogador em rede, use
+`Lobo Branco/Setup/5. Montar sandbox de combate`. Ela é gerada por código de propósito:
+cena montada à mão não é revisável em diff e não é reproduzível.
+
+### 6.1 Testar coop sozinho, na mesma máquina
+
+Desde a tarefa 1.9b o jogador não mora mais na cena. Quem o cria é o host, um por conexão,
+e sem sessão aberta não nasce ninguém. O `NetLauncher` sobe como host sozinho ao entrar em
+Play, então jogar solo continua sendo apertar Play.
+
+Para duas pessoas, o Multiplayer Play Mode abre um segundo jogador dentro do mesmo editor:
+
+1. `Window/Multiplayer/Multiplayer Play Mode`, ative o **Player 2**.
+2. Nos argumentos dele, escreva `-lb-client`. Sem isso as duas instâncias sobem como host
+   e nenhuma vê a outra.
+3. Entre em Play. O editor principal vira host e o Player 2 entra em `127.0.0.1:7777`.
+4. **F2** abre o painel de rede: papel, cliente, ida e volta, e por personagem quem move e
+   quem resolve dano. **F1** continua sendo o painel de combate.
+
+Se precisar de duas máquinas, troque o endereço no painel de rede antes de entrar, ou passe
+`-lb-address <ip>` e `-lb-port <n>` na linha de comando do build.
+
 ## 7. Verificação final
 
 Antes de considerar M0 concluído:

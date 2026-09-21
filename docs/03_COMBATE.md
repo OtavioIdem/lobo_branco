@@ -59,6 +59,19 @@ concede 1,3x adicional; errar concede 0,8x.
 Isso é o motor de decisão mais importante do combate segundo a segundo, e é herança
 direta e intencional do original.
 
+**Nota de implementação, 2026-09-11 (tarefa 1.14).** A tabela acima tem uma linha por
+postura, e não uma por botão: é a postura que decide qual golpe sai. Por isso os dois
+botões de ataque do [doc 02 §4](02_GDD.md) atacam na postura corrente, em vez de o esquerdo
+dar um golpe Rápido e o direito um Forte. Se o botão direito desse um golpe Forte com a
+postura Rápida valendo, escolher postura não seria decisão nenhuma e a camada 2 do §2
+deixaria de existir na prática.
+
+Fica em aberto o que vai distinguir os dois botões **dentro** de uma mesma postura. As
+opções óbvias são um segundo golpe por postura, mais lento e mais caro, ou o botão direito
+virar outra coisa por completo. A decisão não é urgente e não deve ser tomada no escuro:
+ela pede o playtest do portão M1, com as animações do M4 ainda por cima. Até lá os dois
+botões são o mesmo golpe, o que não tira nada de quem joga.
+
 ## 5. Ações defensivas
 
 ### Esquiva (toque)
@@ -113,6 +126,17 @@ Um indicador discreto (um brilho na lâmina, não um ícone de HUD) marca a jane
 - **Sinal reforçado** (1 carga): dobra a intensidade do sinal
 - **Segundo suspiro** (2 cargas): recupera 40% do vigor instantaneamente
 
+**Nota de implementação, 2026-09-12 (tarefa 1.17).** O recurso existe e os ganhos funcionam:
+corrente de Fluxo alta e morte causada rendem carga, e o riposte vai render quando existir
+(tarefa 1.11). Dos três gastos, só o **segundo suspiro** foi implementado, porque é o único
+que não depende de sistema ausente: a finalização precisa de um estado de execução e o sinal
+reforçado precisa dos sinais (tarefa 1.18). Os dois entram junto com o que eles gastam.
+
+Falta também decidir **por onde o jogador gasta**. A tabela de controles do
+[doc 02 §4](02_GDD.md) não tem tecla para nenhum dos três, e inventar uma agora seria
+decidir no escuro uma coisa que o playtest do portão M1 responde melhor. Até lá o segundo
+suspiro é uma chamada que ninguém dispara, e o painel de debug mostra as cargas.
+
 ## 8. Sinais reequilibrados (resolve D6)
 
 Custo em vigor, escalado por Inteligência. Os sinais deixam de ser dano e passam a ser
@@ -133,6 +157,113 @@ Regras que dão relevância aos sinais:
    por Yrden. Isso torna um sinal obrigatório, não opcional.
 3. **Axii em diálogo** aparece em cerca de 15% das conversas, gastando vigor, e às vezes é
    a única forma de obter uma pista.
+
+**Nota de implementação, 2026-09-14 (tarefa 1.32).** Custo e recarga existem como dado, no
+`AbilityDef`, e o Aard é o primeiro asset: 30 de vigor e 4 s, como na tabela. A recarga conta a
+partir do início da conjuração, e o vigor é cobrado no mesmo instante. O efeito é da tarefa 1.18,
+e até lá o sinal cobra, recarrega e não faz nada.
+
+Esta seção não dá dois números que o sistema precisa, e eles foram decididos na tarefa: **0,3 s
+de conjuração** até o efeito e **0,4 s de recuperação**, 0,7 s no total, o mesmo da troca de
+espada. A tarefa 1.30 revê os dois. O "escalado por Inteligência" do primeiro parágrafo também
+não tem fórmula, e fica para a 1.18 decidir junto com a intensidade.
+
+**Nota de implementação, 2026-09-15 (tarefa 1.18b).** O efeito virou dado: cada sinal tem uma
+área e uma lista de efeitos, e só o host os aplica
+([ADR 0012](../tech/adr/0012-efeito-de-sinal-em-asset-aplicado-pelo-host.md)). Três decisões
+que esta seção não trazia:
+
+- **"Escalado por Inteligência" é a intensidade, e não o custo.** A intensidade é
+  `SignIntensity × Inteligência ÷ 10`, e o bruxo de nível 1 tem 10 de Inteligência: com ele, todo
+  sinal sai com os números desta tabela. O custo fica fixo, porque os 30 de vigor são o número
+  contra o qual o dilema do §7 foi medido. O `SignIntensity` é o multiplicador neutro em 1,0 em
+  que o sinal reforçado do §7 escreve.
+- **A intensidade escala potência, e nunca forma.** Duração, dano e força crescem; alcance,
+  abertura, custo e recarga não. Em coop, o cone é o que o companheiro aprende a ler.
+- **O cone do abridor tem 90 graus de abertura.** A tabela dá os 6 m e não a abertura. 90 graus
+  pega os dois barghests que flanqueiam e ainda obriga a mirar. A tarefa 1.30 revê.
+
+O sinal continua sem efeito em jogo até a 1.18c: ele cobra, recarrega, acha quem está no cone, e
+o painel de debug mostra quantos.
+
+**Nota de implementação, 2026-09-15 (tarefa 1.18c).** O abridor passou a controlar. "Leve" e
+"médio" não existiam como dado, e o arquétipo da §4 não serve para isso: um barghest e um bandido
+são ambos ágeis, e só um deles voa com um empurrão. Toda criatura declara agora um **porte**
+(leve, médio ou pesado) no `MonsterDef`. Quatro decisões que esta seção não trazia:
+
+- **A derrubada dura 2 s.** A tabela dá só o atordoamento de 1,5 s. Derrubar é o controle mais
+  forte, então dura mais.
+- **O barghest é leve.** A §12 não diz o porte dele, e a composição Matilha da §10 existe para
+  ensinar o abridor. Com o barghest médio, o abridor só atordoaria a matilha.
+- **Sem porte declarado, a criatura é média:** atordoada, nunca derrubada.
+- **A intensidade alonga o controle e não troca o tipo.** Um Grifo intenso segura o barghest no
+  chão por mais tempo, e nunca derruba o que esta tabela diz que só atordoa.
+
+Ficam de fora, com dono: **quebrar guarda** é a 1.19, e o **empurrão** da §11 é sensação e entra
+com ela. Um risco fica registrado para a 1.35: dois bruxos alternando o abridor a cada 2 s mantêm
+um barghest no chão para sempre, porque o controle nunca soma mas pode ser reaplicado quando
+acaba. Pode ser exatamente a sinergia que o portão M1 procura, ou pode ser controle eterno; o
+playtest decide antes de qualquer imunidade entrar.
+
+**Nota de implementação, 2026-09-15 (tarefa 1.18d).** O fogo fere e queima. Esta seção dá "cone
+5 m, dano 0,8x, Queimadura 4/s por 5 s", e cinco coisas precisaram de decisão:
+
+- **O 0,8x é da espada na mão.** Com 12 de base, o fogo sai 9,6 antes da armadura. Um número de
+  dano próprio seria esquecido quando a espada melhorar.
+- **O dano do sinal passa por 4 dos 11 estágios da §9:** bestiário, poção, armadura e resistência.
+  Postura, afinidade, material, Fluxo, óleo e crítico são de lâmina; com o material na conta, o
+  fogo sairia 0,35x contra monstro com aço na mão. É outra lista de estágios, na mesma ordem, e
+  os onze do golpe e a razão de 5,3 vezes não mudam.
+- **A Queimadura ignora a armadura e respeita a resistência a fogo.** Com a subtração plana, 4
+  por tique viraria 1 contra o alghoul de 12 de armadura, e o fogo seria pior justamente contra
+  quem ele deveria abrir. São tiques de 1 s, 20 de dano no total, e a intensidade escala o dano
+  por segundo e não a duração.
+- **Reaplicar não soma:** a Queimadura mais forte manda, como a lentidão. Dois bruxos com fogo
+  no mesmo barghest não dobram o dano.
+- **O cone tem 60 graus**, mais estreito que os 90 do abridor: o abridor derruba a matilha em
+  volta, e o fogo é mirado no alvo que tem a fraqueza. A tarefa 1.30 revê.
+
+Quebrar guarda continua na 1.19, e interromper a regeneração da Besta (§10) espera a Besta. O
+Lobo recebe o fogo na segunda vaga, e ele só pode ser conjurado quando a roda da 1.18g existir.
+
+**Nota de implementação, 2026-09-15 (tarefa 1.18e).** O escudo existe, e ele trouxe duas peças
+que faltavam. A primeira é uma **forma de área nova**, em quem conjura: o escudo é o único sinal
+cujo alvo já é conhecido antes de qualquer consulta, e ele não custa física nenhuma. A segunda é
+**quem bateu**, que agora viaja no resultado de dano: sem isso o alvo sabe que apanhou e não de
+quem, e não havia para onde devolver os 30%.
+
+- **Absorve um evento de dano inteiro**, de 8 ou de 80, e quebra. É o que faz do escudo uma
+  decisão de quando erguer, e não um colete de vida extra.
+- **O troco não passa pelo pipeline de novo.** Aquele dano já foi resolvido uma vez; rodar os
+  estágios outra vez aplicaria a armadura de quem bateu a um dano que já é o que ele causou.
+- **A intensidade escala o troco, e não a duração.** Como o escudo absorve o golpe inteiro, o
+  retorno é a única potência que existe nele, e uma duração que crescesse tiraria o compromisso.
+- **Erguer de novo substitui**, nunca soma: dois escudos não absorvem dois golpes.
+
+O escudo entra na frente da vida por um contrato, e não por conhecer sinais: a poção de pele de
+pedra do M2 entra pela mesma porta. Ele absorve qualquer dano que chegue por ela, inclusive um
+tique de Queimadura — o que só vai importar quando alguma criatura puser fogo no bruxo.
+
+**Nota de implementação, 2026-09-15 (tarefa 1.18f).** A armadilha é o primeiro sinal que deixa
+algo no mundo em vez de agir num alvo, e por isso é o primeiro **objeto de rede que nasce em
+jogo**: quatro pessoas precisam ver o mesmo círculo no mesmo chão. Ela nasce pelo host e é
+registrada no `NetworkManager`; sem rede, nasce local e funciona igual.
+
+- **O que viaja é só o instante em que ela some.** Raio e força da lentidão vêm do prefab, que é
+  o mesmo em todas as máquinas, e a lentidão em si já viaja no estado de cada criatura.
+- **A lentidão é reaplicada em pulsos curtos**, e não aplicada uma vez pelos 12 s. É o que faz
+  quem sai da armadilha voltar a correr sozinho, sem ninguém precisar avisar.
+- **A intensidade estica o tempo de campo, e não os 60%.** Escalar a lentidão até 100% seria
+  imobilizar: a armadilha deixaria de segurar o campo e passaria a prender.
+- **A armadilha nasce onde o bruxo está**, e por isso a área deste sinal é a mesma do escudo, em
+  quem conjura. Um sinal de área largaria uma armadilha por criatura atingida.
+- O disco é violeta, e não âmbar nem vermelho: essas duas cores já significam telegrafo e golpe
+  imparável na §5, e uma armadilha vermelha ensinaria a esquivar dela.
+
+**Ancorar seres etéreos fica de fora**, e a regra 2 desta seção continua sem dono. Não existe
+criatura etérea no slice: implementar agora seria escrever intangibilidade sem nada para testar.
+Ela volta quando o primeiro espectro entrar, e é lá que a regra "lâmina não toca sem âncora"
+precisa nascer inteira.
 
 ## 9. Pipeline de dano
 
