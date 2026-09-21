@@ -1,9 +1,14 @@
 # TW1-Remaster — Codinome "Projeto Lobo Branco"
 
-Protótipo de RPG de ação em Unity, tomando **The Witcher (2007)** como base de design
-e reinterpretando seus sistemas com mecânicas próprias.
+Protótipo de RPG de ação **cooperativo** em Unity, tomando **The Witcher (2007)** como base
+de design e reinterpretando seus sistemas com mecânicas próprias.
 
-> **Status:** M0 em andamento — projeto Unity criado e configurado. Sem código de jogo ainda.
+De 2 a 4 bruxos de escolas diferentes aceitam o mesmo contrato no Capítulo I e caçam juntos,
+em sessão privada aberta por código de convite. O pivô para coop é de 2026-09-10 e está no
+[docs/13](docs/13_COOP_E_REDE.md), que prevalece sobre os documentos anteriores.
+
+> **Status:** M0 fechado. M1 em andamento — tarefas 1.1 a 1.9 prontas, 115 testes passando.
+> O próximo passo é a camada de rede, antes da tarefa 1.10.
 > **Engine:** Unity `6000.6.0f1` com URP 17.6.0
 > **Projeto Unity:** `unity/LoboBranco`
 > **Plataforma alvo do protótipo:** Windows x64
@@ -28,6 +33,7 @@ e reinterpretando seus sistemas com mecânicas próprias.
 | 11 | [docs/10_LEGAL_E_RISCOS.md](docs/10_LEGAL_E_RISCOS.md) | Propriedade intelectual e riscos do projeto |
 | 12 | [docs/11_SETUP_AMBIENTE.md](docs/11_SETUP_AMBIENTE.md) | Passo a passo de instalação e configuração |
 | 13 | [docs/12_BACKLOG_VERTICAL_SLICE.md](docs/12_BACKLOG_VERTICAL_SLICE.md) | Tarefas concretas, ordenadas, do primeiro dia |
+| 14 | [docs/13_COOP_E_REDE.md](docs/13_COOP_E_REDE.md) | **Coop, escolas e autoridade. Prevalece sobre os anteriores** |
 
 ## Agentes e skills
 
