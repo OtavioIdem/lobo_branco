@@ -43,6 +43,25 @@ namespace LoboBranco.Combat
     }
 
     /// <summary>
+    /// O porte da criatura. Decide o que o abridor faz com ela: derruba leves, atordoa medios e
+    /// nao move pesados (docs/03 secao 8). Quando o empurrao entrar, decide tambem quanto ela voa
+    /// (secao 11).
+    ///
+    /// Separado do <see cref="StanceArchetype"/> de proposito. O arquetipo responde qual postura
+    /// casa com a criatura, e "agil" nao diz se ela e leve ou media: um barghest e um bandido sao
+    /// ambos ageis, e so um deles voa com um empurrao.
+    ///
+    /// Medio e o zero. Uma criatura que nao declara porte e atordoada e nao derrubada, que e o
+    /// meio da tabela e nunca o extremo.
+    /// </summary>
+    public enum BodyWeight
+    {
+        Medium = 0,
+        Light = 1,
+        Heavy = 2,
+    }
+
+    /// <summary>
     /// Classe da criatura. Decide aco contra prata e qual oleo funciona.
     /// Os nomes sao genericos de proposito: o nome exibido vem de asset (tech/adr/0005).
     /// </summary>

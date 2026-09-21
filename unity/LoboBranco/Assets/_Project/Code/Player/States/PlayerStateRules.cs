@@ -44,5 +44,15 @@ namespace LoboBranco.Player
         /// </summary>
         public static bool CanInterrupt(bool committed, PlayerStateId next)
             => !committed || CancelsCommittedAction(next);
+
+        /// <summary>
+        /// Trocar de postura pode durante o deslocamento e nao pode durante um golpe
+        /// (docs/03 secao 4). A pergunta e a mesma de sempre: o que esta rodando agora e
+        /// uma acao comprometida?
+        ///
+        /// Mora aqui junto com a regra de ouro para nao virar um segundo lugar onde se
+        /// decide o que interrompe o que.
+        /// </summary>
+        public static bool CanSwitchStance(bool committed) => !committed;
     }
 }

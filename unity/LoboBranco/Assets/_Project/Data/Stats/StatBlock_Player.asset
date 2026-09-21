@@ -41,3 +41,5 @@ MonoBehaviour:
     value: 1
   - stat: 41
     value: 60
+  - stat: 23
+    value: 1

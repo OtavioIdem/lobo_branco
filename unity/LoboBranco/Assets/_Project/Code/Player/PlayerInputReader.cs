@@ -22,6 +22,9 @@ namespace LoboBranco.Player
 
         const string MapName = "Player";
 
+        // Abaixo disto o eixo e ruido ou volta do direcional ao centro, e nao um pedido.
+        const float DeadZone = 0.5f;
+
         InputActionMap _map;
 
         InputAction _move;
@@ -34,6 +37,15 @@ namespace LoboBranco.Player
         InputAction _castSign;
         InputAction _interact;
         InputAction _witcherSenses;
+        InputAction _cycleStance;
+        InputAction _switchSteel;
+        InputAction _switchSilver;
+        InputAction _signWheel;
+
+        // Uma acao por vaga, e nao uma acao com cinco ligacoes: assim cada sinal pode ser rebindado
+        // sozinho, e o codigo nao precisa perguntar qual tecla disparou.
+        InputAction[] _selectSign;
+        Action<InputAction.CallbackContext>[] _selectSignHandlers;
 
         // ---------------------------------------------------------------- estado
 
@@ -50,6 +62,27 @@ namespace LoboBranco.Player
         public event Action CastSignPressed;
         public event Action InteractPressed;
         public event Action WitcherSensesPressed;
+
+        /// <summary>Roda de postura. Positivo avanca, negativo volta (docs/02 secao 4).</summary>
+        public event Action<int> StanceCycled;
+
+        /// <summary>Pedido de espada de aco. Quem decide se da e a maquina de estados.</summary>
+        public event Action SwitchSteelPressed;
+
+        /// <summary>Pedido de espada de prata.</summary>
+        public event Action SwitchSilverPressed;
+
+        /// <summary>
+        /// A roda de sinais abriu, porque o botao de sinal foi segurado (docs/02 secao 4). Quem
+        /// decide o que fazer com isso e o <see cref="PlayerSignWheel"/>.
+        /// </summary>
+        public event Action SignWheelOpened;
+
+        /// <summary>O botao de sinal foi solto. Dispara tambem quando o toque nem chegou a abrir a roda.</summary>
+        public event Action SignWheelClosed;
+
+        /// <summary>Tecla direta de sinal: a vaga pedida, contada de zero.</summary>
+        public event Action<int> SignSlotPressed;
 
         // ---------------------------------------------------------------- ciclo
 
@@ -74,6 +107,33 @@ namespace LoboBranco.Player
             _castSign = _map.FindAction("CastSign", true);
             _interact = _map.FindAction("Interact", true);
             _witcherSenses = _map.FindAction("WitcherSenses", true);
+            _cycleStance = _map.FindAction("CycleStance", true);
+            _switchSteel = _map.FindAction("SwitchSteel", true);
+            _switchSilver = _map.FindAction("SwitchSilver", true);
+            _signWheel = _map.FindAction("SignWheel", true);
+
+            BindSignSlots();
+        }
+
+        /// <summary>
+        /// As teclas diretas de sinal (tarefa 1.18g). Sao opcionais de proposito: quem nao rodou
+        /// 'Lobo Branco/Setup/10. Teclas de sinal' continua jogando com a roda, em vez de o bruxo
+        /// inteiro se desligar por uma acao que falta.
+        /// </summary>
+        void BindSignSlots()
+        {
+            const int MaxSlots = 5;    // os cinco sinais do docs/03 secao 8
+
+            _selectSign = new InputAction[MaxSlots];
+            _selectSignHandlers = new Action<InputAction.CallbackContext>[MaxSlots];
+
+            for (int i = 0; i < MaxSlots; i++)
+            {
+                _selectSign[i] = _map.FindAction($"SelectSign{i + 1}", throwIfNotFound: false);
+
+                int slot = i;
+                _selectSignHandlers[i] = _ => SignSlotPressed?.Invoke(slot);
+            }
         }
 
         void OnEnable()
@@ -86,6 +146,18 @@ namespace LoboBranco.Player
             _castSign.performed += OnCastSign;
             _interact.performed += OnInteract;
             _witcherSenses.performed += OnWitcherSenses;
+            _cycleStance.performed += OnCycleStance;
+            _switchSteel.performed += OnSwitchSteel;
+            _switchSilver.performed += OnSwitchSilver;
+
+            // Com o Hold da acao, 'performed' e o instante em que a roda abre, e 'canceled' e o
+            // dedo saindo da tecla, tenha a roda aberto ou nao.
+            _signWheel.performed += OnSignWheelOpened;
+            _signWheel.canceled += OnSignWheelClosed;
+
+            for (int i = 0; i < _selectSign.Length; i++)
+                if (_selectSign[i] != null)
+                    _selectSign[i].performed += _selectSignHandlers[i];
 
             _map.Enable();
         }
@@ -100,6 +172,15 @@ namespace LoboBranco.Player
             _castSign.performed -= OnCastSign;
             _interact.performed -= OnInteract;
             _witcherSenses.performed -= OnWitcherSenses;
+            _cycleStance.performed -= OnCycleStance;
+            _switchSteel.performed -= OnSwitchSteel;
+            _switchSilver.performed -= OnSwitchSilver;
+            _signWheel.performed -= OnSignWheelOpened;
+            _signWheel.canceled -= OnSignWheelClosed;
+
+            for (int i = 0; i < _selectSign.Length; i++)
+                if (_selectSign[i] != null)
+                    _selectSign[i].performed -= _selectSignHandlers[i];
 
             _map.Disable();
 
@@ -125,5 +206,23 @@ namespace LoboBranco.Player
         void OnCastSign(InputAction.CallbackContext _) => CastSignPressed?.Invoke();
         void OnInteract(InputAction.CallbackContext _) => InteractPressed?.Invoke();
         void OnWitcherSenses(InputAction.CallbackContext _) => WitcherSensesPressed?.Invoke();
+        void OnSwitchSteel(InputAction.CallbackContext _) => SwitchSteelPressed?.Invoke();
+        void OnSwitchSilver(InputAction.CallbackContext _) => SwitchSilverPressed?.Invoke();
+        void OnSignWheelOpened(InputAction.CallbackContext _) => SignWheelOpened?.Invoke();
+        void OnSignWheelClosed(InputAction.CallbackContext _) => SignWheelClosed?.Invoke();
+
+        /// <summary>
+        /// A acao e um eixo, e nao um botao, porque roda de mouse e direcional sao eixos.
+        /// O valor bruto da roda vem em degraus grandes no Windows, entao o que interessa
+        /// e o sinal e nao a magnitude. A zona morta existe para o retorno do direcional
+        /// ao centro nao contar como uma troca a mais.
+        /// </summary>
+        void OnCycleStance(InputAction.CallbackContext context)
+        {
+            float axis = context.ReadValue<float>();
+
+            if (axis > DeadZone) StanceCycled?.Invoke(1);
+            else if (axis < -DeadZone) StanceCycled?.Invoke(-1);
+        }
     }
 }

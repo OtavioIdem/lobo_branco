@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd563901b06945a4684062c5512339e9, type: 3}
+  m_Name: Attack_Group
+  m_EditorClassIdentifier: TW1R.Combat::LoboBranco.Combat.AttackDef
+  stance: 2
+  strikeTime: 0.4
+  recovery: 0.55
+  hitboxOpenAt: 0.62
+  hitboxCloseAt: 0.95
+  hitboxFromAnimationEvent: 0
+  staminaCost: 12
+  maxTargets: 4
+  arcDegrees: 180
+  reach: 2.6
+  radius: 0.9
+  heightOffset: 1.1

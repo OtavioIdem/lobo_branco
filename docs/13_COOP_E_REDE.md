@@ -81,13 +81,30 @@ de IP em código, registrada na [ADR 0005](../tech/adr/0005-sistemas-agnosticos-
 Escolas de bruxo resolvem os dois e são melhores de projetar, porque cada uma já tem uma
 identidade de luta coerente.
 
-| Escola | Fantasia | Viés de atributo | Postura favorecida | Papel no grupo |
-|---|---|---|---|---|
-| **Lobo** | Equilibrado, espada e sinal | nenhum | Rápida | Referência. É o kit que já existe |
-| **Grifo** | Sinais intensos, controle | Vontade | Grupo | Segura o campo, ancora etéreo, quebra guarda |
-| **Gato** | Velocidade e veneno | Destreza | Rápida | Dano alto, sobrevive mal |
-| **Urso** | Armadura pesada, dano bruto | Vigor | Forte | Absorve o boss enquanto os outros trabalham |
-| **Víbora** | Duas espadas, execução | Destreza | Rápida | Fecha alvo ferido |
+| Escola | Fantasia | Viés de atributo | Postura favorecida | Sinal especializado | Papel no grupo |
+|---|---|---|---|---|---|
+| **Lobo** | Equilibrado, espada e sinal | nenhum | Rápida | Aard | Referência. É o kit que já existe |
+| **Grifo** | Sinais intensos, controle | ~~Vontade~~ Inteligência | Grupo | Igni | Segura o campo, quebra guarda, interrompe regeneração |
+| **Gato** | Velocidade e veneno | Destreza | Rápida | Axii | Dano alto, sobrevive mal |
+| **Urso** | Armadura pesada, dano bruto | Vigor | Forte | Quen | Absorve o boss enquanto os outros trabalham |
+| **Víbora** | Duas espadas, execução | Destreza | Rápida | Todos, sem variante | Fecha alvo ferido |
+
+**Especialização de sinal, decidida em 2026-09-14.** Todas as escolas têm acesso aos cinco
+sinais. Cada escola é especializada em um deles e ganha uma variante com efeito diferente, que
+só ela tem. A Víbora é a exceção: um bônus menor em todos os sinais, sem variante nenhuma. O
+efeito de cada variante é desenhado junto com a escola, e o do Grifo é a tarefa 1.33.
+
+Duas consequências para a tabela. **"Vontade" não existe como atributo:** o [doc 02 §5](02_GDD.md)
+põe a intensidade de sinal na Inteligência, e é ela o viés do Grifo. **O Grifo não ancora mais
+etéreo**, porque ancoragem é efeito do Yrden, e a especialização dele é o Igni. Quebrar guarda e
+interromper regeneração são do Igni pelo [doc 03 §8 e §10](03_COMBATE.md).
+
+Ficam registradas, e **fora do slice**, duas escolas que não estão na tabela. A **Mantícora**,
+especializada em Yrden. E a **Lince**, pensada para a Ciri, que melhora o dano da habilidade
+ancestral dela. A terceira escola só entra depois do portão M1 (risco X7 do §11). A Lince tem
+um problema além do escopo: uma escola de personagem nomeado contradiz este mesmo §5 e a
+[ADR 0005](../tech/adr/0005-sistemas-agnosticos-de-ip.md), e a habilidade ancestral seria um
+sistema novo. Ela volta a ser discutida depois do M1, junto com essa contradição.
 
 **No slice entram duas: Lobo e Grifo.** Não três, não cinco. Lobo porque já está construído.
 Grifo porque força o sistema de habilidade com custo e recarga a existir de verdade, e esse
@@ -98,11 +115,33 @@ sistema é a infraestrutura que as outras três reaproveitam depois.
 Uma escola é a combinação de três alavancas que **já existem no projeto**:
 
 1. `StatBlockDef` diferente, que é o viés de atributo.
-2. Afinidade de postura, que `StanceAffinityStage` já aplica.
-3. Intensidade e custo de sinal, que o [doc 03 §8](03_COMBATE.md) já parametriza.
+2. ~~Afinidade de postura, que `StanceAffinityStage` já aplica.~~ **Corrigido na tarefa 1.31**, abaixo.
+3. Intensidade e custo de sinal, que o [doc 03 §8](03_COMBATE.md) já parametriza. **Custo e
+   recarga moram no `AbilityDef` desde a tarefa 1.32**, e a escola lista as habilidades dela por vaga.
+   **Desde a 1.18b, a especialização também é dado:** o `SchoolDef` aponta o sinal especializado
+   e os efeitos de variante, que são somados aos do sinal. A intensidade usa a Inteligência, que é
+   o viés de atributo da tabela acima.
 
 Uma escola nova é um `SchoolDef` apontando para esses três assets, mais o filtro de vestígio
 do §4.1. Nenhum `if` por escola em código de combate. Se aparecer um, a escola está errada.
+
+**Correção de 2026-09-14, escrita ao implementar a tarefa 1.31.** O item 2 estava errado. O
+`StanceAffinityStage` compara a postura do golpe com o arquétipo do **alvo**, e a escola de
+quem bate não entra nessa conta. A "postura favorecida" da tabela do §5 virou outra coisa,
+mais simples e sem multiplicador novo:
+
+- **A escola é dona dos três golpes, um por postura.** A postura favorecida é a postura com
+  que o bruxo entra na luta, e a vaga em que a escola põe o golpe mais bem feito. Como o que
+  muda é o `AttackDef`, e não um bônus de dano, a razão de 5,3 vezes do doc 03 fica intacta.
+- **A intensidade de sinal é o atributo `SignIntensity`**, e por isso mora no `StatBlockDef`
+  da escola, e não num campo próprio.
+- ~~**Custo de sinal e filtro de vestígio ficam fora do `SchoolDef` por enquanto**~~. O custo
+  entrou na tarefa 1.32, como habilidade com recarga que a escola lista por vaga. O filtro de
+  vestígio continua fora, porque investigação ainda não existe (M3).
+
+Cada golpe tem que declarar a postura da vaga em que está. O golpe viaja pela rede como
+postura e o host resolve o asset pela postura; um golpe na vaga errada faria dono e host
+desferirem golpes diferentes. Há teste para isso sobre os assets reais.
 
 ## 6. Modelo de autoridade, em resumo
 
@@ -116,6 +155,15 @@ Detalhe e justificativa na [ADR 0008](../tech/adr/0008-netcode-for-gameobjects-c
 | Vida, Vigor, Adrenalina, Fluxo | **O host** | Replicados para todos. Cliente lê, não escreve |
 | IA, encontro, attack token | **O host** | O coordenador de token do doc 07 §6 já é peça única por natureza |
 | Efeito visual e som de impacto | Todos, localmente | Reagem ao evento do host |
+| Habilidade: custo e recarga | **O host** confere, cobra e pode recusar; o dono pede e prevê | Cobrada no início da conjuração. A recarga viaja como o instante em que volta, no relógio do servidor, e cada máquina calcula quanto falta. Ao contrário do vigor do golpe, aqui o host recusa, porque sinal de graça é janela de graça ([ADR 0011](../tech/adr/0011-habilidade-cobrada-no-inicio-recarga-como-instante.md)) |
+| Atordoar, derrubar, lentificar | **O host** aplica; todos veem | Instantes de fim no relógio do servidor, como a recarga. A lentidão vira modificador de `MoveSpeed` em todas as máquinas a partir do mesmo estado, e a folha do cliente não diverge da do host. Mora em componente, e não no grafo, pela ADR 0009 (tarefa 1.18a) |
+| Efeito de sinal | **O host** acha os alvos e aplica | No instante do efeito que o dono pede, com a posição que o host vê. O resultado viaja no estado que o alvo já replica, e nenhum efeito manda mensagem própria ([ADR 0012](../tech/adr/0012-efeito-de-sinal-em-asset-aplicado-pelo-host.md), tarefa 1.18b) |
+| Armadilha (Yrden) | **O host** faz nascer, varre e destrói | Objeto de rede registrado no `NetworkManager`. Viaja só o instante em que ela some; raio e lentidão vêm do prefab, igual nas duas máquinas. A lentidão de quem está dentro viaja no estado da própria criatura (tarefa 1.18f) |
+| Escudo (Quen) | **O host** ergue e quebra; todos veem | Instante de queda no relógio do servidor, como o controle. Viaja porque é decisão do jogador: ele precisa saber na própria tela se ainda está protegido antes de entrar no alcance (tarefa 1.18e) |
+| Queimadura | **O host** acende e conta os tiques | O estado não viaja: o dano de cada tique chega na vida replicada, um por segundo. Vira instantes replicados quando o fogo tiver efeito visual ou a regeneração da Besta precisar saber dele (tarefa 1.18d) |
+| Telegrafo de ataque de inimigo | **O host** decide o instante; todos desenham | Um carimbo de tempo por golpe, no relógio do servidor. Cada máquina calcula o aviso a partir do mesmo `AttackDef`, e o aviso do cliente com ping termina junto com a janela de dano do host (tarefa 1.23) |
+| Hitstop | **O host** soma ao golpe; o dono segura o dele pelo mesmo tempo | Nunca `Time.timeScale`, que no host congelaria a sessão inteira. A extensão do golpe é igual nas duas pontas, e a janela de Fluxo sobrevive ([ADR 0010](../tech/adr/0010-tempo-de-jogo-nunca-e-global-em-coop.md)) |
+| Tremor e soco de câmera | Só o dono, na tela dele | Reagem ao acerto confirmado pelo host e à vida do próprio bruxo caindo |
 
 A frase que resolve noventa por cento das dúvidas de implementação: **o cliente pede, o host
 decide, todo mundo assiste.**
@@ -137,11 +185,25 @@ para isso, a preparação exata que rede exige.
 | `Camera/ThirdPersonCameraRig` | **Integral** | Local por natureza |
 | `Player/PlayerInputReader` | **Ajuste** | Passa a rodar só no dono |
 | `Player/PlayerMeleeAttacker` | **Ajuste** | Dispara pedido; quem resolve o acerto é o host |
-| `Combat/CombatDummy` | **Ajuste** | Vira `NetworkBehaviour` |
+| `Combat/CombatDummy` | **Ajuste** | Perde a vida para um `CharacterVitals` ao lado. Ver nota abaixo |
 | `Player/PlayerBrain` | **Reescrever** | É o único que junta input, câmera e FSM. É onde a autoridade entra |
 | `Tests/*` | **Integral** | Os 115 testes continuam valendo. Testam lógica pura, que é justamente o que não muda |
 
 Nada é jogado fora. Um arquivo é reescrito.
+
+**Nota de 2026-09-11, escrita ao implementar as tarefas 1.9e e 1.9f.** A auditoria previa que
+o `CombatDummy` virasse `NetworkBehaviour`. Ele não virou, e a razão é que a vida replicada
+não é um problema do alvo de sandbox: é o mesmo problema do bruxo, do barghest e da Besta.
+Ela saiu para um componente próprio, `Combat/CharacterVitals`, que carrega a folha de
+atributos e a vida atual, e que o jogador e a cápsula usam sem diferença nenhuma. Quem vira
+`NetworkBehaviour` é ele. O `CombatDummy` continua sendo o que sempre foi, um `MonoBehaviour`
+que classifica a criatura e pisca quando apanha, e o `MonsterDef` da tarefa 1.20 vai herdar
+a vida replicada de graça.
+
+Os valores base não são replicados, e isso não é economia de banda: eles saem do mesmo
+`StatBlockDef` em todas as máquinas. O que viaja é o que diverge, e hoje isso é só a vida.
+Quando poções e talentos entrarem no M2, eles nascem no host e os modificadores passam a
+viajar junto.
 
 ## 8. Escopo revisto
 

@@ -61,6 +61,7 @@ Ler o inimigo → escolher postura e arma → abrir com sinal → janela de dano
 | Aparo / bloqueio | Shift esquerdo | LB / L1 |
 | Lançar sinal | Q | RB / R1 |
 | Roda de sinais | Segurar Q | Segurar RB |
+| Sinal direto | 3 a 7 | — (a roda faz o papel) |
 | Trocar espada | 1 (aço) / 2 (prata) | Direcional esquerda/direita |
 | Trocar postura | Roda do mouse | Direcional cima/baixo |
 | Sentidos de Bruxo | Ctrl esquerdo | Analógico direito (clique) |
@@ -70,6 +71,15 @@ Ler o inimigo → escolher postura e arma → abrir com sinal → janela de dano
 
 Tudo via **Unity Input System** com rebind em runtime desde o começo. Retrofitar isso é
 sofrimento; fazer certo no dia 1 custa duas horas.
+
+**Nota de implementação, 2026-09-15 (tarefa 1.18g).** Lançar e escolher moram na mesma tecla, e
+isso decidiu duas coisas. **O sinal sai quando Q é solto**, e não quando é apertado: as duas
+ações dividem a tecla, e sem isso segurar para abrir a roda lançaria o sinal antes. O toque e a
+espera da roda usam o mesmo tempo, 0,3 s, para não existir uma janela em que apertar Q não faz
+nem uma coisa nem outra. **As teclas diretas são 3 a 7**, seguindo o 1 e o 2 das espadas, na
+mesma fileira; no gamepad não há tecla direta, porque o direcional já tem espada e item, e quem
+joga no controle usa a roda. Fechar a roda **não conjura**: o sinal escolhido sai no próximo
+toque, e soltar a roda nunca gasta vigor sem o jogador mandar.
 
 ## 5. Atributos e estatísticas do personagem
 
